@@ -1,0 +1,72 @@
+#clipboard {
+    width:938px;
+    margin:18px auto;
+    text-align:left;
+    background:#fff;
+    border:1px solid #bbb;
+}
+#clipboard h1 {
+    margin:1px;
+    padding:2px 0 4px 6px;
+    background:#b3b6b3 url("../../../themes/default/images/headline.gif") repeat-x;
+    color:#fff;
+}
+#clipboard div {
+    margin:0;
+    padding:6px 11px 8px;
+    text-align:right;
+    color:#666966;
+}
+
+#clipboard ul {
+    list-style: none;
+}
+
+#clipboard li.favorite {
+    font-weight: bold;
+}
+
+#clipboard li{
+    clear: both;
+    width: 300px;
+    line-height: 24px;
+    height: 24px;
+}
+
+#clipboard li div {
+    padding: 0;
+}
+
+#clipboard .tl_left {
+    float: left;
+}
+
+#clipboard .tl_right {
+    float: right;
+}
+
+/* Context menu */
+#clipboardmenu {
+    display:block;
+    position:absolute;
+    z-index:99999999;
+    background:#fff;
+    border:1px solid #ccc;
+    padding:3px 6px;
+    -moz-border-radius:4px;
+    -webkit-border-radius:4px;
+    border-radius:4px;
+    margin-right:12px;
+}
+
+#clipboardmenu a {
+    display:block;
+    line-height:1;
+    padding:3px 0 2px 0;
+    white-space:nowrap;
+}
+
+#clipboardmenu img {
+    padding-bottom:1px;
+    vertical-align:middle;
+}

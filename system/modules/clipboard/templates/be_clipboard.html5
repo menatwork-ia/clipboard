@@ -1,0 +1,28 @@
+<div id="clipboard">
+    <h1><?php echo $this->header; ?></h1>
+    <ul>
+        <?php foreach ($this->clipboard AS $elem): ?>
+            <li class="<?php echo ($elem['favorite']) ? 'favorite' : ''; ?>">
+                <div class="tl_left">
+                    <?php echo $elem['id']; ?>
+                    <?php echo $elem['elem_id']; ?>
+                    <?php echo $elem['title']; ?>
+                    <?php echo $elem['str_table']; ?>
+                </div>
+                <div class="tl_right">
+                    <a title="<?php echo $GLOBALS['TL_LANG']['tl_page']['edit'][0]; ?>" href="<?php echo $elem['edit_href']; ?>">
+                        <img height="16" width="12" alt="<?php echo $GLOBALS['TL_LANG']['tl_page']['edit'][1]; ?>" src="system/themes/default/images/edit.gif">
+                    </a>
+
+                    <a onclick="if (!confirm('<?php echo $GLOBALS['TL_LANG']['MSC']['deleteConfirm']; ?>')) return false; Backend.getScrollOffset();" title="<?php echo $GLOBALS['TL_LANG']['tl_page']['delete'][0]; ?>" href="<?php echo $elem['delete_href']; ?>">
+                        <img height="16" width="14" alt="<?php echo $GLOBALS['TL_LANG']['tl_page']['delete'][1]; ?>" src="system/themes/default/images/delete.gif">
+                    </a>  
+
+                    <a title="<?php echo $GLOBALS['TL_LANG']['tl_page']['edit'][0]; ?>" href="<?php echo $elem['favorite_href']; ?>">
+                        <img height="16" width="16" alt="<?php echo $GLOBALS['TL_LANG']['tl_page']['edit'][1]; ?>" src="system/themes/default/images/featured<?php echo (!$elem['favorite']) ? '_' : ''; ?>.gif">
+                    </a>
+                </div>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+</div>
