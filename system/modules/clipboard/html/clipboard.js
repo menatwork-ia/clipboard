@@ -84,9 +84,27 @@ var ClipboardMenu =
 window.addEvent('domready', function()
 {
     ClipboardMenu.initialize();
+    $('clipboard').addEvent('mouseover', function(){
+        $$('a.edit_button').setStyle('opacity', '1');
+    });
+    $('clipboard').addEvent('mouseout', function(){
+        $$('a.edit_button').setStyle('opacity', '0');
+    });    
+    $$('a.edit_button').addEvent('click', function(){
+        $$('div#cl_show').setStyle('display', 'none');
+        $$('div#cl_edit').setStyle('display', 'block');
+        return false;
+    });  
+    $$('a.cancel_button').addEvent('click', function(){
+        $$('div#cl_show').setStyle('display', 'block');
+        $$('div#cl_edit').setStyle('display', 'none');
+        alert('foo');
+        return false;
+    });      
 });
 
 window.addEvent('structure', function()
 {
     ClipboardMenu.initialize();
 });
+

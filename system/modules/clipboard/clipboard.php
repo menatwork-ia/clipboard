@@ -54,6 +54,7 @@ class clipboard extends Backend
             }
 
             $objTemplate->clipboard = $clipboard;
+            $objTemplate->action = $this->Environment->request;
             $arrContent[] = $objTemplate->parse();
 
             $arrContent[] = strstr($strContent, '<div id="container">');
@@ -114,6 +115,7 @@ class clipboard extends Backend
 
     public function init()
     {
+        FB::log($_POST);
         $boolCl = FALSE;
         $key = $this->Input->get('key');
         if (strlen($key))

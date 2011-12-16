@@ -4,6 +4,7 @@
     text-align:left;
     background:#fff;
     border:1px solid #bbb;
+    position: relative;
 }
 #clipboard h1 {
     margin:1px;
@@ -16,6 +17,44 @@
     padding:6px 11px 8px;
     text-align:right;
     color:#666966;
+}
+
+#clipboard .id {
+    color: #B3B3B3;
+    padding-left: 3px;
+}
+
+#clipboard .minibutton {
+    background: -moz-linear-gradient(center top , #F4F4F4, #ECECEC) repeat scroll 0 0 transparent;
+    border: 1px solid #D4D4D4;
+    border-radius: 3px 3px 3px 3px;
+    color: #333333;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Helvetica,arial,freesans,clean,sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    height: 21px;
+    padding: 0 0 0 3px;
+    position: relative;
+    text-shadow: 1px 1px 0 #FFFFFF;
+    white-space: nowrap;
+}
+
+#clipboard .edit_button {
+    -moz-transition: opacity 0.1s linear 0s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    position: absolute;
+    right: 10px;
+    top: 30px;
+}
+
+#clipboard .edit_button > span {
+    display: block;
+    height: 21px;
+    line-height: 21px;
+    padding: 0 9px 0 7px;
 }
 
 #clipboard ul {
