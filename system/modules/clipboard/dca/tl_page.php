@@ -26,6 +26,7 @@
  * @license    GNU/GPL 2
  * @filesource
  */
+ 
 $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = array('clipboard', 'init');
 
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array
@@ -50,7 +51,7 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array
     (
     'label' => &$GLOBALS['TL_LANG']['tl_page']['pasteafter'],
     'href' => '&amp;act=copy&amp;mode=1',
-    'icon' => 'copy.gif',
+    'icon' => 'pasteafter.gif',
     'attributes' => 'class="cl_paste"',
     'button_callback' => array('tl_page_cl', 'pastPageAfter')
 );
@@ -59,7 +60,7 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array
     (
     'label' => &$GLOBALS['TL_LANG']['tl_page']['pasteinto'],
     'href' => '&amp;act=copy&amp;mode=2',
-    'icon' => 'copy.gif',
+    'icon' => 'pasteinto.gif',
     'attributes' => 'class="cl_paste"',
     'button_callback' => array('tl_page_cl', 'pastPageAfter')
 );

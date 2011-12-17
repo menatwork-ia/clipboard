@@ -15,28 +15,24 @@ var ClipboardMenu =
     initialize: function()
     {
         // Hide the edit header buttons
-        $$('a.cl_paste').each(function(el)
-        {
+        $$('a.cl_paste').each(function(el){
             el.addClass('invisible');
         });
                 
         // Add a trigger to the edit buttons
-        $$('a.clipboardmenu').each(function(el)
-        {                               
+        $$('a.clipboardmenu').each(function(el){                               
             var arrEl = el.getAllNext('a.cl_paste');
             arrEl.unshift(el);
 
             // Show the context menu
-            el.addEvent('contextmenu', function(e)
-            {
+            el.addEvent('contextmenu', function(e){
                 e.preventDefault();
                 ClipboardMenu.show(arrEl, e);
             });
         });
 
         // Hide the context menu 
-        $(document.body).addEvent('click', function()
-        {
+        $(document.body).addEvent('click', function(){
             ClipboardMenu.hide();
         });
     },
@@ -81,30 +77,33 @@ var ClipboardMenu =
     }
 };
 
-window.addEvent('domready', function()
-{
+window.addEvent('domready', function(){
+
     ClipboardMenu.initialize();
+	
     $('clipboard').addEvent('mouseover', function(){
-        $$('a.edit_button').setStyle('opacity', '1');
+        $$('p.button').removeClass('inactive').addClass('active');
     });
+	
     $('clipboard').addEvent('mouseout', function(){
-        $$('a.edit_button').setStyle('opacity', '0');
-    });    
-    $$('a.edit_button').addEvent('click', function(){
-        $$('div#cl_show').setStyle('display', 'none');
-        $$('div#cl_edit').setStyle('display', 'block');
+        $$('p.button').removeClass('active').addClass('inactive');
+    });
+	
+    $('show').getElement('a').addEvent('click', function(){
+		$(this).getParent().addClass('invisible').getNext('p').removeClass('invisible');
         return false;
-    });  
-    $$('a.cancel_button').addEvent('click', function(){
-        $$('div#cl_show').setStyle('display', 'block');
-        $$('div#cl_edit').setStyle('display', 'none');
-        alert('foo');
+    }); 
+	
+    $('hide').getElement('a').addEvent('click', function(){
+        $(this).getParent().addClass('invisible').getPrevious('p').removeClass('invisible');
         return false;
-    });      
+    });
+	
 });
 
-window.addEvent('structure', function()
-{
+window.addEvent('structure', function(){
+
     ClipboardMenu.initialize();
+	
 });
 

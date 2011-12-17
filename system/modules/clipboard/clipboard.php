@@ -41,7 +41,6 @@ class clipboard extends Backend
             $arrContent = array(strstr($strContent, '<div id="container">', TRUE));
 
             $objTemplate = new BackendTemplate($this->strTemplate);
-            $objTemplate->header = 'Clipboard Version 1.0';
 
             $objClipboard = $this->Database->prepare("SELECT * FROM `" . $this->strTable . "` WHERE str_table = %s")->execute('tl_' . $this->Input->get('do'));
             $clipboard = $objClipboard->fetchAllAssoc();
