@@ -22,7 +22,7 @@ if (!defined('TL_ROOT')) die('You cannot access this file directly!');
  * Software Foundation website at <http://www.gnu.org/licenses/>.
  *
  * PHP version 5
- * @copyright  MEN AT WORK 2011
+ * @copyright  MEN AT WORK 2012
  * @package    clipboard
  * @license    GNU/GPL 2
  * @filesource
@@ -41,7 +41,6 @@ class clipboard extends Backend
             $arrContent = array(strstr($strContent, '<div id="container">', TRUE));
 
             $objTemplate = new BackendTemplate($this->strTemplate);
-
             $objClipboard = $this->Database->prepare("SELECT * FROM `" . $this->strTable . "` WHERE str_table = %s")->execute('tl_' . $this->Input->get('do'));
             $clipboard = $objClipboard->fetchAllAssoc();
 
@@ -81,7 +80,7 @@ class clipboard extends Backend
         $this->Database->prepare("UPDATE `" . $this->strTable . "` SET favorite = 0 WHERE str_table = ?")->execute($strTable);
         $this->Database->prepare("UPDATE `" . $this->strTable . "` SET favorite = 1 WHERE id  = ?")->execute($intId);
     }
-    
+
     public function getFavorite($strTable)
     {
         $objDb = $this->Database->prepare("SELECT * FROM " . $this->strTable . " WHERE str_table = ? AND favorite = 1")->execute($strTable);
@@ -99,7 +98,7 @@ class clipboard extends Backend
         $strTable = 'tl_' . $this->Input->get('do');
         $strElemId = $this->Input->get('id');
         $childs = 0;
-        if($this->Input->get('childs') == 1)
+        if ($this->Input->get('childs') == 1)
         {
             $childs = 1;
         }
@@ -114,7 +113,6 @@ class clipboard extends Backend
 
     public function init()
     {
-        FB::log($_POST);
         $boolCl = FALSE;
         $key = $this->Input->get('key');
         if (strlen($key))
