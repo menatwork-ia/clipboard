@@ -1,4 +1,7 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
+
+if (!defined('TL_ROOT'))
+    die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -26,8 +29,7 @@
  * @license    GNU/GPL 2
  * @filesource
  */
-class clipboard extends Backend
-{
+class clipboard extends Backend {
 
     private $strTable = 'tl_clipboard';
     private $strTemplate = 'be_clipboard';
@@ -35,17 +37,14 @@ class clipboard extends Backend
     /**
      * Load database object
      */
-    protected function __construct()
-    {
+    protected function __construct() {
         parent::__construct();
         $this->import('BackendUser', 'User');
     }
 
-    public function generate($strContent, $strTemplate)
-    {
+    public function generate($strContent, $strTemplate) {
 
-        if ($strTemplate == 'be_main' && $this->Database->tableExists($this->strTable))
-        {
+        if ($strTemplate == 'be_main' && $this->Database->tableExists($this->strTable)) {
             $arrContent = array(strstr($strContent, '<div id="container">', TRUE));
 
             $objTemplate = new BackendTemplate($this->strTemplate);
@@ -54,22 +53,20 @@ class clipboard extends Backend
                     ->execute('tl_' . $this->Input->get('do'), $this->User->id);
             $clipboard = $objClipboard->fetchAllAssoc();
 
-            foreach ($clipboard AS $k => $v)
-            {
+            foreach ($clipboard AS $k => $v) {
                 $clipboard[$k]['favorite_href'] = $this->addToUrl('key=cl_favor&amp;cl_id=' . $v['id']);
                 $clipboard[$k]['delete_href'] = $this->addToUrl('key=cl_delete&amp;cl_id=' . $v['id']);
                 $clipboard[$k]['edit_href'] = $this->addToUrl('key=cl_edit&amp;cl_id=' . $v['id']);
             }
 
             $objTemplate->clipboard = $clipboard;
-            $objTemplate->action = $this->Environment->request;
+            $objTemplate->action = $this->Environment->request . '&key=cl_save_title';
             $arrContent[] = $objTemplate->parse();
 
             $arrContent[] = strstr($strContent, '<div id="container">');
 
             $strNewContent = "";
-            foreach ($arrContent AS $content)
-            {
+            foreach ($arrContent AS $content) {
                 $newContent .= $content;
             }
 
@@ -79,15 +76,23 @@ class clipboard extends Backend
         return $strContent;
     }
 
-    public function delete($intId)
-    {
+    public function saveTitle($arrTitles) {
+        if (count($arrTitles) > 0) {
+            foreach ($arrTitles AS $id => $strTitle) {
+                $this->Database
+                        ->prepare("UPDATE `" . $this->strTable . "` SET title = ? WHERE id = ? AND `user_id` = ?")
+                        ->execute($strTitle, $id, $this->User->id);
+            }
+        }
+    }
+
+    public function delete($intId) {
         $this->Database
                 ->prepare("DELETE FROM `" . $this->strTable . "` WHERE `id` = ? AND `user_id` = ?")
                 ->execute($intId, $this->User->id);
     }
 
-    public function favor($intId)
-    {
+    public function favor($intId) {
         $strTable = 'tl_' . $this->Input->get('do');
         $this->Database
                 ->prepare("UPDATE `" . $this->strTable . "` SET favorite = 0 WHERE str_table = ? AND `user_id` = ?")
@@ -97,29 +102,25 @@ class clipboard extends Backend
                 ->execute($intId, $this->User->id);
     }
 
-    public function getFavorite($strTable)
-    {
+    public function getFavorite($strTable) {
         $objDb = $this->Database
                 ->prepare("SELECT * FROM " . $this->strTable . " WHERE str_table = ? AND favorite = 1 AND `user_id` = ?")
                 ->execute($strTable, $this->User->id);
         return $objDb->fetchAssoc();
     }
 
-    public function edit($intId, $strTitle)
-    {
+    public function edit($intId, $strTitle) {
         $strTable = 'tl_' . $this->Input->get('do');
         $this->Database
                 ->prepare("UPDATE `" . $this->strTable . "` SET title = ? WHERE id  = ? AND `user_id` = ?")
                 ->execute($strTitle, $intId, $this->User->id);
     }
 
-    public function copy()
-    {
+    public function copy() {
         $strTable = 'tl_' . $this->Input->get('do');
         $strElemId = $this->Input->get('id');
         $childs = 0;
-        if ($this->Input->get('childs') == 1)
-        {
+        if ($this->Input->get('childs') == 1) {
             $childs = 1;
         }
         $arrSet = array(
@@ -133,48 +134,45 @@ class clipboard extends Backend
                 ->execute($strTable, $this->User->id);
         $this->Database
                 ->prepare("INSERT INTO `" . $this->strTable . "` %s ON DUPLICATE KEY UPDATE favorite = 1")
-                ->set($arrSet)->execute();
+                ->set($arrSet)
+                ->execute();
     }
 
-    public function init()
-    {
+    public function init() {
         $boolCl = FALSE;
         $key = $this->Input->get('key');
-        if (strlen($key))
-        {
-            if (stristr($key, 'cl_'))
-            {
+        if (strlen($key)) {
+            if (stristr($key, 'cl_')) {
                 $boolCl = TRUE;
             }
         }
-        if (is_array($_GET) && $this->Database->tableExists($this->strTable) && $boolCl)
-        {
+        if (is_array($_GET) && $this->Database->tableExists($this->strTable) && $boolCl) {
             $arrGetParams = array_keys($_GET);
             $arrUnsetParams = array();
             $intId = $this->Input->get('cl_id');
-            foreach ($arrGetParams AS $strGetParam)
-            {
+            foreach ($arrGetParams AS $strGetParam) {
                 $strGetValue = $this->Input->get($strGetParam);
-                switch ($strGetParam)
-                {
+                switch ($strGetParam) {
                     case 'key':
-                        switch ($strGetValue)
-                        {
+                        switch ($strGetValue) {
+                            case 'cl_save_title':
+                                $arrTitles = $this->Input->post('title');
+                                if (is_array($arrTitles)) {
+                                    $this->saveTitle($arrTitles);
+                                }
+                                break;
                             case 'cl_favor':
-                                if (strlen($intId))
-                                {
+                                if (strlen($intId)) {
                                     $this->favor($intId);
                                 }
                                 break;
                             case 'cl_delete':
-                                if (strlen($intId))
-                                {
+                                if (strlen($intId)) {
                                     $this->delete($intId);
                                 }
                                 break;
                             case 'cl_edit':
-                                if (strlen($intId))
-                                {
+                                if (strlen($intId)) {
                                     $this->edit($intId, $strGetValue);
                                 }
                                 break;
@@ -192,8 +190,7 @@ class clipboard extends Backend
                         break;
                 }
             }
-            foreach ($arrUnsetParams AS $k => $v)
-            {
+            foreach ($arrUnsetParams AS $k => $v) {
                 $this->Input->setGet($k, NULL);
                 $this->Environment->request = str_replace("&$k=$v", '', $this->Environment->request);
                 $this->Environment->queryString = str_replace("&$k=$v", '', $this->Environment->queryString);

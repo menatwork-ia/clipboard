@@ -1,17 +1,7 @@
 <?php if ($this->clipboard): ?>
     <div id="clipboard">
         <h1><?php echo $GLOBALS['TL_LANG']['MSC']['clipboard']; ?></h1>
-
         <div>
-            <p id="show" class="inactive button">
-                <a id="edit" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['editSelected']; ?></a>
-            </p>
-
-            <p id="hide" class="inactive invisible button">
-                <a id="cancel" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['cancelBT']; ?></a>
-                <button id="save"><?php echo $GLOBALS['TL_LANG']['MSC']['save']; ?></button>
-            </p>
-
             <form action="<?php echo $this->action; ?>" method="post">
                 <input type="hidden" name="REQUEST_TOKEN" value="<?php echo REQUEST_TOKEN; ?>">
                 <ul>
@@ -26,11 +16,18 @@
                                 </a>
                             </p>
                             <p class="cl_title">
-                                <span>(ID <?php echo $item['id']; ?>)</span> <input class="<?php echo ((strlen($item['title'])) ? '' : 'empty '); ?>text" readonly="readonly" type="text" name="<?php echo $item['id']; ?>" value="<?php echo ((strlen($item['title'])) ? $item['title'] : $GLOBALS['TL_LANG']['MSC']['noClipboardTitle']); ?>" />
+                                <span>(ID <?php echo $item['id']; ?>)</span> <input class="<?php echo ((strlen($item['title'])) ? '' : 'empty '); ?>text" readonly="readonly" type="text" name="title[<?php echo $item['id']; ?>]" value="<?php echo ((strlen($item['title'])) ? $item['title'] : $GLOBALS['TL_LANG']['MSC']['noClipboardTitle']); ?>" />
                             </p>
                         </li>
                     <?php endforeach; ?>
                 </ul>
+                <p id="show" class="inactive button">
+                    <a id="edit" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['editSelected']; ?></a>
+                </p>
+                <p id="hide" class="inactive invisible button">
+                    <a id="cancel" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['cancelBT']; ?></a>
+                    <button id="save"><?php echo $GLOBALS['TL_LANG']['MSC']['save']; ?></button>
+                </p>
             </form>  
         </div>
     </div>
