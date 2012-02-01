@@ -13,11 +13,12 @@
 
 CREATE TABLE `tl_clipboard` (
         `id` int(10) unsigned NOT NULL auto_increment,
+        `user_id` int(10) unsigned NOT NULL default '0',
         `title` varchar(128) NOT NULL default '',
         `str_table` varchar(32) NOT NULL default '',
         `favorite` char(1) NOT NULL default '1',
         `childs` char(1) NOT NULL default '0',
         `elem_id` int(10) unsigned NOT NULL default '0',
     PRIMARY KEY  (`id`),
-    UNIQUE KEY `key` (`elem_id`,`str_table`)
+    UNIQUE KEY `key` (`user_id`, `elem_id`, `str_table`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

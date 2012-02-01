@@ -1,5 +1,4 @@
-<?php
-if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -33,6 +32,15 @@ class clipboard extends Backend
     private $strTable = 'tl_clipboard';
     private $strTemplate = 'be_clipboard';
 
+    /**
+     * Load database object
+     */
+    protected function __construct()
+    {
+        parent::__construct();
+        $this->import('BackendUser', 'User');
+    }
+
     public function generate($strContent, $strTemplate)
     {
 
@@ -41,7 +49,9 @@ class clipboard extends Backend
             $arrContent = array(strstr($strContent, '<div id="container">', TRUE));
 
             $objTemplate = new BackendTemplate($this->strTemplate);
-            $objClipboard = $this->Database->prepare("SELECT * FROM `" . $this->strTable . "` WHERE str_table = %s")->execute('tl_' . $this->Input->get('do'));
+            $objClipboard = $this->Database
+                    ->prepare("SELECT * FROM `" . $this->strTable . "` WHERE `str_table` = %s AND `user_id` = ?")
+                    ->execute('tl_' . $this->Input->get('do'), $this->User->id);
             $clipboard = $objClipboard->fetchAllAssoc();
 
             foreach ($clipboard AS $k => $v)
@@ -71,26 +81,36 @@ class clipboard extends Backend
 
     public function delete($intId)
     {
-        $this->Database->prepare("DELETE FROM `" . $this->strTable . "` WHERE id = ?")->execute($intId);
+        $this->Database
+                ->prepare("DELETE FROM `" . $this->strTable . "` WHERE `id` = ? AND `user_id` = ?")
+                ->execute($intId, $this->User->id);
     }
 
     public function favor($intId)
     {
         $strTable = 'tl_' . $this->Input->get('do');
-        $this->Database->prepare("UPDATE `" . $this->strTable . "` SET favorite = 0 WHERE str_table = ?")->execute($strTable);
-        $this->Database->prepare("UPDATE `" . $this->strTable . "` SET favorite = 1 WHERE id  = ?")->execute($intId);
+        $this->Database
+                ->prepare("UPDATE `" . $this->strTable . "` SET favorite = 0 WHERE str_table = ? AND `user_id` = ?")
+                ->execute($strTable, $this->User->id);
+        $this->Database
+                ->prepare("UPDATE `" . $this->strTable . "` SET favorite = 1 WHERE id  = ? AND `user_id` = ?")
+                ->execute($intId, $this->User->id);
     }
 
     public function getFavorite($strTable)
     {
-        $objDb = $this->Database->prepare("SELECT * FROM " . $this->strTable . " WHERE str_table = ? AND favorite = 1")->execute($strTable);
+        $objDb = $this->Database
+                ->prepare("SELECT * FROM " . $this->strTable . " WHERE str_table = ? AND favorite = 1 AND `user_id` = ?")
+                ->execute($strTable, $this->User->id);
         return $objDb->fetchAssoc();
     }
 
     public function edit($intId, $strTitle)
     {
         $strTable = 'tl_' . $this->Input->get('do');
-        $this->Database->prepare("UPDATE `" . $this->strTable . "` SET title = ? WHERE id  = ?")->execute($strTitle, $intId);
+        $this->Database
+                ->prepare("UPDATE `" . $this->strTable . "` SET title = ? WHERE id  = ? AND `user_id` = ?")
+                ->execute($strTitle, $intId, $this->User->id);
     }
 
     public function copy()
@@ -103,12 +123,17 @@ class clipboard extends Backend
             $childs = 1;
         }
         $arrSet = array(
+            'user_id' => $this->User->id,
             'childs' => $childs,
             'str_table' => $strTable,
-            'elem_id' => $strElemId
+            'elem_id' => $strElemId,
         );
-        $this->Database->prepare("UPDATE `" . $this->strTable . "` SET favorite = 0 WHERE str_table = ?")->execute($strTable);
-        $this->Database->prepare("INSERT INTO `" . $this->strTable . "` %s ON DUPLICATE KEY UPDATE favorite = 1")->set($arrSet)->execute();
+        $this->Database
+                ->prepare("UPDATE `" . $this->strTable . "` SET favorite = 0 WHERE str_table = ? AND `user_id` = ?")
+                ->execute($strTable, $this->User->id);
+        $this->Database
+                ->prepare("INSERT INTO `" . $this->strTable . "` %s ON DUPLICATE KEY UPDATE favorite = 1")
+                ->set($arrSet)->execute();
     }
 
     public function init()

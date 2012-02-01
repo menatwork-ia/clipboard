@@ -27,15 +27,22 @@
  * @filesource
  */
 
+$arrLocation = array('page');
+
+if (TL_MODE == 'BE')
+{
+    $objInput = Input::getInstance();
+    
+    if(in_array($objInput->get('do'), $arrLocation))
+    {
+        $GLOBALS['TL_CSS']['clipboard'] = "system/modules/clipboard/html/clipboard.css";
+        $GLOBALS['TL_JAVASCRIPT']['clipboard'] = "system/modules/clipboard/html/clipboard.js";
+    }
+}
+
 /*
  * Hooks
  */
 $GLOBALS['TL_HOOKS']['outputBackendTemplate'][] = array('clipboard', 'generate');
-
-if (TL_MODE == 'BE')
-{
-    $GLOBALS['TL_CSS']['clipboard'] = "system/modules/clipboard/html/clipboard.css";
-    $GLOBALS['TL_JAVASCRIPT']['clipboard'] = "system/modules/clipboard/html/clipboard.js";
-}
 
 ?>

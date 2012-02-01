@@ -4,7 +4,7 @@
 
         <div>
             <p id="show" class="inactive button">
-                <a class="edit" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['editSelected']; ?></a>
+                <a id="edit" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['editSelected']; ?></a>
             </p>
 
             <p id="hide" class="inactive invisible button">
@@ -21,11 +21,11 @@
                                 <a title="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" href="<?php echo $item['favorite_href']; ?>">
                                     <img height="16" width="16" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" src="system/themes/default/images/featured<?php echo (!$item['favorite']) ? '_' : ''; ?>.gif" />
                                 </a>
-                                <a onclick="if (!confirm('<?php echo $GLOBALS['TL_LANG']['MSC']['deleteConfirm']; ?>')) return false; Backend.getScrollOffset();" title="<?php echo $GLOBALS['TL_LANG']['MSC']['deleteSelected']; ?>" href="<?php echo $item['delete_href']; ?>">
+                                <a onclick="if (!confirm('<?php echo sprintf($GLOBALS['TL_LANG']['MSC']['deleteConfirm'], $item['id']); ?>')) return false; Backend.getScrollOffset();" title="<?php echo $GLOBALS['TL_LANG']['MSC']['deleteSelected']; ?>" href="<?php echo $item['delete_href']; ?>">
                                     <img height="16" width="14" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['deleteSelected']; ?>" src="system/themes/default/images/delete.gif" />
                                 </a>
                             </p>
-                            <p>
+                            <p class="cl_title">
                                 <span>(ID <?php echo $item['id']; ?>)</span> <input class="<?php echo ((strlen($item['title'])) ? '' : 'empty '); ?>text" readonly="readonly" type="text" name="<?php echo $item['id']; ?>" value="<?php echo ((strlen($item['title'])) ? $item['title'] : $GLOBALS['TL_LANG']['MSC']['noClipboardTitle']); ?>" />
                             </p>
                         </li>

@@ -81,23 +81,43 @@ window.addEvent('domready', function(){
 
     ClipboardMenu.initialize();
 	
-    $('clipboard').addEvent('mouseover', function(){
-        $$('p.button').removeClass('inactive').addClass('active');
-    });
+    if($('clipboard'))
+    {
+        $('clipboard').addEvent('mouseover', function(){
+            $$('p.button').removeClass('inactive').addClass('active');
+        });
+
+        $('clipboard').addEvent('mouseout', function(){
+            $$('p.button').removeClass('active').addClass('inactive');
+        });
+    }
+    
+    if($('show'))
+    {
+        $('show').getElement('a').addEvent('click', function(){
+            $(this).getParent().addClass('invisible').getNext('p').removeClass('invisible');
+            return false;
+        }); 
+    }
 	
-    $('clipboard').addEvent('mouseout', function(){
-        $$('p.button').removeClass('active').addClass('inactive');
-    });
-	
-    $('show').getElement('a').addEvent('click', function(){
-		$(this).getParent().addClass('invisible').getNext('p').removeClass('invisible');
-        return false;
-    }); 
-	
-    $('hide').getElement('a').addEvent('click', function(){
-        $(this).getParent().addClass('invisible').getPrevious('p').removeClass('invisible');
-        return false;
-    });
+    if($('hide'))
+    {       
+        $('hide').getElement('a').addEvent('click', function(){
+            $(this).getParent().addClass('invisible').getPrevious('p').removeClass('invisible');
+            return false;
+        });
+    }
+    
+    if($('edit'))
+    {
+        $('edit').addEvent('click', function(){
+            var inputElem = new Element('input', {
+                type:'text'
+            });
+            var edit = $$('p.cl_title');
+            inputElem.inject(edit[0], top);
+        })
+    }
 	
 });
 
