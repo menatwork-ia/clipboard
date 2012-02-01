@@ -16,7 +16,7 @@
                                 </a>
                             </p>
                             <p class="cl_title">
-                                <span>(ID <?php echo $item['id']; ?>)</span> <input class="<?php echo ((strlen($item['title'])) ? '' : 'empty '); ?>text" readonly="readonly" type="text" name="title[<?php echo $item['id']; ?>]" value="<?php echo ((strlen($item['title'])) ? $item['title'] : $GLOBALS['TL_LANG']['MSC']['noClipboardTitle']); ?>" />
+                                <span>(ID <?php echo $item['id']; ?>)</span> <input class="<?php echo ((strlen($item['title'])) ? '' : 'empty '); ?>text" readonly="readonly" type="text" name="title[<?php echo $item['id']; ?>]" value="<?php echo $item['title']; ?>" />
                             </p>
                         </li>
                     <?php endforeach; ?>

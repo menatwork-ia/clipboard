@@ -26,7 +26,6 @@
  * @license    GNU/GPL 2
  * @filesource
  */
- 
 $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = array('clipboard', 'init');
 
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array

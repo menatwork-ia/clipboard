@@ -26,23 +26,23 @@
  * @license    GNU/LGPL
  * @filesource
  */
-
-$arrLocation = array('page');
+$arrLocation = array(
+    'page'
+);
 
 if (TL_MODE == 'BE')
 {
     $objInput = Input::getInstance();
-    
-    if(in_array($objInput->get('do'), $arrLocation))
+
+    if (in_array($objInput->get('do'), $arrLocation))
     {
-        $GLOBALS['TL_CSS']['clipboard'] = "system/modules/clipboard/html/clipboard.css";
-        $GLOBALS['TL_JAVASCRIPT']['clipboard'] = "system/modules/clipboard/html/clipboard.js";
+        $GLOBALS['TL_CSS']['clipboard'] = "system/modules/clipboard/html/clipboard_src.css";
+        $GLOBALS['TL_JAVASCRIPT']['clipboard'] = "system/modules/clipboard/html/clipboard_src.js";
     }
 }
 
 /*
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['outputBackendTemplate'][] = array('clipboard', 'generate');
-
+$GLOBALS['TL_HOOKS']['outputBackendTemplate'][] = array('clipboard', 'outputBackendTemplate');
 ?>
