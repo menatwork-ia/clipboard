@@ -153,8 +153,9 @@ class clipboard extends Backend
     public function getTitleForId($id, $do)
     {
         switch ($do)
-        {
+        {            
             case 'page':                
+            case 'article':
                 $objResult = $this->Database
                     ->prepare("SELECT title FROM `tl_" . $do . "` WHERE id = ?")
                     ->execute($id);

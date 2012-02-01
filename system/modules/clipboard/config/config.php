@@ -27,7 +27,8 @@
  * @filesource
  */
 $arrLocation = array(
-    'page'
+    'page',
+    'article'
 );
 
 if (TL_MODE == 'BE')
