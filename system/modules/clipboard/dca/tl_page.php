@@ -52,7 +52,7 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array
     'href' => '&amp;act=copy&amp;mode=1',
     'icon' => 'pasteafter.gif',
     'attributes' => 'class="cl_paste"',
-    'button_callback' => array('tl_page_cl', 'pastPageAfter')
+    'button_callback' => array('tl_page_cl', 'pastPage')
 );
 
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array
@@ -61,13 +61,13 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array
     'href' => '&amp;act=copy&amp;mode=2',
     'icon' => 'pasteinto.gif',
     'attributes' => 'class="cl_paste"',
-    'button_callback' => array('tl_page_cl', 'pastPageAfter')
+    'button_callback' => array('tl_page_cl', 'pastPage')
 );
 
 class tl_page_cl extends tl_page
 {
 
-    public function pastPageAfter($row, $href, $label, $title, $icon, $attributes, $table)
+    public function pastPage($row, $href, $label, $title, $icon, $attributes, $table)
     {
         if ($GLOBALS['TL_DCA'][$table]['config']['closed'])
         {
