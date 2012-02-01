@@ -26,6 +26,7 @@
  * @license    GNU/GPL 2
  * @filesource
  */
+
 $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = array('clipboard', 'init');
 
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array
@@ -43,7 +44,7 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds'] = array
     'href' => 'key=cl_copy&amp;childs=1',
     'icon' => 'copychilds.gif',
     'attributes' => 'class="cl_paste" onclick="Backend.getScrollOffset();"',
-    'button_callback' => array('tl_page_cl', 'copyPageWithSubpages')
+    'button_callback' => array('tl_page_cl', 'cl_copyPageWithSubpages')
 );
 
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array
@@ -52,7 +53,7 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array
     'href' => '&amp;act=copy&amp;mode=1',
     'icon' => 'pasteafter.gif',
     'attributes' => 'class="cl_paste"',
-    'button_callback' => array('tl_page_cl', 'pastPage')
+    'button_callback' => array('tl_page_cl', 'cl_pastePage')
 );
 
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array
@@ -61,13 +62,13 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array
     'href' => '&amp;act=copy&amp;mode=2',
     'icon' => 'pasteinto.gif',
     'attributes' => 'class="cl_paste"',
-    'button_callback' => array('tl_page_cl', 'pastPage')
+    'button_callback' => array('tl_page_cl', 'cl_pastePage')
 );
 
 class tl_page_cl extends tl_page
 {
 
-    public function pastPage($row, $href, $label, $title, $icon, $attributes, $table)
+    public function cl_pastePage($row, $href, $label, $title, $icon, $attributes, $table)
     {
         if ($GLOBALS['TL_DCA'][$table]['config']['closed'])
         {
@@ -78,7 +79,7 @@ class tl_page_cl extends tl_page
         return (is_array($arrFavorite) ? ($this->User->isAdmin || ($this->User->hasAccess($row['type'], 'alpty') && $this->User->isAllowed(2, $row))) ? '<a href="' . $this->addToUrl($href . '&amp;id=' . $arrFavorite['elem_id'] . '&amp;' . (($arrFavorite['childs'] == 1) ? 'childs=1&amp;' : '') . 'pid=' . $row['id']) . '" title="' . specialchars($title) . '"' . $attributes . '>' . $this->generateImage($icon, $label) . '</a> ' : $this->generateImage(preg_replace('/\.gif$/i', '_.gif', $icon)) . ' '  : '');
     }
 
-    public function copyPageWithSubpages($row, $href, $label, $title, $icon, $attributes, $table)
+    public function cl_copyPageWithSubpages($row, $href, $label, $title, $icon, $attributes, $table)
     {
         if ($GLOBALS['TL_DCA'][$table]['config']['closed'])
         {
