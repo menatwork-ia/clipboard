@@ -8,8 +8,8 @@
             </p>
 
             <p id="hide" class="inactive invisible button">
-                <a class="cancel" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['cancelBT']; ?></a>
-                <button class="save"><?php echo $GLOBALS['TL_LANG']['MSC']['save']; ?></button>
+                <a id="cancel" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['cancelBT']; ?></a>
+                <button id="save"><?php echo $GLOBALS['TL_LANG']['MSC']['save']; ?></button>
             </p>
 
             <form action="<?php echo $this->action; ?>" method="post">

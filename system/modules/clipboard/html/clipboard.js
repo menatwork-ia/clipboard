@@ -77,53 +77,122 @@ var ClipboardMenu =
     }
 };
 
+/**
+ * Class Clipboard
+ *
+ * Provide methods to handle the clipboard buttons and edit title functionality
+ * @copyright  MEN AT WORK 2012
+ * @package    clipboard
+ * @license    GNU/GPL 2
+ */
+var Clipboard = 
+{
+    
+    /**
+     * Initialize the clipboard
+     */
+    initialize: function()
+    {  
+        // Add hover events to button bars
+        if($('clipboard'))
+        {        
+            $('clipboard').addEvent('mouseover', function(){
+                Clipboard.showAllButtos();
+            });
+            
+            $('clipboard').addEvent('mouseout', function(){
+                Clipboard.hideAllButtons();
+            });
+        }
+        
+        // Add edit title event
+        if($('edit'))
+        {
+            $('edit').addEvent('click', function(event){
+                event.stop();
+                Clipboard.editTitle();
+                Clipboard.showSave();
+            })
+        }
+        
+        // Add cancel edit title event
+        if($('cancel'))
+        {
+            $('cancel').addEvent('click', function(event){
+                event.stop();
+                Clipboard.cancelEditTitle();
+                Clipboard.showEdit();
+            });
+        }     
+    },
+    
+    /**
+     * Start the edit title functionality
+     */
+    editTitle: function()
+    {        
+        var edit = $$('p.cl_title');
+        edit.each(function(el, index){
+            var input = el.getElement('input').removeProperty('readonly').addClass('edit');
+        });      
+    },
+    
+    /**
+     * Cancel the edit title functionality
+     */
+    cancelEditTitle: function()
+    {
+        var save = $$('p.cl_title');
+        save.each(function(el, index){
+            var input = el.getElement('input').setProperty('readonly', 'readonly').removeClass('edit');
+        });          
+    },
+    
+    /**
+     * Hide edit button bar and show save button bar
+     */
+    showSave: function()
+    {
+        $('hide').removeClass('invisible');
+        $('show').addClass('invisible');
+    },
+    
+    /**
+     * Hide show button bar and show edit button bar
+     */
+    showEdit: function()
+    {
+        $('show').removeClass('invisible');
+        $('hide').addClass('invisible');
+    },
+    
+    /**
+     * Add all button bars
+     */
+    showAllButtos: function()
+    {
+        $$('p.button').removeClass('inactive').addClass('active');    
+    },
+    
+    /**
+     * Remove all button bars
+     */
+    hideAllButtons: function()
+    {
+        $$('p.button').removeClass('active').addClass('inactive');
+    } 
+};
+
 window.addEvent('domready', function(){
 
     ClipboardMenu.initialize();
-	
-    if($('clipboard'))
-    {
-        $('clipboard').addEvent('mouseover', function(){
-            $$('p.button').removeClass('inactive').addClass('active');
-        });
-
-        $('clipboard').addEvent('mouseout', function(){
-            $$('p.button').removeClass('active').addClass('inactive');
-        });
-    }
-    
-    if($('show'))
-    {
-        $('show').getElement('a').addEvent('click', function(){
-            $(this).getParent().addClass('invisible').getNext('p').removeClass('invisible');
-            return false;
-        }); 
-    }
-	
-    if($('hide'))
-    {       
-        $('hide').getElement('a').addEvent('click', function(){
-            $(this).getParent().addClass('invisible').getPrevious('p').removeClass('invisible');
-            return false;
-        });
-    }
-    
-    if($('edit'))
-    {
-        $('edit').addEvent('click', function(){
-            var inputElem = new Element('input', {
-                type:'text'
-            });
-            var edit = $$('p.cl_title');
-            inputElem.inject(edit[0], top);
-        })
-    }
+    Clipboard.initialize();  
 	
 });
 
 window.addEvent('structure', function(){
 
-    ClipboardMenu.initialize();
+    ClipboardMenu.initialize();    
 	
 });
 
