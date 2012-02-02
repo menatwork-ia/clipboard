@@ -4,6 +4,7 @@
         <div>
             <form action="<?php echo $this->action; ?>" method="post">
                 <input type="hidden" name="REQUEST_TOKEN" value="<?php echo REQUEST_TOKEN; ?>">
+                <input type="hidden" name="favorite" value="<?php echo $this->favorite['elem_id']; ?>" />
                 <ul>
                     <?php foreach ($this->clipboard as $item): ?>
                         <li<?php echo ($item['favorite']) ? ' class="featured"' : ''; ?>>

@@ -1,5 +1,7 @@
 <?php
 
+//
+
 if (!defined('TL_ROOT'))
     die('You cannot access this file directly!');
 
@@ -28,9 +30,10 @@ if (!defined('TL_ROOT'))
  * @package    clipboard
  * @license    GNU/GPL 2
  * @filesource
-
- *  */
+ */
 $GLOBALS['TL_DCA']['tl_article']['config']['onload_callback'][] = array('clipboard', 'init');
+
+$GLOBALS['TL_DCA']['tl_article']['list']['sorting']['paste_button_callback'] = array('tl_article_cl', 'pasteArticle');
 
 $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_copy'] = array
     (
@@ -47,12 +50,13 @@ $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after'] = array
     'href' => '&amp;act=copy&amp;mode=1',
     'icon' => 'pasteafter.gif',
     'attributes' => 'class="cl_paste"',
-    'button_callback' => array('tl_article_cl', 'pastArticle')
+    'button_callback' => array('tl_article_cl', 'cl_pasteArticle')
 );
 
 class tl_article_cl extends tl_article
 {
-    public function pastArticle($row, $href, $label, $title, $icon, $attributes, $table)
+
+    public function cl_pasteArticle($row, $href, $label, $title, $icon, $attributes, $table)
     {
         if ($GLOBALS['TL_DCA'][$table]['config']['closed'])
         {
@@ -61,6 +65,13 @@ class tl_article_cl extends tl_article
         $this->import('clipboard');
         $arrFavorite = $this->clipboard->getFavorite($table);
         return (is_array($arrFavorite) ? ($this->User->isAdmin || ($this->User->hasAccess($row['type'], 'alpty') && $this->User->isAllowed(2, $row))) ? '<a href="' . $this->addToUrl($href . '&amp;id=' . $arrFavorite['elem_id'] . '&amp;' . (($arrFavorite['childs'] == 1) ? 'childs=1&amp;' : '') . 'pid=' . $row['id']) . '" title="' . specialchars($title) . '"' . $attributes . '>' . $this->generateImage($icon, $label) . '</a> ' : $this->generateImage(preg_replace('/\.gif$/i', '_.gif', $icon)) . ' '  : '');
-    }    
+    }
+
+    public function pasteArticle(DataContainer $dc, $row, $table, $cr, $arrClipboard = false)
+    {
+        return parent::pasteArticle($dc, $row, $table, $cr, $arrClipboard);
+    }
+
 }
+
 ?>

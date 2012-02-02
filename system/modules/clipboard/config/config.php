@@ -28,7 +28,7 @@
  */
 $arrLocation = array(
     'page',
-    'article'
+    'article',
 );
 
 if (TL_MODE == 'BE')
@@ -37,6 +37,10 @@ if (TL_MODE == 'BE')
 
     if (in_array($objInput->get('do'), $arrLocation))
     {
+        if($objInput->get('do') == 'article')
+        {
+            $GLOBALS['TL_JAVASCRIPT']['clipboard_article_tree'] = "system/modules/clipboard/html/clipboard_article_tree_src.js";
+        }
         $GLOBALS['TL_CSS']['clipboard'] = "system/modules/clipboard/html/clipboard_src.css";
         $GLOBALS['TL_JAVASCRIPT']['clipboard'] = "system/modules/clipboard/html/clipboard_src.js";
     }

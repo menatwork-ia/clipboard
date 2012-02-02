@@ -69,6 +69,7 @@ class clipboard extends Backend
 
             $objTemplate->clipboard = $clipboard;
             $objTemplate->action = $this->Environment->request . '&key=cl_edit';
+            $objTemplate->favorite = $this->getFavorite('tl_' . $this->Input->get('do'));
             $arrContent[] = $objTemplate->parse();
 
             $arrContent[] = strstr($strContent, '<div id="container">');
