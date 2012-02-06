@@ -27,47 +27,91 @@
  * @filesource
  */
 
+/**
+ * Config 
+ */
 $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = array('clipboard', 'init');
 
+/**
+ * List operations 
+ */
+// Copy button
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array
     (
     'label' => &$GLOBALS['TL_LANG']['tl_page']['copy'],
-    'href' => 'key=cl_copy',
-    'icon' => 'copy.gif',
-    'attributes' => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"',
     'button_callback' => array('tl_page', 'copyPage')
 );
 
+$GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array_merge(
+        $GLOBALS['CLIPBOARD']['copy'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy']
+);
+
+// -----------------------------------------------------------------------------
+// Copy with childs button
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds'] = array
     (
     'label' => &$GLOBALS['TL_LANG']['tl_page']['copyChilds'],
-    'href' => 'key=cl_copy&amp;childs=1',
-    'icon' => 'copychilds.gif',
-    'attributes' => 'class="cl_paste" onclick="Backend.getScrollOffset();"',
     'button_callback' => array('tl_page_cl', 'cl_copyPageWithSubpages')
 );
 
+$GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds'] = array_merge(
+        $GLOBALS['CLIPBOARD']['copy_childs'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds']
+);
+
+// -----------------------------------------------------------------------------
+// Paste after button
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array
     (
-    'label' => &$GLOBALS['TL_LANG']['tl_page']['pasteafter'],
-    'href' => '&amp;act=copy&amp;mode=1',
-    'icon' => 'pasteafter.gif',
+    'label' => $GLOBALS['TL_LANG']['tl_page']['pasteafter'],
     'attributes' => 'class="cl_paste"',
     'button_callback' => array('tl_page_cl', 'cl_pastePage')
 );
 
+$GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array_merge(
+        $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after']
+);
+
+// -----------------------------------------------------------------------------
+// Paste into button
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array
     (
-    'label' => &$GLOBALS['TL_LANG']['tl_page']['pasteinto'],
-    'href' => '&amp;act=copy&amp;mode=2',
-    'icon' => 'pasteinto.gif',
+    'label' => $GLOBALS['TL_LANG']['tl_page']['pasteinto'],
     'attributes' => 'class="cl_paste"',
     'button_callback' => array('tl_page_cl', 'cl_pastePage')
 );
 
+$GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array_merge(
+        $GLOBALS['CLIPBOARD']['pasteinto'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into']
+);
+
+// -----------------------------------------------------------------------------
+
+/**
+ * Class tl_page_cl
+ *
+ * Provide miscellaneous methods that are used by the data configuration array.
+ * 
+ * PHP version 5
+ * @copyright  MEN AT WORK 2012
+ * @package    clipboard
+ * @license    GNU/GPL 2
+ * @filesource
+ */
 class tl_page_cl extends tl_page
 {
 
+    /**
+     * Return the paste button
+     * 
+     * @param array $row
+     * @param string $href
+     * @param string $label
+     * @param string $title
+     * @param string $icon
+     * @param string $attributes
+     * @param string $table
+     * @return string 
+     */
     public function cl_pastePage($row, $href, $label, $title, $icon, $attributes, $table)
     {
         if ($GLOBALS['TL_DCA'][$table]['config']['closed'])
@@ -75,10 +119,21 @@ class tl_page_cl extends tl_page
             return '';
         }
         $this->import('clipboard');
-        $arrFavorite = $this->clipboard->getFavorite($table);
-        return (is_array($arrFavorite) ? ($this->User->isAdmin || ($this->User->hasAccess($row['type'], 'alpty') && $this->User->isAllowed(2, $row))) ? '<a href="' . $this->addToUrl($href . '&amp;id=' . $arrFavorite['elem_id'] . '&amp;' . (($arrFavorite['childs'] == 1) ? 'childs=1&amp;' : '') . 'pid=' . $row['id']) . '" title="' . specialchars($title) . '"' . $attributes . '>' . $this->generateImage($icon, $label) . '</a> ' : $this->generateImage(preg_replace('/\.gif$/i', '_.gif', $icon)) . ' '  : '');
+        return $this->clipboard->getPasteButton($row, $href, $label, $title, $icon, $attributes, $table);
     }
 
+    /**
+     * Return the copy page with subpages button
+     * 
+     * @param array $row
+     * @param string $href
+     * @param string $label
+     * @param string $title
+     * @param string $icon
+     * @param string $attributes
+     * @param string $table
+     * @return string
+     */
     public function cl_copyPageWithSubpages($row, $href, $label, $title, $icon, $attributes, $table)
     {
         if ($GLOBALS['TL_DCA'][$table]['config']['closed'])

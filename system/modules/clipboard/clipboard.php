@@ -26,27 +26,36 @@
  * @license    GNU/GPL 2
  * @filesource
  */
+
+/**
+ * Class clipboard 
+ */
 class clipboard extends Backend
 {
 
     private $strTable = 'tl_clipboard';
     private $strTemplate = 'be_clipboard';
+    public $objClipboard;
 
     /**
-     * Load database object
+     * Initialize the object
      */
     protected function __construct()
     {
         parent::__construct();
         $this->import('BackendUser', 'User');
+        $this->objClipboard = $this->Database
+                ->prepare("SELECT * FROM `" . $this->strTable . "` WHERE `str_table` = %s AND `user_id` = ?")
+                ->execute('tl_' . $this->Input->get('do'), $this->User->id);
     }
 
     /**
      * Add the Clipboard to the backend template
+     * HOOK: $GLOBALS['TL_HOOKS']['outputBackendTemplate']
      * 
      * @param type $strContent
      * @param type $strTemplate
-     * @return type 
+     * @return string 
      */
     public function outputBackendTemplate($strContent, $strTemplate)
     {
@@ -56,10 +65,10 @@ class clipboard extends Backend
             $arrContent = array(strstr($strContent, '<div id="container">', TRUE));
 
             $objTemplate = new BackendTemplate($this->strTemplate);
-            $objClipboard = $this->Database
-                    ->prepare("SELECT * FROM `" . $this->strTable . "` WHERE `str_table` = %s AND `user_id` = ?")
-                    ->execute('tl_' . $this->Input->get('do'), $this->User->id);
-            $clipboard = $objClipboard->fetchAllAssoc();
+
+            $clipboard = $this->Database
+                            ->prepare("SELECT * FROM `" . $this->strTable . "` WHERE `str_table` = %s AND `user_id` = ?")
+                            ->execute('tl_' . $this->Input->get('do'), $this->User->id)->fetchAllAssoc();
 
             foreach ($clipboard AS $k => $v)
             {
@@ -69,7 +78,6 @@ class clipboard extends Backend
 
             $objTemplate->clipboard = $clipboard;
             $objTemplate->action = $this->Environment->request . '&key=cl_edit';
-            $objTemplate->favorite = $this->getFavorite('tl_' . $this->Input->get('do'));
             $arrContent[] = $objTemplate->parse();
 
             $arrContent[] = strstr($strContent, '<div id="container">');
@@ -86,6 +94,11 @@ class clipboard extends Backend
         return $strContent;
     }
 
+    /**
+     * Delete the entry with the given id
+     * 
+     * @param integer $intId 
+     */
     public function delete($intId)
     {
         $this->Database
@@ -93,6 +106,11 @@ class clipboard extends Backend
                 ->execute($intId, $this->User->id);
     }
 
+    /**
+     * Make the given id favorit
+     * 
+     * @param integer $intId 
+     */
     public function favor($intId)
     {
         $strTable = 'tl_' . $this->Input->get('do');
@@ -104,14 +122,25 @@ class clipboard extends Backend
                 ->execute($intId, $this->User->id);
     }
 
+    /**
+     * Return the current favorit element
+     * 
+     * @param string $strTable
+     * @return array 
+     */
     public function getFavorite($strTable)
     {
         $objDb = $this->Database
                 ->prepare("SELECT * FROM " . $this->strTable . " WHERE str_table = ? AND favorite = 1 AND `user_id` = ?")
                 ->execute($strTable, $this->User->id);
-        return $objDb->fetchAssoc();
+        return $objDb;
     }
 
+    /**
+     * Override all given element titles in the clipboard view
+     * 
+     * @param array $arrTitles 
+     */
     public function edit($arrTitles)
     {
         if (count($arrTitles) > 0)
@@ -125,10 +154,13 @@ class clipboard extends Backend
         }
     }
 
+    /**
+     * Copy element to clipboard 
+     */
     public function copy()
     {
         $strTable = 'tl_' . $this->Input->get('do');
-        $strElemId = $this->Input->get('id');        
+        $strElemId = $this->Input->get('id');
         $strTitle = $this->getTitleForId($strElemId, $this->Input->get('do'));
         $childs = 0;
         if ($this->Input->get('childs') == 1)
@@ -150,22 +182,94 @@ class clipboard extends Backend
                 ->set($arrSet)
                 ->execute();
     }
-    
+
+    /**
+     * Return the title for the given id
+     * 
+     * @param integer $id
+     * @param string $do
+     * @return string 
+     */
     public function getTitleForId($id, $do)
     {
         switch ($do)
-        {            
-            case 'page':                
+        {
+            case 'page':
             case 'article':
                 $objResult = $this->Database
-                    ->prepare("SELECT title FROM `tl_" . $do . "` WHERE id = ?")
-                    ->execute($id);
+                        ->prepare("SELECT title FROM `tl_" . $do . "` WHERE id = ?")
+                        ->execute($id);
                 return $objResult->title;
             default:
                 return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'];
         }
     }
 
+    /**
+     * Return bool true if the clipboard is active and have entries for active page and user
+     * 
+     * @return boolean 
+     */
+    public static function isClipboard()
+    {
+        $objClipboard = Database::getInstance()
+                ->prepare("SELECT * FROM `tl_clipboard` WHERE `str_table` = %s AND `user_id` = ?")
+                ->execute('tl_' . Input::getInstance()->get('do'), BackendUser::getInstance()->id);
+
+        $arrClipboard = $objClipboard->fetchAllAssoc();
+
+        if (count($arrClipboard) > 0)
+        {
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
+    /**
+     * Return the paste button
+     * 
+     * @param array $row
+     * @param string $href
+     * @param string $label
+     * @param string $title
+     * @param string $icon
+     * @param string $attributes
+     * @param string $table
+     * @return string 
+     */
+    public function getPasteButton($row, $href, $label, $title, $icon, $attributes, $table)
+    {
+        return ($this->getFavorite($table)->numRows ? ($this->User->isAdmin || ($this->User->hasAccess($row['type'], 'alpty') && $this->User->isAllowed(2, $row))) ? '<a href="' . $this->addToUrl($href . '&amp;id=' . $this->getFavorite($table)->elem_id . '&amp;' . (($this->getFavorite($table)->childs == 1) ? 'childs=1&amp;' : '') . 'pid=' . $row['id']) . '" title="' . specialchars($title) . '"' . $attributes . '>' . $this->generateImage($icon, $label) . '</a> ' : $this->generateImage(preg_replace('/\.gif$/i', '_.gif', $icon)) . ' '  : '');
+    }
+
+    /**
+     * Return some independently buttons
+     * 
+     * @param object $dc
+     * @param array $row
+     * @param string $table
+     * @param boolean $cr
+     * @param array $arrClipboard
+     * @param childs $childs
+     * @return string
+     */
+    public function independentlyButtons(DataContainer $dc, $row, $table, $cr, $arrClipboard = false, $childs)
+    {
+        if ($dc->table == 'tl_article' && $table == 'tl_page')
+        {
+            $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteinto'][1], array($this->getFavorite($dc->table)->elem_id));
+            $return = $this->getPasteButton(
+                    $row, $GLOBALS['CLIPBOARD']['pasteinto']['href'], $label, $title, $GLOBALS['CLIPBOARD']['pasteinto']['icon'], $GLOBALS['CLIPBOARD']['pasteinto']['attributes'], $dc->table
+            );
+
+            return $return;
+        }
+    }
+
+    /**
+     * Handle all main operations, clean up the url and redirect to itself 
+     */
     public function init()
     {
         $boolCl = FALSE;
@@ -230,6 +334,8 @@ class clipboard extends Backend
                 $this->Environment->queryString = str_replace("&$k=$v", '', $this->Environment->queryString);
                 $this->Environment->requestUri = str_replace("&$k=$v", '', $this->Environment->requestUri);
             }
+
+            $this->redirect($this->Environment->request);
         }
     }
 

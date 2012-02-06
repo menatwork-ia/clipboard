@@ -26,6 +26,7 @@
  * @license    GNU/LGPL
  * @filesource
  */
+
 $arrLocation = array(
     'page',
     'article',
@@ -37,17 +38,40 @@ if (TL_MODE == 'BE')
 
     if (in_array($objInput->get('do'), $arrLocation))
     {
-        if($objInput->get('do') == 'article')
-        {
-            $GLOBALS['TL_JAVASCRIPT']['clipboard_article_tree'] = "system/modules/clipboard/html/clipboard_article_tree_src.js";
-        }
         $GLOBALS['TL_CSS']['clipboard'] = "system/modules/clipboard/html/clipboard_src.css";
         $GLOBALS['TL_JAVASCRIPT']['clipboard'] = "system/modules/clipboard/html/clipboard_src.js";
     }
-}
 
-/*
- * Hooks
- */
-$GLOBALS['TL_HOOKS']['outputBackendTemplate'][] = array('clipboard', 'outputBackendTemplate');
+    /**
+     * Hooks
+     */
+    $GLOBALS['TL_HOOKS']['outputBackendTemplate'][] = array('clipboard', 'outputBackendTemplate');
+    $GLOBALS['TL_HOOKS']['independentlyButtons'][] = array('clipboard', 'independentlyButtons');
+    
+    /**
+     * Config
+     */
+    $GLOBALS['CLIPBOARD'] = array(
+        'copy' => array(
+            'href' => 'key=cl_copy',
+            'icon' => 'featured.gif',
+            'attributes' => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"',            
+        ),
+        'copy_childs' => array(
+            'href' => 'key=cl_copy&amp;childs=1',
+            'icon' => 'copychilds.gif',
+            'attributes' => 'class="cl_paste" onclick="Backend.getScrollOffset();"',            
+        ),
+        'pasteinto' => array(            
+            'href' => '&amp;act=copy&amp;mode=2',
+            'icon' => 'pasteafter.gif',
+            'attributes' => ''
+        ),
+        'pasteafter' => array(
+            'href' => '&amp;act=copy&amp;mode=1',
+            'icon' => 'pasteinto.gif',
+            'attributes' => ''            
+        )
+    );
+}
 ?>
