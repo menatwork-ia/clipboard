@@ -1,4 +1,7 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
+
+if (!defined('TL_ROOT'))
+    die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -33,9 +36,10 @@
 class clipboard extends Backend
 {
 
-    private $strTable = 'tl_clipboard';
-    private $strTemplate = 'be_clipboard';
-    public $objClipboard;
+    protected $strTable = 'tl_clipboard';
+    protected $strTemplate = 'be_clipboard';
+    protected $objClipboard;
+    protected $pageType;
 
     /**
      * Initialize the object
@@ -46,7 +50,16 @@ class clipboard extends Backend
         $this->import('BackendUser', 'User');
         $this->objClipboard = $this->Database
                 ->prepare("SELECT * FROM `" . $this->strTable . "` WHERE `str_table` = %s AND `user_id` = ?")
-                ->execute('tl_' . $this->Input->get('do'), $this->User->id);
+                ->execute('tl_' . $this->pageType, $this->User->id);
+
+        if ($this->Input->get('table') == 'tl_content')
+        {
+            $this->pageType = 'content';
+        }
+        else
+        {
+            $this->pageType = $this->pageType;
+        }
     }
 
     /**
@@ -68,7 +81,7 @@ class clipboard extends Backend
 
             $clipboard = $this->Database
                             ->prepare("SELECT * FROM `" . $this->strTable . "` WHERE `str_table` = %s AND `user_id` = ?")
-                            ->execute('tl_' . $this->Input->get('do'), $this->User->id)->fetchAllAssoc();
+                            ->execute('tl_' . $this->pageType, $this->User->id)->fetchAllAssoc();
 
             foreach ($clipboard AS $k => $v)
             {
@@ -113,7 +126,7 @@ class clipboard extends Backend
      */
     public function favor($intId)
     {
-        $strTable = 'tl_' . $this->Input->get('do');
+        $strTable = 'tl_' . $this->pageType;
         $this->Database
                 ->prepare("UPDATE `" . $this->strTable . "` SET favorite = 0 WHERE str_table = ? AND `user_id` = ?")
                 ->execute($strTable, $this->User->id);
@@ -132,6 +145,7 @@ class clipboard extends Backend
     {
         $objDb = $this->Database
                 ->prepare("SELECT * FROM " . $this->strTable . " WHERE str_table = ? AND favorite = 1 AND `user_id` = ?")
+                ->limit(1)
                 ->execute($strTable, $this->User->id);
         return $objDb;
     }
@@ -159,9 +173,10 @@ class clipboard extends Backend
      */
     public function copy()
     {
-        $strTable = 'tl_' . $this->Input->get('do');
+        $strTable = 'tl_' . $this->pageType;
         $strElemId = $this->Input->get('id');
-        $strTitle = $this->getTitleForId($strElemId, $this->Input->get('do'));
+        $strTitle = $this->getTitleForId($strElemId, $this->pageType);
+
         $childs = 0;
         if ($this->Input->get('childs') == 1)
         {
@@ -258,7 +273,15 @@ class clipboard extends Backend
     {
         if ($dc->table == 'tl_article' && $table == 'tl_page')
         {
-            $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteinto'][1], array($this->getFavorite($dc->table)->elem_id));
+            if ($this->pageType == 'content')
+            {
+                $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteafter'][1], array($this->getFavorite($dc->table)->elem_id));
+            }
+            else
+            {
+                $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteinto'][1], array($this->getFavorite($dc->table)->elem_id));
+            }
+
             $return = $this->getPasteButton(
                     $row, $GLOBALS['CLIPBOARD']['pasteinto']['href'], $label, $title, $GLOBALS['CLIPBOARD']['pasteinto']['icon'], $GLOBALS['CLIPBOARD']['pasteinto']['attributes'], $dc->table
             );
@@ -327,12 +350,32 @@ class clipboard extends Backend
                         break;
                 }
             }
+
             foreach ($arrUnsetParams AS $k => $v)
             {
                 $this->Input->setGet($k, NULL);
                 $this->Environment->request = str_replace("&$k=$v", '', $this->Environment->request);
                 $this->Environment->queryString = str_replace("&$k=$v", '', $this->Environment->queryString);
                 $this->Environment->requestUri = str_replace("&$k=$v", '', $this->Environment->requestUri);
+            }
+
+            if ($arrUnsetParams['key'] == 'cl_copy' && $this->pageType == 'content')
+            {
+                $objArticle = $this->Database
+                        ->prepare("
+                            SELECT a.* 
+                            FROM `tl_article` AS a
+                            LEFT JOIN `tl_content` AS c
+                            ON c.pid = a.id
+                            WHERE c.id = ?")
+                        ->limit(1)
+                        ->execute($this->Input->get('id'));
+
+                $strRequestWithoutId = str_replace(
+                        substr($this->Environment->request, strpos($this->Environment->request, '&id')), '', $this->Environment->request
+                );
+
+                $this->redirect($strRequestWithoutId . '&id=' . $objArticle->id);
             }
 
             $this->redirect($this->Environment->request);
