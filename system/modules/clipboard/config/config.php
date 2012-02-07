@@ -47,6 +47,7 @@ if (TL_MODE == 'BE')
      */
     $GLOBALS['TL_HOOKS']['outputBackendTemplate'][] = array('clipboard', 'outputBackendTemplate');
     $GLOBALS['TL_HOOKS']['independentlyButtons'][] = array('clipboard', 'independentlyButtons');
+    $GLOBALS['TL_HOOKS']['independentlyTlContentHeaderButtons'][] = array('clipboard', 'independentlyTlContentHeaderButtons');    
     
     /**
      * Config

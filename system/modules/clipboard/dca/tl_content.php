@@ -1,7 +1,4 @@
-<?php
-
-if (!defined('TL_ROOT'))
-    die('You cannot access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -33,6 +30,10 @@ if (!defined('TL_ROOT'))
  * Config 
  */
 $GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = array('clipboard', 'init');
+if (clipboard::isClipboard())
+{
+    $GLOBALS['TL_DCA']['tl_content']['config']['dataContainer'] = 'Clipboard';
+}
 
 /**
  * List operations 
@@ -54,7 +55,7 @@ $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy'] = array_merge(
 // Paste after button
 $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array
     (
-    'label' => $GLOBALS['TL_LANG']['tl_content']['pasteafter'],
+    'label' => $GLOBALS['TL_LANG']['tl_content']['cl_pasteafter'],
     'attributes' => 'class="cl_paste"',
     'button_callback' => array('tl_content_cl', 'cl_pasteContent')
 );
@@ -96,7 +97,6 @@ class tl_content_cl extends tl_content
             return '';
         }
         $this->import('clipboard');
-        FB::log($this->clipboard->getPasteButton($row, $href, $label, $title, $icon, $attributes, $table));
         return $this->clipboard->getPasteButton($row, $href, $label, $title, $icon, $attributes, $table);
     }
 

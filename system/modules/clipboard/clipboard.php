@@ -58,7 +58,8 @@ class clipboard extends Backend
         }
         else
         {
-            $this->pageType = $this->pageType;
+            $this->pageType = $this->Input->get('do');
+            ;
         }
     }
 
@@ -227,9 +228,18 @@ class clipboard extends Backend
      */
     public static function isClipboard()
     {
+        if (Input::getInstance()->get('table') == 'tl_content')
+        {
+            $pageType = Input::getInstance()->get('table');
+        }
+        else
+        {
+            $pageType = 'tl_' . Input::getInstance()->get('do');
+        }
+
         $objClipboard = Database::getInstance()
                 ->prepare("SELECT * FROM `tl_clipboard` WHERE `str_table` = %s AND `user_id` = ?")
-                ->execute('tl_' . Input::getInstance()->get('do'), BackendUser::getInstance()->id);
+                ->execute($pageType, BackendUser::getInstance()->id);
 
         $arrClipboard = $objClipboard->fetchAllAssoc();
 
@@ -260,6 +270,7 @@ class clipboard extends Backend
 
     /**
      * Return some independently buttons
+     * HOOK: $GLOBALS['TL_HOOKS']['independentlyButtons']
      * 
      * @param object $dc
      * @param array $row
@@ -288,6 +299,41 @@ class clipboard extends Backend
 
             return $return;
         }
+    }
+
+    /**
+     * Return button conainer as array
+     * HOOK: $GLOBALS['TL_HOOKS']['independentlyTlContentHeaderButtons']
+     * 
+     * @param DataContainer $dc
+     * @param DB_Mysql_Result $objParent
+     * @param array $arrButton
+     * @param string $ptable
+     * @param string $table
+     * @return array
+     */
+    public function independentlyTlContentHeaderButtons(DataContainer $dc, DB_Mysql_Result $objParent, $arrButton, $ptable, $table)
+    {
+        $arrNewButtons = array();
+
+        foreach ($arrButton AS $key => $button)
+        {
+            if ($key == 'close')
+            {
+                $arrParent = $objParent->fetchAllAssoc();
+                $row = $arrParent[0];
+                $row['type'] = 'root';
+                
+                $label = $title = $GLOBALS['TL_LANG'][$dc->table]['cl_pastenew'][0];
+                
+                $arrNewButtons[] = $this->getPasteButton(
+                        $row, $GLOBALS['CLIPBOARD']['pasteinto']['href'], $label, $title, $GLOBALS['CLIPBOARD']['pasteinto']['icon'], $GLOBALS['CLIPBOARD']['pasteinto']['attributes'], $dc->table
+                );
+            }
+            $arrNewButtons[$key] = $button;
+        }
+
+        return $arrNewButtons;
     }
 
     /**
