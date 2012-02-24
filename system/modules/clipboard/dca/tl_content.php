@@ -1,4 +1,5 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php if (!defined('TL_ROOT'))
+    die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -26,43 +27,51 @@
  * @license    GNU/GPL 2
  * @filesource
  */
+
 /**
- * Config 
+ * Create DCA if clipboard is ready to use 
  */
-$GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = array('clipboard', 'init');
-if (clipboard::isClipboard())
+if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
 {
-    $GLOBALS['TL_DCA']['tl_content']['config']['dataContainer'] = 'Clipboard';
+    /**
+     * Config 
+     */
+    $GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = array('Clipboard', 'init');
+    
+    if (Clipboard::getInstance()->isClipboard())
+    {
+        $GLOBALS['TL_DCA']['tl_content']['config']['dataContainer'] = 'Clipboard';
+    }
+
+    /**
+     * List operations 
+     */
+    // Copy button
+    // Copy button
+    $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy'] = array
+        (
+        'label' => &$GLOBALS['TL_LANG']['tl_content']['copy'],
+        'button_callback' => array('tl_content_cl', 'copyContent')
+    );
+
+    $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy'] = array_merge(
+            $GLOBALS['CLIPBOARD']['copy'], $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy']
+    );
+
+
+    // -----------------------------------------------------------------------------
+    // Paste after button
+    $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array
+        (
+        'label' => $GLOBALS['TL_LANG']['tl_content']['cl_pasteafter'],
+        'attributes' => 'class="cl_paste"',
+        'button_callback' => array('tl_content_cl', 'cl_pasteContent')
+    );
+
+    $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array_merge(
+            $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after']
+    );
 }
-
-/**
- * List operations 
- */
-// Copy button
-// Copy button
-$GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy'] = array
-    (
-    'label' => &$GLOBALS['TL_LANG']['tl_content']['copy'],
-    'button_callback' => array('tl_content_cl', 'copyContent')
-);
-
-$GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy'] = array_merge(
-        $GLOBALS['CLIPBOARD']['copy'], $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy']
-);
-
-
-// -----------------------------------------------------------------------------
-// Paste after button
-$GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array
-    (
-    'label' => $GLOBALS['TL_LANG']['tl_content']['cl_pasteafter'],
-    'attributes' => 'class="cl_paste"',
-    'button_callback' => array('tl_content_cl', 'cl_pasteContent')
-);
-
-$GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array_merge(
-        $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after']
-);
 
 /**
  * Class tl_content
@@ -77,6 +86,15 @@ $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array
  */
 class tl_content_cl extends tl_content
 {
+
+    /**
+     * Initialize the object
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->import('ClipboardHelper');
+    }
 
     /**
      * Return the paste button
@@ -96,8 +114,7 @@ class tl_content_cl extends tl_content
         {
             return '';
         }
-        $this->import('clipboard');
-        return $this->clipboard->getPasteButton($row, $href, $label, $title, $icon, $attributes, $table);
+        return $this->ClipboardHelper->getPasteButton($row, $href, $label, $title, $icon, $attributes, $table);
     }
 
     /**

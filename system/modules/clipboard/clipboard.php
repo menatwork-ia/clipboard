@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('TL_ROOT'))
     die('You cannot access this file directly!');
 
@@ -31,26 +30,39 @@ if (!defined('TL_ROOT'))
  */
 
 /**
- * Class clipboard 
+ * Class Clipboard
  */
-class clipboard extends Backend
+class Clipboard extends Backend
 {
 
-    protected $strTable = 'tl_clipboard';
-    protected $strTemplate = 'be_clipboard';
-    protected $objClipboard;
-    protected $pageType;
+    /**
+     * Current object instance (Singleton)
+     * 
+     * @var Clipboard
+     */
+    protected static $objInstance = NULL;
 
     /**
-     * Initialize the object
+     * Necessary objects
+     * 
+     * @var object 
+     */
+    protected $objHelper;
+    protected $objDatabase;
+    protected $objClipboardXml;
+
+    /**
+     * Prevent constructing the object (Singleton)
      */
     protected function __construct()
     {
         parent::__construct();
+
         $this->import('BackendUser', 'User');
-        $this->objClipboard = $this->Database
-                ->prepare("SELECT * FROM `" . $this->strTable . "` WHERE `str_table` = %s AND `user_id` = ?")
-                ->execute('tl_' . $this->pageType, $this->User->id);
+
+        $this->objHelper = ClipboardHelper::getInstance();
+        $this->objDatabase = ClipboardDatabase::getInstance();
+        $this->objClipboardXml = ClipboardXml::getInstance();
 
         if ($this->Input->get('table') == 'tl_content')
         {
@@ -59,53 +71,117 @@ class clipboard extends Backend
         else
         {
             $this->pageType = $this->Input->get('do');
-            ;
         }
     }
 
     /**
+     * Prevent cloning of the object (Singleton)
+     */
+    final private function __clone()
+    {
+        
+    }
+
+    /**
+     * Get instanz of the object (Singelton) 
+     *
+     * @return Clipboard 
+     */
+    public static function getInstance()
+    {
+        if (self::$objInstance == NULL)
+        {
+            self::$objInstance = new Clipboard();
+        }
+        return self::$objInstance;
+    }
+
+    /**
      * Add the Clipboard to the backend template
+     * 
      * HOOK: $GLOBALS['TL_HOOKS']['outputBackendTemplate']
      * 
-     * @param type $strContent
-     * @param type $strTemplate
+     * @param string $strContent
+     * @param string $strTemplate
      * @return string 
      */
     public function outputBackendTemplate($strContent, $strTemplate)
     {
-
-        if ($strTemplate == 'be_main' && $this->Database->tableExists($this->strTable))
+        if ($strTemplate == 'be_main')
         {
-            $arrContent = array(strstr($strContent, '<div id="container">', TRUE));
+            $objTemplate = new BackendTemplate('be_clipboard');
 
-            $objTemplate = new BackendTemplate($this->strTemplate);
+            $arrClipboard = $this->objDatabase->getCurrentClipboard($this->pageType, $this->User->id)->fetchAllAssoc();
 
-            $clipboard = $this->Database
-                            ->prepare("SELECT * FROM `" . $this->strTable . "` WHERE `str_table` = %s AND `user_id` = ?")
-                            ->execute('tl_' . $this->pageType, $this->User->id)->fetchAllAssoc();
-
-            foreach ($clipboard AS $k => $v)
+            foreach ($arrClipboard AS $key => $value)
             {
-                $clipboard[$k]['favorite_href'] = $this->addToUrl('key=cl_favor&amp;cl_id=' . $v['id']);
-                $clipboard[$k]['delete_href'] = $this->addToUrl('key=cl_delete&amp;cl_id=' . $v['id']);
+                $arrClipboard[$key]['favorite_href'] = $this->addToUrl('key=cl_favor&amp;cl_id=' . $value['id']);
+                $arrClipboard[$key]['delete_href'] = $this->addToUrl('key=cl_delete&amp;cl_id=' . $value['id']);
             }
 
-            $objTemplate->clipboard = $clipboard;
+            $objTemplate->clipboard = $arrClipboard;
             $objTemplate->action = $this->Environment->request . '&key=cl_edit';
-            $arrContent[] = $objTemplate->parse();
 
-            $arrContent[] = strstr($strContent, '<div id="container">');
+            $strNewContent = preg_replace("/<div.*id=\"container\".*>/", $objTemplate->parse() . "\n$0", $strContent, 1);
 
-            $strNewContent = "";
-            foreach ($arrContent AS $content)
+            if ($strNewContent == "")
             {
-                $newContent .= $content;
+                return $strContent;
             }
-
-            $strContent = $newContent;
+            else
+            {
+                $strContent = $strNewContent;
+            }
         }
 
         return $strContent;
+    }
+
+    /**
+     * Return the current favorite as object
+     * 
+     * @param type $strTable
+     * @return DB_Mysql_Result 
+     */
+    public function getFavorite($strTable)
+    {
+        return $this->objDatabase->getFavorite($strTable, $this->User->id);
+    }
+
+    /**
+     * Return the title for the given id
+     * 
+     * @param integer $id
+     * @param string $do
+     * @return string 
+     */
+    public function getTitleForId($intId)
+    {
+        switch ($this->pageType)
+        {
+            case 'page':
+            case 'article':
+                return call_user_func_array(array($this->objDatabase, 'get' . $this->pageType . 'Object'), array($intId))->title;
+            default:
+                return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'];
+        }
+    }
+
+    /**
+     * Copy element to clipboard 
+     */
+    public function copy()
+    {
+        $arrSet = array(
+            'user_id' => $this->User->id,
+            'childs' => $childs = (($this->Input->get('childs') == 1) ? 1 : 0),
+            'str_table' => 'tl_' . $this->pageType,
+            'title' => $this->getTitleForId($this->Input->get('id')),
+            'elem_id' => $this->Input->get('id'),
+        );
+
+        //FB::log($this->objClipboardXml->writeXml($strTable, $strElemId, $strTitle));        
+        $this->objDatabase->copyToClipboard($arrSet);
     }
 
     /**
@@ -115,9 +191,7 @@ class clipboard extends Backend
      */
     public function delete($intId)
     {
-        $this->Database
-                ->prepare("DELETE FROM `" . $this->strTable . "` WHERE `id` = ? AND `user_id` = ?")
-                ->execute($intId, $this->User->id);
+        $this->objDatabase->deleteFromClipboard($intId, $this->User->id);
     }
 
     /**
@@ -127,30 +201,9 @@ class clipboard extends Backend
      */
     public function favor($intId)
     {
-        $strTable = 'tl_' . $this->pageType;
-        $this->Database
-                ->prepare("UPDATE `" . $this->strTable . "` SET favorite = 0 WHERE str_table = ? AND `user_id` = ?")
-                ->execute($strTable, $this->User->id);
-        $this->Database
-                ->prepare("UPDATE `" . $this->strTable . "` SET favorite = 1 WHERE id  = ? AND `user_id` = ?")
-                ->execute($intId, $this->User->id);
+        $this->objDatabase->setNewFavorite($intId, $this->pageType, $this->User->id);
     }
-
-    /**
-     * Return the current favorit element
-     * 
-     * @param string $strTable
-     * @return array 
-     */
-    public function getFavorite($strTable)
-    {
-        $objDb = $this->Database
-                ->prepare("SELECT * FROM " . $this->strTable . " WHERE str_table = ? AND favorite = 1 AND `user_id` = ?")
-                ->limit(1)
-                ->execute($strTable, $this->User->id);
-        return $objDb;
-    }
-
+    
     /**
      * Override all given element titles in the clipboard view
      * 
@@ -162,88 +215,19 @@ class clipboard extends Backend
         {
             foreach ($arrTitles AS $id => $strTitle)
             {
-                $this->Database
-                        ->prepare("UPDATE `" . $this->strTable . "` SET title = ? WHERE id = ? AND `user_id` = ?")
-                        ->execute($strTitle, $id, $this->User->id);
+                $this->objDatabase->editClipboardEntry($strTitle, $id, $this->User->id);
             }
         }
-    }
-
-    /**
-     * Copy element to clipboard 
-     */
-    public function copy()
-    {
-        $strTable = 'tl_' . $this->pageType;
-        $strElemId = $this->Input->get('id');
-        $strTitle = $this->getTitleForId($strElemId, $this->pageType);
-
-        $childs = 0;
-        if ($this->Input->get('childs') == 1)
-        {
-            $childs = 1;
-        }
-        $arrSet = array(
-            'user_id' => $this->User->id,
-            'childs' => $childs,
-            'str_table' => $strTable,
-            'title' => $strTitle,
-            'elem_id' => $strElemId,
-        );
-        $this->Database
-                ->prepare("UPDATE `" . $this->strTable . "` SET favorite = 0 WHERE str_table = ? AND `user_id` = ?")
-                ->execute($strTable, $this->User->id);
-        $this->Database
-                ->prepare("INSERT INTO `" . $this->strTable . "` %s ON DUPLICATE KEY UPDATE favorite = 1")
-                ->set($arrSet)
-                ->execute();
-    }
-
-    /**
-     * Return the title for the given id
-     * 
-     * @param integer $id
-     * @param string $do
-     * @return string 
-     */
-    public function getTitleForId($id, $do)
-    {
-        switch ($do)
-        {
-            case 'page':
-            case 'article':
-                $objResult = $this->Database
-                        ->prepare("SELECT title FROM `tl_" . $do . "` WHERE id = ?")
-                        ->execute($id);
-                return $objResult->title;
-            default:
-                return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'];
-        }
-    }
+    }    
 
     /**
      * Return bool true if the clipboard is active and have entries for active page and user
      * 
      * @return boolean 
      */
-    public static function isClipboard()
+    public function isClipboard()
     {
-        if (Input::getInstance()->get('table') == 'tl_content')
-        {
-            $pageType = Input::getInstance()->get('table');
-        }
-        else
-        {
-            $pageType = 'tl_' . Input::getInstance()->get('do');
-        }
-
-        $objClipboard = Database::getInstance()
-                ->prepare("SELECT * FROM `tl_clipboard` WHERE `str_table` = %s AND `user_id` = ?")
-                ->execute($pageType, BackendUser::getInstance()->id);
-
-        $arrClipboard = $objClipboard->fetchAllAssoc();
-
-        if (count($arrClipboard) > 0)
+        if (count($this->objDatabase->getCurrentClipboard($this->pageType, $this->User->id)->fetchAllAssoc()) > 0)
         {
             return TRUE;
         }
@@ -252,129 +236,38 @@ class clipboard extends Backend
     }
 
     /**
-     * Return the paste button
-     * 
-     * @param array $row
-     * @param string $href
-     * @param string $label
-     * @param string $title
-     * @param string $icon
-     * @param string $attributes
-     * @param string $table
-     * @return string 
-     */
-    public function getPasteButton($row, $href, $label, $title, $icon, $attributes, $table)
-    {
-        return ($this->getFavorite($table)->numRows ? ($this->User->isAdmin || ($this->User->hasAccess($row['type'], 'alpty') && $this->User->isAllowed(2, $row))) ? '<a href="' . $this->addToUrl($href . '&amp;id=' . $this->getFavorite($table)->elem_id . '&amp;' . (($this->getFavorite($table)->childs == 1) ? 'childs=1&amp;' : '') . 'pid=' . $row['id']) . '" title="' . specialchars($title) . '"' . $attributes . '>' . $this->generateImage($icon, $label) . '</a> ' : $this->generateImage(preg_replace('/\.gif$/i', '_.gif', $icon)) . ' '  : '');
-    }
-
-    /**
-     * Return some independently buttons
-     * HOOK: $GLOBALS['TL_HOOKS']['independentlyButtons']
-     * 
-     * @param object $dc
-     * @param array $row
-     * @param string $table
-     * @param boolean $cr
-     * @param array $arrClipboard
-     * @param childs $childs
-     * @return string
-     */
-    public function independentlyButtons(DataContainer $dc, $row, $table, $cr, $arrClipboard = false, $childs)
-    {
-        if ($dc->table == 'tl_article' && $table == 'tl_page')
-        {
-            if ($this->pageType == 'content')
-            {
-                $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteafter'][1], array($this->getFavorite($dc->table)->elem_id));
-            }
-            else
-            {
-                $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteinto'][1], array($this->getFavorite($dc->table)->elem_id));
-            }
-
-            $return = $this->getPasteButton(
-                    $row, $GLOBALS['CLIPBOARD']['pasteinto']['href'], $label, $title, $GLOBALS['CLIPBOARD']['pasteinto']['icon'], $GLOBALS['CLIPBOARD']['pasteinto']['attributes'], $dc->table
-            );
-
-            return $return;
-        }
-    }
-
-    /**
-     * Return button conainer as array
-     * HOOK: $GLOBALS['TL_HOOKS']['independentlyTlContentHeaderButtons']
-     * 
-     * @param DataContainer $dc
-     * @param DB_Mysql_Result $objParent
-     * @param array $arrButton
-     * @param string $ptable
-     * @param string $table
-     * @return array
-     */
-    public function independentlyTlContentHeaderButtons(DataContainer $dc, DB_Mysql_Result $objParent, $arrButton, $ptable, $table)
-    {
-        $arrNewButtons = array();
-
-        foreach ($arrButton AS $key => $button)
-        {
-            if ($key == 'close')
-            {
-                $arrParent = $objParent->fetchAllAssoc();
-                $row = $arrParent[0];
-                $row['type'] = 'root';
-                
-                $label = $title = $GLOBALS['TL_LANG'][$dc->table]['cl_pastenew'][0];
-                
-                $arrNewButtons[] = $this->getPasteButton(
-                        $row, $GLOBALS['CLIPBOARD']['pasteinto']['href'], $label, $title, $GLOBALS['CLIPBOARD']['pasteinto']['icon'], $GLOBALS['CLIPBOARD']['pasteinto']['attributes'], $dc->table
-                );
-            }
-            $arrNewButtons[$key] = $button;
-        }
-
-        return $arrNewButtons;
-    }
-
-    /**
      * Handle all main operations, clean up the url and redirect to itself 
      */
     public function init()
     {
-        $boolCl = FALSE;
-        $key = $this->Input->get('key');
-        if (strlen($key))
+        // Handle the set get params
+        if (stristr($this->Input->get('key'), 'cl_'))
         {
-            if (stristr($key, 'cl_'))
-            {
-                $boolCl = TRUE;
-            }
-        }
-        if (is_array($_GET) && $this->Database->tableExists($this->strTable) && $boolCl)
-        {
-            $arrGetParams = array_keys($_GET);
             $arrUnsetParams = array();
-            $intId = $this->Input->get('cl_id');
-            foreach ($arrGetParams AS $strGetParam)
+            foreach (array_keys($_GET) AS $strGetParam)
             {
-                $strGetValue = $this->Input->get($strGetParam);
                 switch ($strGetParam)
                 {
                     case 'key':
-                        switch ($strGetValue)
+                        switch ($this->Input->get($strGetParam))
                         {
+                            // Set new favorite
                             case 'cl_favor':
-                                if (strlen($intId))
+                                if (strlen($this->Input->get('cl_id')))
                                 {
-                                    $this->favor($intId);
+                                    $this->favor($this->Input->get('cl_id'));
                                 }
                                 break;
+
+                            // Delete an element
                             case 'cl_delete':
-                                if (strlen($intId))
+                                if (strlen($this->Input->get('cl_id')))
                                 {
-                                    $this->delete($intId);
+                                    $this->delete($this->Input->get('cl_id'));
                                 }
                                 break;
+
+                            // Edit Element
                             case 'cl_edit':
                                 $arrTitles = $this->Input->post('title');
                                 if (is_array($arrTitles))
@@ -382,17 +275,19 @@ class clipboard extends Backend
                                     $this->edit($arrTitles);
                                 }
                                 break;
+
+                            // Create new entry
                             case 'cl_copy':
                                 $this->copy();
                                 break;
                         }
-                        $arrUnsetParams[$strGetParam] = $strGetValue;
+                        $arrUnsetParams[$strGetParam] = $this->Input->get($strGetParam);
                         break;
                     case 'childs':
                     case 'act':
                     case 'mode':
                     case 'cl_id':
-                        $arrUnsetParams[$strGetParam] = $strGetValue;
+                        $arrUnsetParams[$strGetParam] = $this->Input->get($strGetParam);
                         break;
                 }
             }
@@ -405,17 +300,10 @@ class clipboard extends Backend
                 $this->Environment->requestUri = str_replace("&$k=$v", '', $this->Environment->requestUri);
             }
 
+
             if ($arrUnsetParams['key'] == 'cl_copy' && $this->pageType == 'content')
             {
-                $objArticle = $this->Database
-                        ->prepare("
-                            SELECT a.* 
-                            FROM `tl_article` AS a
-                            LEFT JOIN `tl_content` AS c
-                            ON c.pid = a.id
-                            WHERE c.id = ?")
-                        ->limit(1)
-                        ->execute($this->Input->get('id'));
+                $objArticle = $this->objDatabase->getArticleObjectFromContentId($this->Input->get('id'));
 
                 $strRequestWithoutId = str_replace(
                         substr($this->Environment->request, strpos($this->Environment->request, '&id')), '', $this->Environment->request
@@ -429,5 +317,3 @@ class clipboard extends Backend
     }
 
 }
-
-?>

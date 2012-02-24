@@ -40,7 +40,7 @@ class ClipboardDatabase extends Backend
      * Current object instance (Singleton)
      * @var ClipboardDatabase
      */
-    protected static $objInstance;
+    protected static $objInstance;    
 
     /**
      * Prevent constructing the object (Singleton)
@@ -84,6 +84,7 @@ class ClipboardDatabase extends Backend
                     SELECT *
                     FROM `tl_page`
                     WHERE id = ?")
+                ->limit(1)
                 ->execute($intId);
 
         return $objDb;
@@ -102,6 +103,7 @@ class ClipboardDatabase extends Backend
                     SELECT *
                     FROM `tl_article`
                     WHERE id = ?")
+                ->limit(1)
                 ->execute($intId);
 
         return $objDb;        
@@ -120,9 +122,151 @@ class ClipboardDatabase extends Backend
                     SELECT *
                     FROM `tl_article`
                     WHERE pid = ?")
+                ->limit(1)
                 ->execute($intId);
 
         return $objDb;        
+    }
+    
+    /**
+     * Return article object from given child content id
+     * 
+     * @param integer $intId
+     * @return DB_Mysql_Result
+     */
+    public function getArticleObjectFromContentId($intId)
+    {
+        $objDb = $this->Database
+                ->prepare("
+                    SELECT a.* 
+                    FROM `tl_article` AS a
+                    LEFT JOIN `tl_content` AS c
+                    ON c.pid = a.id
+                    WHERE c.id = ?")
+                ->limit(1)
+                ->execute($intId);
+        
+        return $objDb;        
+    }
+
+
+    /**
+     * Return the current favorite as object
+     * 
+     * @param string $strTable
+     * @param integer $intUserId
+     * @return DB_Mysql_Result 
+     */
+    public function getFavorite($strTable, $intUserId)
+    {
+        $objDb = $this->Database
+                ->prepare("
+                    SELECT * 
+                    FROM `tl_clipboard` 
+                    WHERE str_table = ? 
+                    AND favorite = 1 
+                    AND `user_id` = ?")
+                ->limit(1)
+                ->execute($strTable, $intUserId);
+        
+        return $objDb;        
+        
+    }
+    
+    /**
+     * Set clipboardentry to favorite and reset the old one
+     * 
+     * @param integer $intId
+     * @param string $strPageType
+     * @param integer $intUserId 
+     */
+    public function setNewFavorite($intId, $strPageType, $intUserId)
+    {
+        $this->Database
+                ->prepare("
+                    UPDATE `tl_clipboard` 
+                    SET favorite = 0 
+                    WHERE str_table = ? 
+                    AND `user_id` = ?")
+                ->execute('tl_' . $strPageType, $intUserId);
+        
+        $this->Database
+                ->prepare("
+                    UPDATE `tl_clipboard` 
+                    SET favorite = 1 
+                    WHERE id  = ? 
+                    AND `user_id` = ?")
+                ->execute($intId, $intUserId);        
+    }
+    
+    /**
+     * Return the current clipboard as object
+     * 
+     * @param string $strPageType
+     * @param integer $intUserId
+     * @return DB_Mysql_Result
+     */
+    public function getCurrentClipboard($strPageType, $intUserId)
+    {
+        $objDb = $this->Database
+                ->prepare("
+                    SELECT * 
+                    FROM `tl_clipboard` 
+                    WHERE str_table = ? 
+                    AND user_id = ?")
+                ->execute('tl_' . $strPageType, $intUserId);
+        
+        return $objDb;
+    }
+    
+    /**
+     * Copy given array set to clipboard and update favorite
+     * 
+     * @param array $arrSet 
+     */
+    public function copyToClipboard($arrSet)
+    {
+        $this->Database
+                ->prepare("
+                    UPDATE `tl_clipboard`
+                    SET favorite = 0
+                    WHERE str_table = ?
+                    AND user_id = ?")
+                ->execute($arrSet['str_table'], $arrSet['user_id']);
+        
+        $this->Database
+                ->prepare("INSERT INTO `tl_clipboard` 
+                    %s ON DUPLICATE KEY 
+                    UPDATE favorite = 1")
+                ->set($arrSet)
+                ->execute();        
+    }
+    
+    public function editClipboardEntry($strTitle, $intId, $intUserId)
+    {
+        $this->Database
+                ->prepare("
+                    UPDATE `tl_clipboard` 
+                    SET title = ? 
+                    WHERE id = ? 
+                    AND `user_id` = ?")
+                ->execute($strTitle, $intId, $intUserId);
+    }
+    
+    /**
+     * Delete the entry with the given id
+     * 
+     * @param integer $intId
+     * @param integer $intUserId
+     */
+    public function deleteFromClipboard($intId, $intUserId)
+    {
+        $this->Database
+                ->prepare("
+                    DELETE FROM `tl_clipboard` 
+                    WHERE `id` = ? 
+                    AND `user_id` = ?")
+                ->execute($intId, $intUserId);
     }
 
 }

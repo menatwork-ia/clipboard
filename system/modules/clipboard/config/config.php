@@ -1,4 +1,5 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php if (!defined('TL_ROOT')) 
+    die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -27,52 +28,57 @@
  * @filesource
  */
 
-$arrLocation = array(
+// Allowed clipboard locations
+$arrAllowedLocations = array(
     'page',
     'article',
+    'content'
 );
 
-if (TL_MODE == 'BE')
-{
-    $objInput = Input::getInstance();
-
-    if (in_array($objInput->get('do'), $arrLocation))
-    {
-        $GLOBALS['TL_CSS']['clipboard'] = "system/modules/clipboard/html/clipboard_src.css";
-        $GLOBALS['TL_JAVASCRIPT']['clipboard'] = "system/modules/clipboard/html/clipboard_src.js";
-    }
+ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations))
+ {
+    /**
+     * Set header informations 
+     */
+    $GLOBALS['TL_CSS']['Clipboard']         = "system/modules/clipboard/html/clipboard_src.css";
+    $GLOBALS['TL_JAVASCRIPT']['Clipboard']  = "system/modules/clipboard/html/clipboard_src.js";
 
     /**
      * Hooks
      */
-    $GLOBALS['TL_HOOKS']['outputBackendTemplate'][] = array('clipboard', 'outputBackendTemplate');
-    $GLOBALS['TL_HOOKS']['independentlyButtons'][] = array('clipboard', 'independentlyButtons');
-    $GLOBALS['TL_HOOKS']['independentlyTlContentHeaderButtons'][] = array('clipboard', 'independentlyTlContentHeaderButtons');    
+    $GLOBALS['TL_HOOKS']['outputBackendTemplate'][]                 = array('Clipboard', 'outputBackendTemplate');
+    $GLOBALS['TL_HOOKS']['independentlyButtons'][]                  = array('ClipboardHelper', 'independentlyButtons');
+    $GLOBALS['TL_HOOKS']['independentlyTlContentHeaderButtons'][]   = array('ClipboardHelper', 'independentlyTlContentHeaderButtons');    
     
     /**
      * Config
      */
     $GLOBALS['CLIPBOARD'] = array(
+        // Copy button
         'copy' => array(
-            'href' => 'key=cl_copy',
-            'icon' => 'featured.gif',
-            'attributes' => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"',            
+            'href'          => 'key=cl_copy',
+            'icon'          => 'featured.gif',
+            'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"',            
         ),
+        // Copy with children button
         'copy_childs' => array(
-            'href' => 'key=cl_copy&amp;childs=1',
-            'icon' => 'copychilds.gif',
-            'attributes' => 'class="cl_paste" onclick="Backend.getScrollOffset();"',            
+            'href'          => 'key=cl_copy&amp;childs=1',
+            'icon'          => 'copychilds.gif',
+            'attributes'    => 'class="cl_paste" onclick="Backend.getScrollOffset();"',            
         ),
+        // Paste into button
         'pasteinto' => array(            
-            'href' => '&amp;act=copy&amp;mode=2',
-            'icon' => 'pasteafter.gif',
-            'attributes' => ''
+            'href'          => '&amp;act=copy&amp;mode=2',
+            'icon'          => 'pasteafter.gif',
+            'attributes'    => ''
         ),
+        // Paste after button
         'pasteafter' => array(
-            'href' => '&amp;act=copy&amp;mode=1',
-            'icon' => 'pasteinto.gif',
-            'attributes' => ''            
-        )
+            'href'          => '&amp;act=copy&amp;mode=1',
+            'icon'          => 'pasteinto.gif',
+            'attributes'    => ''            
+        ),
+        'locations' => $arrAllowedLocations
     );
 }
 ?>

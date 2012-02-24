@@ -43,7 +43,7 @@ class ClipboardXml extends Backend
     protected static $objInstance;
     protected $objBeUser;
     protected $objClUserFolder;
-    protected $objDatabase;    
+    protected $objDatabase;
     protected $objFiles;
 
     /**
@@ -122,15 +122,15 @@ class ClipboardXml extends Backend
                 $objXml = $this->writeTlContent($intId, $objXml);
                 break;
         }
-        
+
         $objXml->endElement();
-        
+
         $strXml = $objXml->outputMemory();
-        
+
         $filename = substr($strTable, 3) . '_' . strtolower($strTitle) . '.xml';
         $objFile = new File($this->objClUserFolder->value . '/' . $filename);
         $write = $objFile->write($strXml);
-        if($write)
+        if ($write)
         {
             $objFile->close;
             return TRUE;
@@ -141,48 +141,73 @@ class ClipboardXml extends Backend
     protected function writeTlPage($intId, $objXml)
     {
         $arrPage = $this->objDatabase->getPageObject($intId)->fetchAllAssoc();
-        
-        if(count($arrPage) > 0)
-        {            
-            foreach($arrPage AS $page)
+
+        if (count($arrPage) > 0)
+        {
+            foreach ($arrPage AS $page)
             {
                 // Start writing tl_page
                 $objXml->startElement('tl_page');
-                
-                foreach($page AS $field => $value)
+
+                foreach ($page AS $field => $value)
                 {
                     // start writing fields
                     $objXml->startElement('field');
                     $objXml->writeAttribute("name", $field);
                     $objXml->writeElement('value', $value);
-                    $objXml->endElement();                
+                    $objXml->endElement();
                 }
-                
+
                 $objXml = $this->writeTlArticle($intId, $objXml, TRUE);
-                
+
                 $objXml->endElement();
             }
         }
-        
+
         return $objXml;
-        
     }
 
     protected function writeTlArticle($intId, $objXml, $isChild = FALSE)
     {
-        if($isChild)
+        FB::log($this->objDatabase->getArticleObjectFromPid($intId));
+        
+        if ($isChild)
         {
-            $arrArticle = $this->objDatabase->getArticleObjectFromPid($intId)->fetchAllAssoc();            
+            $arrArticle = $this->objDatabase->getArticleObjectFromPid($intId)->fetchAllAssoc();
         }
         else
         {
             $arrArticle = $this->objDatabase->getArticleObject($intId)->fetchAllAssoc();
         }
+
+        if (count($arrArticle) > 0)
+        {
+            foreach ($arrArticle AS $article)
+            {
+                // Start writing tl_page
+                $objXml->startElement('tl_article');
+
+                foreach ($article AS $field => $value)
+                {
+                    // start writing fields
+                    $objXml->startElement('field');
+                    $objXml->writeAttribute("name", $field);
+                    $objXml->writeElement('value', $value);
+                    $objXml->endElement();
+                }
+
+                $objXml = $this->writeTlContent($intId, $objXml, TRUE);
+
+                $objXml->endElement();
+            }
+        }
+        
+        return $objXml;
     }
 
     protected function writeTlContent($intId, $objXml, $isChild = FALSE)
     {
-        
+        return $objXml;
     }
 
 }
