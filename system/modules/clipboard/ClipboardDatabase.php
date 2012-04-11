@@ -147,8 +147,7 @@ class ClipboardDatabase extends Backend
     public function getArticleObjectFromContentId($intId)
     {
         $objDb = $this->Database
-                ->prepare("
-                    SELECT a.* 
+                ->prepare("SELECT a.* 
                     FROM `tl_article` AS a
                     LEFT JOIN `tl_content` AS c
                     ON c.pid = a.id
@@ -185,7 +184,7 @@ class ClipboardDatabase extends Backend
         $objDb = $this->Database
                 ->prepare("SELECT * FROM `tl_content` WHERE id = ?")
                 ->limit(1)
-                ->execute($intId);
+                ->executeUncached($intId);
 
         return $objDb;
     }
@@ -200,8 +199,7 @@ class ClipboardDatabase extends Backend
     public function getFavorite($strTable, $intUserId)
     {
         $objDb = $this->Database
-                ->prepare("
-                    SELECT * 
+                ->prepare("SELECT * 
                     FROM `tl_clipboard` 
                     WHERE str_table = ? 
                     AND favorite = 1 
@@ -222,16 +220,14 @@ class ClipboardDatabase extends Backend
     public function setNewFavorite($intId, $strPageType, $intUserId)
     {
         $this->Database
-                ->prepare("
-                    UPDATE `tl_clipboard` 
+                ->prepare("UPDATE `tl_clipboard` 
                     SET favorite = 0 
                     WHERE str_table = ? 
                     AND `user_id` = ?")
                 ->execute('tl_' . $strPageType, $intUserId);
 
         $this->Database
-                ->prepare("
-                    UPDATE `tl_clipboard` 
+                ->prepare("UPDATE `tl_clipboard` 
                     SET favorite = 1 
                     WHERE id  = ? 
                     AND `user_id` = ?")
@@ -248,8 +244,7 @@ class ClipboardDatabase extends Backend
     public function getCurrentClipboard($strPageType, $intUserId)
     {
         $objDb = $this->Database
-                ->prepare("
-                    SELECT * 
+                ->prepare("SELECT * 
                     FROM `tl_clipboard` 
                     WHERE str_table = ? 
                     AND user_id = ?")
@@ -269,8 +264,7 @@ class ClipboardDatabase extends Backend
     public function getClipboardEntryFromElemId($strPageType, $intUserId, $intElemId)
     {
         $objDb = $this->Database
-                ->prepare("
-                    SELECT * 
+                ->prepare("SELECT * 
                     FROM `tl_clipboard` 
                     WHERE str_table = ? 
                     AND user_id = ?
@@ -305,8 +299,7 @@ class ClipboardDatabase extends Backend
     public function copyToClipboard($arrSet)
     {
         $this->Database
-                ->prepare("
-                    UPDATE `tl_clipboard`
+                ->prepare("UPDATE `tl_clipboard`
                     SET favorite = 0
                     WHERE str_table = ?
                     AND user_id = ?")
@@ -331,8 +324,7 @@ class ClipboardDatabase extends Backend
     public function editClipboardElemTitle($strTitle, $intId, $intUserId, $strFilename)
     {
         $this->Database
-                ->prepare("
-                    UPDATE `tl_clipboard` 
+                ->prepare("UPDATE `tl_clipboard` 
                     SET title = ?, filename = ?
                     WHERE id = ? 
                     AND `user_id` = ?")
@@ -348,11 +340,78 @@ class ClipboardDatabase extends Backend
     public function deleteFromClipboard($intId, $intUserId)
     {
         $this->Database
-                ->prepare("
-                    DELETE FROM `tl_clipboard` 
+                ->prepare("DELETE FROM `tl_clipboard` 
                     WHERE `id` = ? 
                     AND `user_id` = ?")
                 ->execute($intId, $intUserId);
+    }
+    
+    /**
+     * Insert array set to given table
+     * 
+     * @param string $strTable
+     * @param array $arrSet
+     * @return DB_Mysql_Result
+     */
+    public function insertInto($strTable, $arrSet)
+    {        
+        $objDb = $this->Database
+                ->prepare("INSERT INTO `$strTable` %s")
+                ->set($arrSet)
+                ->execute();
+        
+        return $objDb;
+    }    
+    
+    /**
+     * Get the next sorting from given id
+     * 
+     * @param string $strTable
+     * @param integer $intId
+     * @param integer $intSorting
+     * @return DB_Mysql_Result 
+     */
+    public function getNextSorting($strTable, $intId, $intSorting)
+    {
+        $objDb = $this->Database
+                ->prepare("SELECT MIN(sorting) AS sorting 
+                    FROM " . $strTable . "
+                    WHERE pid = ? AND sorting > ?")
+                ->executeUncached($intId, $intSorting);
+        
+        return $objDb;
+    }
+    
+    /**
+     * Get elements sorting from given pid ordert by sorting
+     * 
+     * @param string $strTable
+     * @param interer $intId 
+     */
+    public function getSortingElem($strTable, $intId)
+    {
+        $objDb = $this->Database
+                ->prepare("SELECT id, sorting 
+                    FROM " . $strTable . " 
+                    WHERE pid = ? 
+                    ORDER BY sorting")
+                ->executeUncached($intId);
+    }
+    
+    /**
+     * Update sorting
+     * 
+     * @param string $strTable
+     * @param integer $intSorting
+     * @param integer $intId 
+     */
+    public function updateSorting($strTable, $intSorting, $intId)
+    {
+        $this->Database
+                ->prepare("UPDATE " . $strTable . " 
+                    SET sorting = ? 
+                    WHERE id = ?")
+                ->execute($intSorting, $intId);        
     }
 
 }

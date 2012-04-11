@@ -48,8 +48,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
     // Copy button
     $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy'] = array
         (
-        'label' => &$GLOBALS['TL_LANG']['tl_content']['copy'],
-        'button_callback' => array('tl_content_cl', 'copyContent')
+        'label' => &$GLOBALS['TL_LANG']['tl_content']['copy']
     );
 
     $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy'] = array_merge(
@@ -62,80 +61,12 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
     $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array
         (
         'label' => $GLOBALS['TL_LANG']['tl_content']['cl_pasteafter'],
-        'attributes' => 'class="cl_paste"',
-        'button_callback' => array('tl_content_cl', 'cl_pasteContent')
+        'attributes' => 'class="cl_paste"'
     );
 
     $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array_merge(
             $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after']
     );
-}
-
-/**
- * Class tl_content_cl
- *
- * Provide miscellaneous methods that are used by the data configuration array.
- * 
- * PHP version 5
- * @copyright  MEN AT WORK 2012
- * @package    clipboard
- * @license    GNU/GPL 2
- * @filesource
- */
-class tl_content_cl extends tl_content
-{
-
-    /**
-     * Initialize the object
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->import('ClipboardHelper');
-    }
-
-    /**
-     * Return the paste button
-     * 
-     * @param array $row
-     * @param string $href
-     * @param string $label
-     * @param string $title
-     * @param string $icon
-     * @param string $attributes
-     * @param string $table
-     * @return string 
-     */
-    public function cl_pasteContent($row, $href, $label, $title, $icon, $attributes, $table)
-    {
-        if ($GLOBALS['TL_DCA'][$table]['config']['closed'])
-        {
-            return '';
-        }
-        return $this->ClipboardHelper->getPasteButton($row, $href, $label, $title, $icon, $attributes, $table);
-    }
-
-    /**
-     * Return the copy page button
-     * @param array
-     * @param string
-     * @param string
-     * @param string
-     * @param string
-     * @param string
-     * @param string
-     * @return string
-     */
-    public function copyContent($row, $href, $label, $title, $icon, $attributes, $table)
-    {
-        if ($GLOBALS['TL_DCA'][$table]['config']['closed'])
-        {
-            return '';
-        }
-
-        return ($this->User->isAdmin || ($this->User->hasAccess($row['type'], 'alpty') && $this->User->isAllowed(2, $row))) ? '<a href="' . $this->addToUrl($href . '&amp;id=' . $row['id']) . '" title="' . specialchars($title) . '"' . $attributes . '>' . $this->generateImage($icon, $label) . '</a> ' : $this->generateImage(preg_replace('/\.gif$/i', '_.gif', $icon)) . ' ';
-    }
-
 }
 
 ?>

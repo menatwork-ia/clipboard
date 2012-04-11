@@ -192,6 +192,25 @@ class Clipboard extends Backend
         $this->objDatabase->copyToClipboard($arrSet);
         $this->objClipboardXml->writeXml('tl_' . $this->pageType, $this->Input->get('id'), $arrSet['title'], $arrSet['filename'], $boolHasChilds);
     }
+    
+    /**
+     * Paste favorite into
+     */
+    public function pasteInto()
+    {
+//        $objFavorite = $this->getFavorite('tl_' . $this->pageType);
+//        $this->objClipboardXml->readXml($objFavorite->filename, 'pasteInto', $this->Input->get('id'));
+    }
+    
+    /**
+     * Paste favorite after 
+     */
+    public function pasteAfter()
+    {
+        $objFavorite = $this->getFavorite('tl_' . $this->pageType);
+        $this->objClipboardXml->readXml($objFavorite->filename, 'pasteAfter', $this->Input->get('id'));
+    }
+    
 
     /**
      * Delete the given element and remove xml
@@ -229,10 +248,10 @@ class Clipboard extends Backend
         {
             foreach ($arrTitles AS $id => $strTitle)
             {                
-                $objClipboard = $this->objDatabase->getClipboardEntryFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
+                $objClipboard = $this->objDatabase->getClipboardEntryFromId($id);
 
                 $strFilename = $this->objClipboardXml->updateFileNameTitle($objClipboard->filename, $strTitle);
-                
+
                 $this->objDatabase->editClipboardElemTitle($strTitle, $id, $this->User->id, $strFilename);
 
                 $this->objClipboardXml->editTitle($objClipboard->filename, $strFilename, $strTitle);
@@ -273,7 +292,7 @@ class Clipboard extends Backend
                             // Set new favorite
                             case 'cl_favor':
                                 if (strlen($this->Input->get('cl_id')))
-                                {
+                                {                                    
                                     $this->favor($this->Input->get('cl_id'));
                                 }
                                 break;
@@ -299,6 +318,14 @@ class Clipboard extends Backend
                             case 'cl_copy':
                                 $this->copy();
                                 break;
+                            
+                            case 'cl_paste_into':
+                                $this->pasteInto();
+                                break;
+                            
+                            case 'cl_paste_after':
+                                $this->pasteAfter();
+                                break;
                         }
                         $arrUnsetParams[$strGetParam] = $this->Input->get($strGetParam);
                         break;
@@ -319,8 +346,13 @@ class Clipboard extends Backend
                 $this->Environment->requestUri = str_replace("&$k=$v", '', $this->Environment->requestUri);
             }
 
+            $arrUnsetKeyParams = array(
+                'cl_copy',
+                'cl_paste_into',
+                'cl_paste_after'
+            );
 
-            if ($arrUnsetParams['key'] == 'cl_copy' && $this->pageType == 'content')
+            if (in_array($arrUnsetParams['key'], $arrUnsetKeyParams) && $this->pageType == 'content')
             {
                 $objArticle = $this->objDatabase->getArticleObjectFromContentId($this->Input->get('id'));
 
