@@ -218,8 +218,8 @@ class Clipboard extends Backend
     }
 
     /**
-     * Override all given element titles in the clipboard view and edit same tag
-     * in xml file
+     * Override all given element titles in the clipboard view and 
+     * edit and rename xml file
      * 
      * @param array $arrTitles 
      */
@@ -228,12 +228,14 @@ class Clipboard extends Backend
         if (count($arrTitles) > 0)
         {
             foreach ($arrTitles AS $id => $strTitle)
-            {
+            {                
                 $objClipboard = $this->objDatabase->getClipboardEntryFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
 
-                $this->objDatabase->editClipboardElemTitle($strTitle, $id, $this->User->id);
+                $strFilename = $this->objClipboardXml->updateFileNameTitle($objClipboard->filename, $strTitle);
+                
+                $this->objDatabase->editClipboardElemTitle($strTitle, $id, $this->User->id, $strFilename);
 
-                $this->objClipboardXml->editTitle($objClipboard->filename, $strTitle);
+                $this->objClipboardXml->editTitle($objClipboard->filename, $strFilename, $strTitle);
             }
         }
     }

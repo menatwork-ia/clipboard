@@ -326,16 +326,17 @@ class ClipboardDatabase extends Backend
      * @param string $strTitle
      * @param integer $intId
      * @param integer $intUserId 
+     * @param string $strFilename
      */
-    public function editClipboardElemTitle($strTitle, $intId, $intUserId)
+    public function editClipboardElemTitle($strTitle, $intId, $intUserId, $strFilename)
     {
         $this->Database
                 ->prepare("
                     UPDATE `tl_clipboard` 
-                    SET title = ? 
+                    SET title = ?, filename = ?
                     WHERE id = ? 
                     AND `user_id` = ?")
-                ->execute($strTitle, $intId, $intUserId);
+                ->execute($strTitle, $strFilename, $intId, $intUserId);
     }
 
     /**

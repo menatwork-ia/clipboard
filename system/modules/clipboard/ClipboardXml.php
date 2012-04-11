@@ -116,6 +116,26 @@ class ClipboardXml extends Backend
 
         return $strFilename;
     }
+    
+    /**
+     * Replace title from given filename with new given title
+     * 
+     * @param string $strOldFilename
+     * @param string $strNewTitle
+     * @return string 
+     */
+    public function updateFileNameTitle($strOldFilename, $strNewTitle)
+    {
+        $arrOldFileName = explode('_', $strOldFilename);
+        $arrNewFileName = array(
+            $arrOldFileName[0], 
+            $arrOldFileName[1],
+            standardize(strtolower($strNewTitle)),
+            '.xml'
+        );
+        
+        return implode('_', $arrNewFileName);
+    }
 
     /**
      * Check if the given file exists and return TRUE or FALSE
@@ -149,29 +169,30 @@ class ClipboardXml extends Backend
     }
 
     /**
-     * Edit the title tag in the given file
+     * Edit the title tag in the given file and rename 
      * 
      * @param string $strFilename
      * @param string $strTitle
      * @return boolean 
      */
-    public function editTitle($strFilename, $strTitle)
+    public function editTitle($strOldFilename, $strNewFilename, $strTitle)
     {
-        if ($this->fileExists($strFilename))
+        if ($this->fileExists($strOldFilename))
         {
             $objDomDoc = new DOMDocument();
-            $objDomDoc->load(TL_ROOT . '/' . $this->getFolderPath() . '/' . $strFilename);
+            $objDomDoc->load(TL_ROOT . '/' . $this->getFolderPath() . '/' . $strOldFilename);
             $nodeTitle = $objDomDoc->getElementsByTagName('metatags')->item(0)->getElementsByTagName('title')->item(0);
             $nodeTitle->nodeValue = $strTitle;
             $strDomDoc = $objDomDoc->saveXML();
 
-            $objUserFolder = new Folder($this->getFolderPath());
-            $objFile = new File($objUserFolder->value . '/' . $strFilename);
+            $objUserFolder = new Folder($this->getFolderPath());            
+            $objFile = new File($objUserFolder->value . '/' . $strOldFilename);
             $write = $objFile->write($strDomDoc);
             if ($write)
             {
                 $objFile->close;
-                return TRUE;
+                return $this->_objFiles->rename($objUserFolder->value . '/' . $strOldFilename, $objUserFolder->value . '/' . $strNewFilename);
+                
             }
         }
         return FALSE;
