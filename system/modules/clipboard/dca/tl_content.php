@@ -1,5 +1,4 @@
-<?php if (!defined('TL_ROOT'))
-    die('You cannot access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -37,7 +36,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
      * Config 
      */
     $GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = array('Clipboard', 'init');
-    
+
     if (Clipboard::getInstance()->isClipboard())
     {
         $GLOBALS['TL_DCA']['tl_content']['config']['dataContainer'] = 'Clipboard';
@@ -46,7 +45,6 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
     /**
      * List operations 
      */
-    // Copy button
     // Copy button
     $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy'] = array
         (
@@ -74,7 +72,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
 }
 
 /**
- * Class tl_content
+ * Class tl_content_cl
  *
  * Provide miscellaneous methods that are used by the data configuration array.
  * 

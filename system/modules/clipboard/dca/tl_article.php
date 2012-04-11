@@ -1,5 +1,4 @@
-<?php if (!defined('TL_ROOT'))
-    die('You cannot access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -83,6 +82,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('article'))
  */
 class tl_article_cl extends tl_article
 {
+
     /**
      * Initialize the object
      */
@@ -91,7 +91,7 @@ class tl_article_cl extends tl_article
         parent::__construct();
         $this->import('ClipboardHelper');
     }
-    
+
     /**
      * Return the paste button
      * 
@@ -109,7 +109,7 @@ class tl_article_cl extends tl_article
         if ($GLOBALS['TL_DCA'][$table]['config']['closed'])
         {
             return '';
-        }       
+        }
         return $this->ClipboardHelper->getPasteButton($row, $href, $label, $title, $icon, $attributes, $table);
     }
 

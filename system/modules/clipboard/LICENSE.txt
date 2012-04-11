@@ -2,6 +2,6 @@
  * Package    	clipboard Extension
  * Copyright  	MEN AT WORK 2012
  * Author       Andreas Isaak <cms@men-at-work.de>, David Maack <cms@men-at-work.de>, Stefan Heimes <cms@men-at-work.de>, Patrick Kahl <cms@men-at-work.de>
- * Link		http://www.men-at-work.de/
+ * Link		    http://www.men-at-work.de/
  * License    	GNU/LGPL
  */

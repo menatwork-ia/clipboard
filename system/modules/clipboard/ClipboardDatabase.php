@@ -1,7 +1,4 @@
-<?php
-
-if (!defined('TL_ROOT'))
-    die('You cannot access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -40,7 +37,7 @@ class ClipboardDatabase extends Backend
      * Current object instance (Singleton)
      * @var ClipboardDatabase
      */
-    protected static $objInstance;    
+    protected static $objInstance;
 
     /**
      * Prevent constructing the object (Singleton)
@@ -53,10 +50,7 @@ class ClipboardDatabase extends Backend
     /**
      * Prevent cloning of the object (Singleton)
      */
-    final private function __clone()
-    {
-        
-    }
+    final private function __clone(){}
 
     /**
      *
@@ -72,7 +66,18 @@ class ClipboardDatabase extends Backend
     }
 
     /**
-     * Return page object from id
+     * Get all fiels from given table
+     * 
+     * @param string $strTable
+     * @return DB_Mysql_Result
+     */
+    public function getFields($strTable)
+    {
+        return $this->Database->listFields($strTable);
+    }
+
+    /**
+     * Return page object from given id
      * 
      * @param integer $intId
      * @return DB_Mysql_Result
@@ -80,54 +85,59 @@ class ClipboardDatabase extends Backend
     public function getPageObject($intId)
     {
         $objDb = $this->Database
-                ->prepare("
-                    SELECT *
-                    FROM `tl_page`
-                    WHERE id = ?")
+                ->prepare("SELECT * FROM `tl_page` WHERE id = ?")
                 ->limit(1)
                 ->execute($intId);
 
         return $objDb;
     }
-    
+
     /**
-     * Return article object from id
+     * Return all subpages as object from given id
      * 
      * @param integer $intId
      * @return DB_Mysql_Result
-     */    
+     */
+    public function getSubpagesObject($intId)
+    {
+        $objDb = $this->Database
+                ->prepare("SELECT * FROM `tl_page` WHERE pid = ?")
+                ->execute($intId);
+
+        return $objDb;
+    }
+
+    /**
+     * Return article object from given id
+     * 
+     * @param integer $intId
+     * @return DB_Mysql_Result
+     */
     public function getArticleObject($intId)
     {
         $objDb = $this->Database
-                ->prepare("
-                    SELECT *
-                    FROM `tl_article`
-                    WHERE id = ?")
+                ->prepare("SELECT * FROM `tl_article` WHERE id = ?")
                 ->limit(1)
                 ->execute($intId);
 
-        return $objDb;        
+        return $objDb;
     }
-    
+
     /**
-     * Return article object from pid
+     * Return article object from given pid
      * 
      * @param integer $intId
      * @return DB_Mysql_Result
-     */    
+     */
     public function getArticleObjectFromPid($intId)
     {
         $objDb = $this->Database
-                ->prepare("
-                    SELECT *
-                    FROM `tl_article`
-                    WHERE pid = ?")
-                ->limit(1)
+                ->prepare("SELECT * FROM `tl_article` WHERE pid = ?")
                 ->execute($intId);
 
-        return $objDb;        
+        return $objDb;
     }
-    
+
     /**
      * Return article object from given child content id
      * 
@@ -145,10 +155,40 @@ class ClipboardDatabase extends Backend
                     WHERE c.id = ?")
                 ->limit(1)
                 ->execute($intId);
-        
-        return $objDb;        
+
+        return $objDb;
     }
 
+    /**
+     * Return content object from given pid
+     * 
+     * @param integer $intId
+     * @return DB_Mysql_Result
+     */
+    public function getContentObjectFromPid($intId)
+    {
+        $objDb = $this->Database
+                ->prepare("SELECT * FROM `tl_content` WHERE pid = ?")
+                ->execute($intId);
+
+        return $objDb;
+    }
+
+    /**
+     * Return content object from given id
+     * 
+     * @param integer $intId
+     * @return DB_Mysql_Result
+     */
+    public function getContentObject($intId)
+    {
+        $objDb = $this->Database
+                ->prepare("SELECT * FROM `tl_content` WHERE id = ?")
+                ->limit(1)
+                ->execute($intId);
+
+        return $objDb;
+    }
 
     /**
      * Return the current favorite as object
@@ -168,11 +208,10 @@ class ClipboardDatabase extends Backend
                     AND `user_id` = ?")
                 ->limit(1)
                 ->execute($strTable, $intUserId);
-        
-        return $objDb;        
-        
+
+        return $objDb;
     }
-    
+
     /**
      * Set clipboardentry to favorite and reset the old one
      * 
@@ -189,16 +228,16 @@ class ClipboardDatabase extends Backend
                     WHERE str_table = ? 
                     AND `user_id` = ?")
                 ->execute('tl_' . $strPageType, $intUserId);
-        
+
         $this->Database
                 ->prepare("
                     UPDATE `tl_clipboard` 
                     SET favorite = 1 
                     WHERE id  = ? 
                     AND `user_id` = ?")
-                ->execute($intId, $intUserId);        
+                ->execute($intId, $intUserId);
     }
-    
+
     /**
      * Return the current clipboard as object
      * 
@@ -215,14 +254,37 @@ class ClipboardDatabase extends Backend
                     WHERE str_table = ? 
                     AND user_id = ?")
                 ->execute('tl_' . $strPageType, $intUserId);
-        
+
         return $objDb;
     }
-    
+
     /**
-     * Copy given array set to clipboard and update favorite
+     * Return clipboard entry for given params
      * 
-     * @param array $arrSet 
+     * @param string $strPageType
+     * @param integer $intUserId
+     * @param integer $intElemId
+     * @return DB_Mysql_Result 
+     */
+    public function getClipboardElemFromElemId($strPageType, $intUserId, $intElemId)
+    {
+        $objDb = $this->Database
+                ->prepare("
+                    SELECT * 
+                    FROM `tl_clipboard` 
+                    WHERE str_table = ? 
+                    AND user_id = ?
+                    AND elem_id = ?")
+                ->limit(1)
+                ->execute('tl_' . $strPageType, $intUserId, $intElemId);
+
+        return $objDb;
+    }
+
+    /**
+     * Copy given array set to clipboard and update favorite and xml filename
+     * 
+     * @param array $arrSet
      */
     public function copyToClipboard($arrSet)
     {
@@ -233,16 +295,23 @@ class ClipboardDatabase extends Backend
                     WHERE str_table = ?
                     AND user_id = ?")
                 ->execute($arrSet['str_table'], $arrSet['user_id']);
-        
+
         $this->Database
                 ->prepare("INSERT INTO `tl_clipboard` 
                     %s ON DUPLICATE KEY 
-                    UPDATE favorite = 1")
+                    UPDATE favorite = 1, filename = ?")
                 ->set($arrSet)
-                ->execute();        
+                ->execute($arrSet['filename']);
     }
-    
-    public function editClipboardEntry($strTitle, $intId, $intUserId)
+
+    /**
+     * Update the specific given clipboard element title
+     * 
+     * @param string $strTitle
+     * @param integer $intId
+     * @param integer $intUserId 
+     */
+    public function editClipboardElemTitle($strTitle, $intId, $intUserId)
     {
         $this->Database
                 ->prepare("
@@ -252,7 +321,7 @@ class ClipboardDatabase extends Backend
                     AND `user_id` = ?")
                 ->execute($strTitle, $intId, $intUserId);
     }
-    
+
     /**
      * Delete the entry with the given id
      * 

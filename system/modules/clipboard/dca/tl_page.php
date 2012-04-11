@@ -1,5 +1,4 @@
-<?php if (!defined('TL_ROOT'))
-    die('You cannot access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -104,6 +103,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
  */
 class tl_page_cl extends tl_page
 {
+
     /**
      * Initialize the object
      */
@@ -112,7 +112,7 @@ class tl_page_cl extends tl_page
         parent::__construct();
         $this->import('ClipboardHelper');
     }
-    
+
     /**
      * Return the paste button
      * 

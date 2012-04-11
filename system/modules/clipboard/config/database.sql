@@ -19,6 +19,7 @@ CREATE TABLE `tl_clipboard` (
         `favorite` char(1) NOT NULL default '1',
         `childs` char(1) NOT NULL default '0',
         `elem_id` int(10) unsigned NOT NULL default '0',
+        `filename` varchar(128) NOT NULL default '',
     PRIMARY KEY  (`id`),
-    UNIQUE KEY `key` (`user_id`, `elem_id`, `str_table`)
+    UNIQUE KEY `key` (`user_id`, `elem_id`, `str_table`, `filename`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

@@ -35,20 +35,19 @@ $arrAllowedLocations = array(
     'content'
 );
 
- if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations))
- {
+if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations))
+{
     /**
      * Set header informations 
      */
-    $GLOBALS['TL_CSS']['Clipboard']         = "system/modules/clipboard/html/clipboard_src.css";
-    $GLOBALS['TL_JAVASCRIPT']['Clipboard']  = "system/modules/clipboard/html/clipboard_src.js";
+    $GLOBALS['TL_CSS']['clipboard']         = "system/modules/clipboard/html/clipboard.css";
+    $GLOBALS['TL_JAVASCRIPT']['clipboard']  = "system/modules/clipboard/html/clipboard.js";
 
     /**
      * Hooks
      */
     $GLOBALS['TL_HOOKS']['outputBackendTemplate'][]                 = array('Clipboard', 'outputBackendTemplate');
-    $GLOBALS['TL_HOOKS']['independentlyButtons'][]                  = array('ClipboardHelper', 'independentlyButtons');
-    $GLOBALS['TL_HOOKS']['independentlyTlContentHeaderButtons'][]   = array('ClipboardHelper', 'independentlyTlContentHeaderButtons');    
+    $GLOBALS['TL_HOOKS']['clipboardButtons'][]                      = array('ClipboardHelper', 'clipboardButtons');
     
     /**
      * Config

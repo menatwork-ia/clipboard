@@ -1,6 +1,4 @@
-<?php
-if (!defined('TL_ROOT'))
-    die('You cannot access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -77,10 +75,7 @@ class Clipboard extends Backend
     /**
      * Prevent cloning of the object (Singleton)
      */
-    final private function __clone()
-    {
-        
-    }
+    final private function __clone(){}
 
     /**
      * Get instanz of the object (Singelton) 
@@ -155,7 +150,7 @@ class Clipboard extends Backend
      * @param string $do
      * @return string 
      */
-    public function getTitleForId($intId)
+    public function getTitle($intId)
     {
         switch ($this->pageType)
         {
@@ -168,34 +163,52 @@ class Clipboard extends Backend
     }
 
     /**
-     * Copy element to clipboard 
+     * Copy element to clipboeard and write xml
      */
     public function copy()
     {
+        $boolHasChilds = (($this->Input->get('childs') == 1) ? TRUE : FALSE);
+
         $arrSet = array(
             'user_id' => $this->User->id,
-            'childs' => $childs = (($this->Input->get('childs') == 1) ? 1 : 0),
+            'childs' => $boolHasChilds,
             'str_table' => 'tl_' . $this->pageType,
-            'title' => $this->getTitleForId($this->Input->get('id')),
             'elem_id' => $this->Input->get('id'),
         );
 
-        //FB::log($this->objClipboardXml->writeXml($strTable, $strElemId, $strTitle));        
+        $objClipboard = $this->objDatabase->getClipboardElemFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
+
+        if ($objClipboard->numRows && $objClipboard->filename != '' && $this->objClipboardXml->fileExists($objClipboard->filename))
+        {
+            $arrSet['title'] = $objClipboard->title;
+            $arrSet['filename'] = $objClipboard->filename;
+        }
+        else
+        {
+            $arrSet['title'] = $this->getTitle($this->Input->get('id'));
+            $arrSet['filename'] = $this->objClipboardXml->getFileName('tl_' . $this->pageType, $this->getTitle($this->Input->get('id')), FALSE);
+        }
+
         $this->objDatabase->copyToClipboard($arrSet);
+        $this->objClipboardXml->writeXml('tl_' . $this->pageType, $this->Input->get('id'), $arrSet['title'], $arrSet['filename'], $boolHasChilds);
     }
 
     /**
-     * Delete the entry with the given id
+     * Delete the given element and remove xml
      * 
      * @param integer $intId 
      */
     public function delete($intId)
     {
+        $objClipboard = $this->objDatabase->getClipboardElemFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
+
         $this->objDatabase->deleteFromClipboard($intId, $this->User->id);
+
+        $this->objClipboardXml->deleteFile($objClipboard->filename);
     }
 
     /**
-     * Make the given id favorit
+     * Make the given element favorit
      * 
      * @param integer $intId 
      */
@@ -203,9 +216,10 @@ class Clipboard extends Backend
     {
         $this->objDatabase->setNewFavorite($intId, $this->pageType, $this->User->id);
     }
-    
+
     /**
-     * Override all given element titles in the clipboard view
+     * Override all given element titles in the clipboard view and edit same tag
+     * in xml file
      * 
      * @param array $arrTitles 
      */
@@ -215,10 +229,14 @@ class Clipboard extends Backend
         {
             foreach ($arrTitles AS $id => $strTitle)
             {
-                $this->objDatabase->editClipboardEntry($strTitle, $id, $this->User->id);
+                $objClipboard = $this->objDatabase->getClipboardElemFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
+
+                $this->objDatabase->editClipboardElemTitle($strTitle, $id, $this->User->id);
+
+                $this->objClipboardXml->editTitle($objClipboard->filename, $strTitle);
             }
         }
-    }    
+    }
 
     /**
      * Return bool true if the clipboard is active and have entries for active page and user
@@ -240,7 +258,6 @@ class Clipboard extends Backend
      */
     public function init()
     {
-        // Handle the set get params
         if (stristr($this->Input->get('key'), 'cl_'))
         {
             $arrUnsetParams = array();

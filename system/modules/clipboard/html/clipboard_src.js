@@ -2,8 +2,7 @@
  * Class ClipboardMenu
  *
  * Provide methods to handle context menus
- * @copyright  Leo Feyer 2005-2011
- * @author     Leo Feyer <http://www.contao.org>
+ * @copyright  MEN AT WORK 2012
  * @package    Backend
  */
 var ClipboardMenu =
