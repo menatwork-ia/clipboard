@@ -192,9 +192,9 @@ class DC_Clipboard extends DC_Table
 
         // Added by Patrick Kahl
         // HOOK: call the hooks for independently buttons
-        if (isset($GLOBALS['TL_HOOKS']['independentlyButtons']) && is_array($GLOBALS['TL_HOOKS']['independentlyButtons']))
+        if (isset($GLOBALS['TL_HOOKS']['clipboardButtons']) && is_array($GLOBALS['TL_HOOKS']['clipboardButtons']))
         {
-            foreach ($GLOBALS['TL_HOOKS']['independentlyButtons'] as $callback)
+            foreach ($GLOBALS['TL_HOOKS']['clipboardButtons'] as $callback)
             {
                 $this->import($callback[0]);
                 $_buttons .= $this->$callback[0]->$callback[1]($this, $objRow->row(), $table, $blnCircularReference, $arrClipboard, $childs, $previous, $next);
