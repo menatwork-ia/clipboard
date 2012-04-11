@@ -176,7 +176,7 @@ class Clipboard extends Backend
             'elem_id' => $this->Input->get('id'),
         );
 
-        $objClipboard = $this->objDatabase->getClipboardElemFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
+        $objClipboard = $this->objDatabase->getClipboardEntryFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
 
         if ($objClipboard->numRows && $objClipboard->filename != '' && $this->objClipboardXml->fileExists($objClipboard->filename))
         {
@@ -200,8 +200,8 @@ class Clipboard extends Backend
      */
     public function delete($intId)
     {
-        $objClipboard = $this->objDatabase->getClipboardElemFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
-
+        $objClipboard = $this->objDatabase->getClipboardEntryFromId($intId);
+        
         $this->objDatabase->deleteFromClipboard($intId, $this->User->id);
 
         $this->objClipboardXml->deleteFile($objClipboard->filename);
@@ -229,7 +229,7 @@ class Clipboard extends Backend
         {
             foreach ($arrTitles AS $id => $strTitle)
             {
-                $objClipboard = $this->objDatabase->getClipboardElemFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
+                $objClipboard = $this->objDatabase->getClipboardEntryFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
 
                 $this->objDatabase->editClipboardElemTitle($strTitle, $id, $this->User->id);
 

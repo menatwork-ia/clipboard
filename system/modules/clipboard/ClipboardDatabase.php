@@ -266,7 +266,7 @@ class ClipboardDatabase extends Backend
      * @param integer $intElemId
      * @return DB_Mysql_Result 
      */
-    public function getClipboardElemFromElemId($strPageType, $intUserId, $intElemId)
+    public function getClipboardEntryFromElemId($strPageType, $intUserId, $intElemId)
     {
         $objDb = $this->Database
                 ->prepare("
@@ -279,6 +279,22 @@ class ClipboardDatabase extends Backend
                 ->execute('tl_' . $strPageType, $intUserId, $intElemId);
 
         return $objDb;
+    }
+    
+    /**
+     * Return clipboard entry for given id
+     * 
+     * @param integer $intId
+     * @return DB_Mysql_Result 
+     */
+    public function getClipboardEntryFromId($intId)
+    {
+        $objDb = $this->Database
+                ->prepare("SELECT * FROM `tl_clipboard` WHERE id = ?")
+                ->limit(1)
+                ->execute($intId);
+
+        return $objDb;        
     }
 
     /**
