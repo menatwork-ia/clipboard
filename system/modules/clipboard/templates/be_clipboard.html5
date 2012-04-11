@@ -1,34 +1,34 @@
 <?php if ($this->clipboard): ?>
-    <div id="clipboard">
-        <h1><?php echo $GLOBALS['TL_LANG']['MSC']['clipboard']; ?></h1>
-        <div>
-            <form action="<?php echo $this->action; ?>" method="post">
-                <input type="hidden" name="REQUEST_TOKEN" value="<?php echo REQUEST_TOKEN; ?>">
-                <ul>
-                    <?php foreach ($this->clipboard as $item): ?>
-                        <li<?php echo ($item['favorite']) ? ' class="featured"' : ''; ?>>
-                            <p class="edit">
-                                <a title="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" href="<?php echo $item['favorite_href']; ?>">
-                                    <img height="16" width="16" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" src="system/themes/default/images/featured<?php echo (!$item['favorite']) ? '_' : ''; ?>.gif" />
-                                </a>
-                                <a onclick="if (!confirm('<?php echo sprintf($GLOBALS['TL_LANG']['MSC']['deleteConfirm'], $item['id']); ?>')) return false; Backend.getScrollOffset();" title="<?php echo $GLOBALS['TL_LANG']['MSC']['deleteSelected']; ?>" href="<?php echo $item['delete_href']; ?>">
-                                    <img height="16" width="14" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['deleteSelected']; ?>" src="system/themes/default/images/delete.gif" />
-                                </a>
-                            </p>
-                            <p class="cl_title">
-                                <span>(ID <?php echo $item['id']; ?>)</span> <input class="<?php echo ((strlen($item['title'])) ? '' : 'empty '); ?>text" readonly="readonly" type="text" name="title[<?php echo $item['id']; ?>]" value="<?php echo $item['title']; ?>" />
-                            </p>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-                <p id="show" class="inactive button">
-                    <a id="edit" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['editSelected']; ?></a>
-                </p>
-                <p id="hide" class="inactive invisible button">
-                    <a id="cancel" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['cancelBT']; ?></a>
-                    <button id="save"><?php echo $GLOBALS['TL_LANG']['MSC']['save']; ?></button>
-                </p>
-            </form>  
-        </div>
+<div id="clipboard">
+    <h1><?php echo $GLOBALS['TL_LANG']['MSC']['clipboard']; ?></h1>
+    <div>
+        <form action="<?php echo $this->action; ?>" method="post">
+            <input type="hidden" name="REQUEST_TOKEN" value="<?php echo REQUEST_TOKEN; ?>">
+            <ul>
+            <?php foreach ($this->clipboard as $item): ?>
+                <li<?php echo ($item['favorite']) ? ' class="featured"' : ''; ?>>
+                    <p class="edit">
+                        <a title="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" href="<?php echo $item['favorite_href']; ?>">
+                            <img height="16" width="16" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" src="system/themes/default/images/featured<?php echo (!$item['favorite']) ? '_' : ''; ?>.gif" />
+                        </a>
+                        <a onclick="if (!confirm('<?php echo sprintf($GLOBALS['TL_LANG']['MSC']['deleteConfirm'], $item['id']); ?>')) return false; Backend.getScrollOffset();" title="<?php echo $GLOBALS['TL_LANG']['MSC']['deleteSelected']; ?>" href="<?php echo $item['delete_href']; ?>">
+                            <img height="16" width="14" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['deleteSelected']; ?>" src="system/themes/default/images/delete.gif" />
+                        </a>
+                    </p>
+                    <p class="cl_title">
+                        <span>(ID <?php echo $item['id']; ?>)</span> <input class="<?php echo ((strlen($item['title'])) ? '' : 'empty '); ?>text" readonly="readonly" type="text" name="title[<?php echo $item['id']; ?>]" value="<?php echo $item['title']; ?>" />
+                    </p>
+                </li>
+            <?php endforeach; ?>
+            </ul>
+            <p id="show" class="inactive button">
+                <a id="edit" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['editSelected']; ?></a>
+            </p>
+            <p id="hide" class="inactive invisible button">
+                <a id="cancel" href="#"><?php echo $GLOBALS['TL_LANG']['MSC']['cancelBT']; ?></a>
+                <button id="save"><?php echo $GLOBALS['TL_LANG']['MSC']['save']; ?></button>
+            </p>
+        </form>  
     </div>
+</div>
 <?php endif; ?>
