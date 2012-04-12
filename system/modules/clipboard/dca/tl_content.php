@@ -30,6 +30,9 @@
 /**
  * Create DCA if clipboard is ready to use 
  */
+ 
+$this->loadLanguageFile('tl_page');
+
 if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
 {
     /**
@@ -61,7 +64,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
         // Paste after button    
         $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array
             (
-            'label' => $GLOBALS['TL_LANG']['tl_content']['cl_pasteafter']
+            'label' => $GLOBALS['TL_LANG']['tl_page']['pasteafter']
         );
 
         $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array_merge(
