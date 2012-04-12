@@ -2,7 +2,7 @@
 
 /**
  * Contao Open Source CMS
- * Copyright (C) 2005-2010 Leo Feyer
+ * Copyright (C) 2005-2011 Leo Feyer
  *
  * Formerly known as TYPOlight Open Source CMS.
  *
@@ -28,9 +28,8 @@
  */
 
 /**
- * Backend 
+ * Back end modules
  */
-$GLOBALS['TL_LANG']['MSC']['clipboard'] = 'Clipboard';
-$GLOBALS['TL_LANG']['MSC']['featureSelected'] = 'Favorit';
-$GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] = 'Keine Beschreibung';
+$GLOBALS['TL_LANG']['tl_content']['cl_header_pastenew'] = array('Paste clipboard element', '')
+
 ?>

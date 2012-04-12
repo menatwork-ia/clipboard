@@ -30,9 +30,6 @@
 /**
  * Back end modules
  */
-$GLOBALS['TL_LANG']['tl_content']['cl_pasteafter'] = array('Einfügen nach', 'Nach dem Inhaltselement ID %s einfügen');
-$GLOBALS['TL_LANG']['tl_content']['cl_pastenew'] = array('Oben einfügen', '');
 $GLOBALS['TL_LANG']['tl_content']['cl_header_pastenew'] = array('Clipboardelement einfügen', '')
-
 
 ?>
