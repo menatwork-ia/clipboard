@@ -575,12 +575,18 @@ class ClipboardXml extends Backend
                     case XMLReader::ELEMENT:
                         switch ($objXml->localName)
                         {
+                            case 'page':
+                                $this->createPage($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
+                                break;
+                        
                             case 'article':
                                 $this->createArticle($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
                                 break;
+                            
                             case 'content':
                                 $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
                                 break;
+                            
                             default:
                                 break;
                         }
@@ -594,25 +600,88 @@ class ClipboardXml extends Backend
     }
 
     /**
+     * Create page elements
+     * 
+     * @param XMLReader $objXml
+     * @param string $strTable
+     * @param string $strPastePos
+     * @param integer $intElemId
+     * @param bool $boolIsChild
+     */    
+    public function createPage($objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
+    {
+        $intLastInsertId = 0;
+        
+        if ($boolIsChild == TRUE)
+        {
+            $intId = $intElemId;
+        }
+        else
+        {
+            if ($strPastePos == 'pasteAfter')
+            {
+                $objElem = $this->_objDatabase->getPageObject($intElemId);
+                $intId = $objElem->pid;
+            }
+        }        
+
+        while ($objXml->read())
+        {
+            switch ($objXml->nodeType)
+            {
+                case XMLReader::ELEMENT:
+                    switch ($objXml->localName)
+                    {
+                        case 'article':
+                            $this->createArticle($objXml, $objXml->getAttribute("table"), $strPastePos, $intLastInsertId, TRUE);
+                            break;
+                        
+                        case 'row':
+                            $objDb = $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild));
+                            $intLastInsertId = $objDb->insertId;
+                            break;
+                        
+                        case 'subpage':
+                            $this->createPage($objXml, $objXml->getAttribute("table"), $strPastePos, $intLastInsertId, TRUE);
+                    }
+                    break;
+                case XMLReader::END_ELEMENT:
+                    switch ($objXml->localName)
+                    {
+                        case 'page':
+                            return;
+                            break;
+                    }
+                    break;
+            }
+        }        
+    }
+
+
+    /**
      * Create article elements
      * 
      * @param XMLReader $objXml
      * @param string $strTable
      * @param string $strPastePos
-     * @param integer $intElemId 
+     * @param integer $intElemId
+     * @param bool $boolIsChild
      */
-    public function createArticle($objXml, $strTable, $strPastePos, $intElemId)
+    public function createArticle($objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
     {
         $intLastInsertId = 0;
 
-        if ($strPastePos == 'pasteAfter')
+        if ($boolIsChild == TRUE)
         {
-            $objElem = $this->_objDatabase->getArticleObject($intElemId);
-            $intId = $objElem->pid;
+            $intId = $intElemId;
         }
         else
         {
-            $intId = $intElemId;
+            if ($strPastePos == 'pasteAfter')
+            {
+                $objElem = $this->_objDatabase->getContentObject($intElemId);
+                $intId = $objElem->pid;
+            }
         }
 
         while ($objXml->read())
@@ -625,8 +694,9 @@ class ClipboardXml extends Backend
                         case 'content':
                             $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intLastInsertId, TRUE);
                             break;
+                        
                         case 'row':
-                            $objDb = $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId));
+                            $objDb = $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild));
                             $intLastInsertId = $objDb->insertId;
                             break;
                     }
@@ -650,11 +720,11 @@ class ClipboardXml extends Backend
      * @param string $strTable
      * @param string $strPastePos
      * @param integer $intElemId
-     * @param bool $isChild
+     * @param bool $boolIsChild
      */
-    protected function createContent($objXml, $strTable, $strPastePos, $intElemId, $isChild = FALSE)
+    protected function createContent($objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
     {
-        if ($isChild == TRUE)
+        if ($boolIsChild == TRUE)
         {
             $intId = $intElemId;
         }
@@ -675,7 +745,7 @@ class ClipboardXml extends Backend
                     switch ($objXml->localName)
                     {
                         case 'row':
-                            $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $isChild));
+                            $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild));
                             break;
                     }
                     break;
@@ -699,10 +769,10 @@ class ClipboardXml extends Backend
      * @param string $strTable
      * @param string $strPastePos
      * @param integer $intElemId
-     * @param bool $isChild
+     * @param bool $boolIsChild
      * @return array
      */
-    protected function createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $isChild = FALSE)
+    protected function createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
     {
         $arrFields = $this->getFields($strTable);
         $arrSet = array();
@@ -723,7 +793,7 @@ class ClipboardXml extends Backend
                                 break;
 
                             case 'sorting':
-                                if ($isChild == TRUE)
+                                if ($boolIsChild == TRUE)
                                 {
                                     $arrSet['pid'] = $intId;
                                 }
@@ -741,10 +811,12 @@ class ClipboardXml extends Backend
                                     case 'empty':
                                         $arrSet[$strFieldName] = '';
                                         break;
+                                    
                                     case 'default':
                                         $strValue = str_replace(array("\\\\", "\\'", "\\r", "\\n"), array("\\", "'", "\r", "\n"), $objXml->value);
                                         $arrSet[$strFieldName] = substr($strValue, 1, (strlen($strValue) - 2));
                                         break;
+                                    
                                     default:
                                         $arrSet[$strFieldName] = $objXml->value;
                                         break;
@@ -759,6 +831,7 @@ class ClipboardXml extends Backend
                         $strFieldType = $objXml->getAttribute("type");
                     }
                     break;
+                    
                 case XMLReader::END_ELEMENT:
                     if ($objXml->localName == 'row')
                     {

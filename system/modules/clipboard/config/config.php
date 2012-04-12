@@ -56,25 +56,25 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
         'copy' => array(
             'href'          => 'key=cl_copy',
             'icon'          => 'featured.gif',
-            'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"',            
+            'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         // Copy with children button
         'copy_childs' => array(
             'href'          => 'key=cl_copy&amp;childs=1',
             'icon'          => 'copychilds.gif',
-            'attributes'    => 'class="cl_paste" onclick="Backend.getScrollOffset();"',            
+            'attributes'    => 'class="cl_paste" onclick="Backend.getScrollOffset();"'        
         ),
         // Paste into button
         'pasteinto' => array(
             'href'          => 'key=cl_paste_into',            
             'icon'          => 'pasteafter.gif',
-            'attributes'    => ''
+            'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         // Paste after button
         'pasteafter' => array(
             'href'          => 'key=cl_paste_after',
             'icon'          => 'pasteinto.gif',
-            'attributes'    => ''            
+            'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         'locations' => $arrAllowedLocations
     );

@@ -43,8 +43,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
     // Copy button
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array
         (
-        'label' => &$GLOBALS['TL_LANG']['tl_page']['copy'],
-        'button_callback' => array('tl_page', 'copyPage')
+        'label' => &$GLOBALS['TL_LANG']['tl_page']['copy']
     );
 
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array_merge(
@@ -55,8 +54,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
     // Copy with childs button
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds'] = array
         (
-        'label' => &$GLOBALS['TL_LANG']['tl_page']['copyChilds'],
-        'button_callback' => array('tl_page_cl', 'cl_copyPageWithSubpages')
+        'label' => &$GLOBALS['TL_LANG']['tl_page']['copyChilds']
     );
 
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds'] = array_merge(
@@ -68,8 +66,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array
         (
         'label' => $GLOBALS['TL_LANG']['tl_page']['pasteafter'],
-        'attributes' => 'class="cl_paste"',
-//        'button_callback' => array('tl_page_cl', 'cl_pastePage')
+        'attributes' => 'class="cl_paste"'
     );
 
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array_merge(
@@ -81,8 +78,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array
         (
         'label' => $GLOBALS['TL_LANG']['tl_page']['pasteinto'],
-        'attributes' => 'class="cl_paste"',
-//        'button_callback' => array('tl_page_cl', 'cl_pastePage')
+        'attributes' => 'class="cl_paste"'
     );
 
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array_merge(
