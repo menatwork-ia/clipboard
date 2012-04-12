@@ -174,8 +174,7 @@ class ClipboardHelper extends Backend
     }
 
     /**
-     * Check if the current site is in backend, allowed for clipboard and the 
-     * clipboard table exists 
+     * Check if the current site is in backend, allowed for clipboard and the clipboard table exists 
      * 
      * @param string $dca
      * @return boolean 

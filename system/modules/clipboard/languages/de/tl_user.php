@@ -28,7 +28,7 @@
  */
 
 /**
- * Back end modules
+ * Fields
  */
 $GLOBALS['TL_LANG']['tl_user']['clipboard'] = array('Clipboard verwenden', 'Das erweiterte Clipboard verwenden.');
 

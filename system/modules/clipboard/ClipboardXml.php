@@ -1,6 +1,4 @@
-<?php
-if (!defined('TL_ROOT'))
-    die('You cannot access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -84,10 +82,6 @@ class ClipboardXml extends Backend
         }
         return self::$_objInstance;
     }
-
-    //--------------------------------------------------------------------------
-    // File and Folder Methods
-    //--------------------------------------------------------------------------
 
     /**
      * Return path to xml file for current backend user
@@ -269,19 +263,6 @@ class ClipboardXml extends Backend
         }
         return $arrMetaTags;
     }
-
-    //--------------------------------------------------------------------------
-    // Write to xml
-    //--------------------------------------------------------------------------    
-
-    /**
-     * 
-     * 
-     * @param string $strTable
-     * @param integer $intId
-     * @param string $strTitle
-     * @return boolean 
-     */
 
     /**
      * Create xml file for the given element and all his childs
@@ -551,13 +532,8 @@ class ClipboardXml extends Backend
         }
     }
 
-    //--------------------------------------------------------------------------
-    // Table field information
-    //--------------------------------------------------------------------------    
-
     /**
-     * Write the field information from the given table string to an array and
-     * return it
+     * Write the field information from the given table string to an array and return it
      * 
      * @param string $strTable
      * @return array 
@@ -597,10 +573,6 @@ class ClipboardXml extends Backend
         }
         return $arrFields;
     }
-
-    //--------------------------------------------------------------------------
-    // Read xml and write it into database
-    //--------------------------------------------------------------------------
 
     /**
      * Read xml file and create elements

@@ -31,6 +31,11 @@
  * Backend 
  */
 $GLOBALS['TL_LANG']['MSC']['clipboard'] = 'Clipboard';
+
+/**
+ * Miscellaneous
+ */
 $GLOBALS['TL_LANG']['MSC']['featureSelected'] = 'Favorit';
 $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] = 'Keine Beschreibung';
+
 ?>
