@@ -69,7 +69,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
         (
         'label' => $GLOBALS['TL_LANG']['tl_page']['pasteafter'],
         'attributes' => 'class="cl_paste"',
-        'button_callback' => array('tl_page_cl', 'cl_pastePage')
+//        'button_callback' => array('tl_page_cl', 'cl_pastePage')
     );
 
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array_merge(
@@ -82,7 +82,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
         (
         'label' => $GLOBALS['TL_LANG']['tl_page']['pasteinto'],
         'attributes' => 'class="cl_paste"',
-        'button_callback' => array('tl_page_cl', 'cl_pastePage')
+//        'button_callback' => array('tl_page_cl', 'cl_pastePage')
     );
 
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array_merge(

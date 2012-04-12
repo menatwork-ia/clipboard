@@ -93,10 +93,8 @@ class ClipboardHelper extends Backend
                 $return .= vsprintf('<a href="%s" title="%s" %s>%s</a>', array(
                     // Create URL
                     $this->addToUrl(
-                            vsprintf('%s&amp;id=$s&amp;%spid=%s', array(
+                            vsprintf('%s&amp;id=%s', array(
                                 $href,
-                                $objFavorit->elem_id,
-                                (($objFavorit->childs == 1) ? 'childs=1&amp;' : ''),
                                 $row['id']
                                     )
                             )
@@ -124,7 +122,7 @@ class ClipboardHelper extends Backend
     /**
      * Return clipboard button
      * 
-     * HOOK: $GLOBALS['TL_HOOKS']['independentlyButtons']
+     * HOOK: $GLOBALS['TL_HOOKS']['clipboardButtons']
      * 
      * @param object $dc
      * @param array $row

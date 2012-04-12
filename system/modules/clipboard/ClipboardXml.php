@@ -503,7 +503,7 @@ class ClipboardXml extends Backend
             }
         }
     }
-    
+
     //--------------------------------------------------------------------------
     // Table field information
     //--------------------------------------------------------------------------    
@@ -575,6 +575,9 @@ class ClipboardXml extends Backend
                     case XMLReader::ELEMENT:
                         switch ($objXml->localName)
                         {
+                            case 'article':
+                                $this->createArticle($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
+                                break;
                             case 'content':
                                 $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
                                 break;
@@ -591,18 +594,25 @@ class ClipboardXml extends Backend
     }
 
     /**
-     * Create Content elements
+     * Create article elements
      * 
      * @param XMLReader $objXml
      * @param string $strTable
      * @param string $strPastePos
-     * @param integer $intElemId
+     * @param integer $intElemId 
      */
-    protected function createContent($objXml, $strTable, $strPastePos, $intElemId)
+    public function createArticle($objXml, $strTable, $strPastePos, $intElemId)
     {
+        $intLastInsertId = 0;
+
         if ($strPastePos == 'pasteAfter')
         {
-            $objElem = $this->_objDatabase->getContentObject($intElemId);
+            $objElem = $this->_objDatabase->getArticleObject($intElemId);
+            $intId = $objElem->pid;
+        }
+        else
+        {
+            $intId = $intElemId;
         }
 
         while ($objXml->read())
@@ -613,8 +623,59 @@ class ClipboardXml extends Backend
                     switch ($objXml->localName)
                     {
                         case 'content':
+                            $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intLastInsertId, TRUE);
+                            break;
                         case 'row':
-                            $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $objElem->pid, $strTable,$strPastePos, $intElemId));
+                            $objDb = $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId));
+                            $intLastInsertId = $objDb->insertId;
+                            break;
+                    }
+                    break;
+                case XMLReader::END_ELEMENT:
+                    switch ($objXml->localName)
+                    {
+                        case 'article':
+                            return;
+                            break;
+                    }
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Create Content elements
+     * 
+     * @param XMLReader $objXml
+     * @param string $strTable
+     * @param string $strPastePos
+     * @param integer $intElemId
+     * @param bool $isChild
+     */
+    protected function createContent($objXml, $strTable, $strPastePos, $intElemId, $isChild = FALSE)
+    {
+        if ($isChild == TRUE)
+        {
+            $intId = $intElemId;
+        }
+        else
+        {
+            if ($strPastePos == 'pasteAfter')
+            {
+                $objElem = $this->_objDatabase->getContentObject($intElemId);
+                $intId = $objElem->pid;
+            }
+        }
+
+        while ($objXml->read())
+        {
+            switch ($objXml->nodeType)
+            {
+                case XMLReader::ELEMENT:
+                    switch ($objXml->localName)
+                    {
+                        case 'row':
+                            $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $isChild));
                             break;
                     }
                     break;
@@ -638,9 +699,10 @@ class ClipboardXml extends Backend
      * @param string $strTable
      * @param string $strPastePos
      * @param integer $intElemId
+     * @param bool $isChild
      * @return array
      */
-    protected function createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId)
+    protected function createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $isChild = FALSE)
     {
         $arrFields = $this->getFields($strTable);
         $arrSet = array();
@@ -656,11 +718,22 @@ class ClipboardXml extends Backend
                     {
                         switch ($strFieldName)
                         {
-                            case 'sorting':
-                                $arrSorting = $this->getNewPosition($strTable, $intElemId, $strPastePos);
-                                $arrSet['pid'] = $arrSorting['pid'];
-                                $arrSet['sorting'] = $arrSorting['sorting'];
+                            case 'pid':
+                            case 'id':
                                 break;
+
+                            case 'sorting':
+                                if ($isChild == TRUE)
+                                {
+                                    $arrSet['pid'] = $intId;
+                                }
+                                else
+                                {
+                                    $arrSorting = $this->getNewPosition($strTable, $intElemId, $strPastePos);
+                                    $arrSet['pid'] = $arrSorting['pid'];
+                                    $arrSet['sorting'] = $arrSorting['sorting'];
+                                    break;
+                                }
 
                             default:
                                 switch ($strFieldType)
@@ -669,7 +742,8 @@ class ClipboardXml extends Backend
                                         $arrSet[$strFieldName] = '';
                                         break;
                                     case 'default':
-                                        $arrSet[$strFieldName] = substr($objXml->value, 1, (strlen($objXml->value) - 2));
+                                        $strValue = str_replace(array("\\\\", "\\'", "\\r", "\\n"), array("\\", "'", "\r", "\n"), $objXml->value);
+                                        $arrSet[$strFieldName] = substr($strValue, 1, (strlen($strValue) - 2));
                                         break;
                                     default:
                                         $arrSet[$strFieldName] = $objXml->value;
@@ -678,7 +752,6 @@ class ClipboardXml extends Backend
                                 break;
                         }
                     }
-                    break;
                 case XMLReader::ELEMENT:
                     if ($objXml->localName == 'field')
                     {
@@ -707,48 +780,43 @@ class ClipboardXml extends Backend
     protected function getNewPosition($strTable, $intPid, $strPastePos)
     {
         // Insert the current record at the beginning when inserting into the parent record
-        if($strPastePos == 'pasteInto')
+        if ($strPastePos == 'pasteInto')
         {
-//                    $newPid = $pid;
-//                    $objSorting = $this->Database->prepare("SELECT MIN(sorting) AS sorting FROM " . $this->strTable . " WHERE pid=?")
-//                            ->executeUncached($pid);
-//
-//                    // Select sorting value of the first record
-//                    if ($objSorting->numRows)
-//                    {
-//                        $intCurSorting = $objSorting->sorting;
-//
-//                        // Resort if the new sorting value is not an integer or smaller than 1
-//                        if (($intCurSorting % 2) != 0 || $intCurSorting < 1)
-//                        {
-//                            $objNewSorting = $this->Database->prepare("SELECT id, sorting FROM " . $this->strTable . " WHERE pid=? ORDER BY sorting")
-//                                    ->executeUncached($pid);
-//
-//                            $count = 2;
-//                            $newSorting = 128;
-//
-//                            while ($objNewSorting->next())
-//                            {
-//                                $this->Database->prepare("UPDATE " . $this->strTable . " SET sorting=? WHERE id=?")
-//                                        ->limit(1)
-//                                        ->execute(($count++ * 128), $objNewSorting->id);
-//                            }
-//                        }
-//
-//                        // Else new sorting = (current sorting / 2)
-//                        else
-//                            $newSorting = ($intCurSorting / 2);
-//                    }
-//
-//                    // Else new sorting = 128
-//                    else
-//                        $newSorting = 128;
-//                }            
+            $newPid = $intPid;
+            $objSorting = $this->_objDatabase->getSorting($strTable, $intPid);
+
+            // Select sorting value of the first record
+            if ($objSorting->numRows)
+            {
+                $intCurSorting = $objSorting->sorting;
+
+                // Resort if the new sorting value is not an integer or smaller than 1
+                if (($intCurSorting % 2) != 0 || $intCurSorting < 1)
+                {
+                    $objNewSorting = $this->_objDatabase->getSortingElem($strTable, $intPid);
+
+                    $count = 2;
+                    $newSorting = 128;
+
+                    while ($objNewSorting->next())
+                    {
+                        $this->_objDatabase->updateSorting($strTable, ($count++ * 128), $objNewSorting->id);
+                    }
+                }
+
+                // Else new sorting = (current sorting / 2)
+                else
+                    $newSorting = ($intCurSorting / 2);
+            }
+
+            // Else new sorting = 128
+            else
+                $newSorting = 128;
         }
         // Else insert the current record after the parent record
         elseif ($strPastePos == 'pasteAfter' && $intPid > 0)
         {
-            $objSorting = $this->_objDatabase->getContentObject($intPid);
+            $objSorting = $this->_objDatabase->getDynamicObject($strTable, $intPid);
 
             // Set parent ID of the current record as new parent ID
             if ($objSorting->numRows)
@@ -775,7 +843,7 @@ class ClipboardXml extends Backend
 
                             while ($objNewSorting->next())
                             {
-                                $this->_objDatabase->updateSorting(($count++ * 128), $objNewSorting->id);
+                                $this->_objDatabase->updateSorting($strTable, ($count++ * 128), $objNewSorting->id);
 
                                 if ($objNewSorting->sorting == $intCurSorting)
                                 {
@@ -802,7 +870,7 @@ class ClipboardXml extends Backend
                 $newSorting = 128;
             }
         }
-        
+
         return array('pid' => intval($newPid), 'sorting' => intval($newSorting));
     }
 

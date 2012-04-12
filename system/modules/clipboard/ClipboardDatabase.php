@@ -188,6 +188,23 @@ class ClipboardDatabase extends Backend
 
         return $objDb;
     }
+    
+    /**
+     * Return object from given table and his id
+     * 
+     * @param string $strTable
+     * @param integer $intId
+     * @return DB_Mysql_Result
+     */
+    public function getDynamicObject($strTable, $intId)
+    {
+        $objDb = $this->Database
+                ->prepare("SELECT * FROM `$strTable` WHERE id = ?")
+                ->limit(1)
+                ->executeUncached($intId);
+
+        return $objDb;
+    }
 
     /**
      * Return the current favorite as object
@@ -340,9 +357,7 @@ class ClipboardDatabase extends Backend
     public function deleteFromClipboard($intId, $intUserId)
     {
         $this->Database
-                ->prepare("DELETE FROM `tl_clipboard` 
-                    WHERE `id` = ? 
-                    AND `user_id` = ?")
+                ->prepare("DELETE FROM `tl_clipboard` WHERE `id` = ? AND `user_id` = ?")
                 ->execute($intId, $intUserId);
     }
     
@@ -363,6 +378,15 @@ class ClipboardDatabase extends Backend
         return $objDb;
     }    
     
+    public function getSorting($strTable, $intId)
+    {
+        $objDb = $this->Database
+                ->prepare("SELECT MIN(sorting) AS sorting FROM " . $strTable . " WHERE pid=?")
+                ->executeUncached($intId);
+        
+        return $objDb;        
+    }
+    
     /**
      * Get the next sorting from given id
      * 
@@ -374,13 +398,11 @@ class ClipboardDatabase extends Backend
     public function getNextSorting($strTable, $intId, $intSorting)
     {
         $objDb = $this->Database
-                ->prepare("SELECT MIN(sorting) AS sorting 
-                    FROM " . $strTable . "
-                    WHERE pid = ? AND sorting > ?")
+                ->prepare("SELECT MIN(sorting) AS sorting FROM " . $strTable . " WHERE pid = ? AND sorting > ?")
                 ->executeUncached($intId, $intSorting);
         
         return $objDb;
-    }
+    }    
     
     /**
      * Get elements sorting from given pid ordert by sorting
@@ -391,11 +413,10 @@ class ClipboardDatabase extends Backend
     public function getSortingElem($strTable, $intId)
     {
         $objDb = $this->Database
-                ->prepare("SELECT id, sorting 
-                    FROM " . $strTable . " 
-                    WHERE pid = ? 
-                    ORDER BY sorting")
+                ->prepare("SELECT id, sorting FROM " . $strTable . " WHERE pid = ? ORDER BY sorting")
                 ->executeUncached($intId);
+        
+        return $objDb;
     }
     
     /**
@@ -408,10 +429,8 @@ class ClipboardDatabase extends Backend
     public function updateSorting($strTable, $intSorting, $intId)
     {
         $this->Database
-                ->prepare("UPDATE " . $strTable . " 
-                    SET sorting = ? 
-                    WHERE id = ?")
-                ->execute($intSorting, $intId);        
+                ->prepare("UPDATE " . $strTable . " SET sorting = ? WHERE id = ?")
+                ->execute($intSorting, $intId);            
     }
 
 }

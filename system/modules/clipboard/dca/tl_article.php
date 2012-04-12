@@ -50,7 +50,6 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('article'))
         (
         'label' => &$GLOBALS['TL_LANG']['tl_article']['copy'],
         'attributes' => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"',
-        'button_callback' => array('tl_article_cl', 'copyArticle')
     );
 
     $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_copy'] = array_merge(
@@ -62,57 +61,12 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('article'))
     $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after'] = array
         (
         'label' => &$GLOBALS['TL_LANG']['tl_article']['pasteafter'],
-        'href' => '&amp;act=copy&amp;mode=1',
-        'icon' => 'pasteafter.gif',
-        'attributes' => 'class="cl_paste"',
-        'button_callback' => array('tl_article_cl', 'cl_pasteArticle')
+        'attributes' => 'class="cl_paste"'
     );
-}
-
-/**
- * Class tl_article_cl
- *
- * Provide miscellaneous methods that are used by the data configuration array.
- *
- * PHP version 5
- * @copyright  MEN AT WORK 2012
- * @package    clipboard
- * @license    GNU/GPL 2
- * @filesource
- */
-class tl_article_cl extends tl_article
-{
-
-    /**
-     * Initialize the object
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->import('ClipboardHelper');
-    }
-
-    /**
-     * Return the paste button
-     * 
-     * @param array $row
-     * @param string $href
-     * @param string $label
-     * @param string $title
-     * @param string $icon
-     * @param string $attributes
-     * @param string $table
-     * @return string 
-     */
-    public function cl_pasteArticle($row, $href, $label, $title, $icon, $attributes, $table)
-    {
-        if ($GLOBALS['TL_DCA'][$table]['config']['closed'])
-        {
-            return '';
-        }
-        return $this->ClipboardHelper->getPasteButton($row, $href, $label, $title, $icon, $attributes, $table);
-    }
-
+    
+    $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after'] = array_merge(
+            $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after']
+    );
 }
 
 ?>

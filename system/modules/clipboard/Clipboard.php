@@ -198,8 +198,8 @@ class Clipboard extends Backend
      */
     public function pasteInto()
     {
-//        $objFavorite = $this->getFavorite('tl_' . $this->pageType);
-//        $this->objClipboardXml->readXml($objFavorite->filename, 'pasteInto', $this->Input->get('id'));
+        $objFavorite = $this->getFavorite('tl_' . $this->pageType);
+        $this->objClipboardXml->readXml($objFavorite->filename, 'pasteInto', $this->Input->get('id'));
     }
     
     /**

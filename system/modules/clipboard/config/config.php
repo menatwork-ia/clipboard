@@ -65,15 +65,13 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
             'attributes'    => 'class="cl_paste" onclick="Backend.getScrollOffset();"',            
         ),
         // Paste into button
-        'pasteinto' => array(            
-//            'href'          => '&amp;act=copy&amp;mode=2',
+        'pasteinto' => array(
             'href'          => 'key=cl_paste_into',            
             'icon'          => 'pasteafter.gif',
             'attributes'    => ''
         ),
         // Paste after button
         'pasteafter' => array(
-//            'href'          => '&amp;act=copy&amp;mode=1',
             'href'          => 'key=cl_paste_after',
             'icon'          => 'pasteinto.gif',
             'attributes'    => ''            
