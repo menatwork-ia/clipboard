@@ -23,3 +23,13 @@ CREATE TABLE `tl_clipboard` (
     PRIMARY KEY  (`id`),
     UNIQUE KEY `key` (`user_id`, `elem_id`, `str_table`, `filename`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table `tl_user`
+-- 
+
+CREATE TABLE `tl_user` (
+  `clipboard` char(1) NOT NULL default '0',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
