@@ -329,6 +329,19 @@ class ClipboardDatabase extends Backend
                 ->set($arrSet)
                 ->execute($arrSet['filename']);
     }
+    
+    /**
+     * Copy given array set to clipboard
+     * 
+     * @param array $arrSet
+     */
+    public function copyToClipboardWithoutFavor($arrSet)
+    {
+        $this->Database
+                ->prepare("INSERT INTO `tl_clipboard` %s")
+                ->set($arrSet)
+                ->execute();
+    }    
 
     /**
      * Update the specific given clipboard element title

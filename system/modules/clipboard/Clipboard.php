@@ -102,7 +102,7 @@ class Clipboard extends Backend
      */
     public function outputBackendTemplate($strContent, $strTemplate)
     {
-        if ($strTemplate == 'be_main')
+        if ($strTemplate == 'be_main' && $this->User->clipboard)
         {
             $objTemplate = new BackendTemplate('be_clipboard');
 
@@ -157,6 +157,15 @@ class Clipboard extends Backend
             case 'page':
             case 'article':
                 return call_user_func_array(array($this->objDatabase, 'get' . $this->pageType . 'Object'), array($intId))->title;
+                break;
+            
+            case 'content':
+                $strTitel = $this->objHelper->createContentTitle($intId);
+                if(!is_null($strTitel))
+                {
+                    return $strTitel;
+                }
+                    
             default:
                 return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'];
         }
@@ -335,7 +344,8 @@ class Clipboard extends Backend
                                 $this->copy();
                                 break;
                             
-                            case 'cl_paste_into':
+                            case 'cl_header_pastenew':
+                            case 'cl_paste_into':                                
                                 $this->pasteInto();
                                 break;
                             

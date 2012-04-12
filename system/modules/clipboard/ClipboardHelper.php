@@ -40,6 +40,13 @@ class ClipboardHelper extends Backend
     protected static $objInstance = NULL;
 
     /**
+     * Objects 
+     */
+    protected $_objDatabase;
+    protected $_objString;
+    protected $_objClipboardXml;
+
+    /**
      * Prevent constructing the object (Singleton)
      */
     protected function __construct()
@@ -47,6 +54,9 @@ class ClipboardHelper extends Backend
         parent::__construct();
 
         $this->import('BackendUser', 'User');
+        $this->_objDatabase = ClipboardDatabase::getInstance();
+        $this->_objString = String::getInstance();
+        $this->_objClipboardXml = ClipboardXml::getInstance();
     }
 
     /**
@@ -171,8 +181,8 @@ class ClipboardHelper extends Backend
      * @return boolean 
      */
     public function isClipboardReadyToUse($dca = NULL)
-    {
-        if ($dca == NULL || !isset($GLOBALS['CLIPBOARD']['locations']))
+    {                
+        if ($dca == NULL || !isset($GLOBALS['CLIPBOARD']['locations']) || !$this->User->clipboard)
         {
             return FALSE;
         }
@@ -183,10 +193,74 @@ class ClipboardHelper extends Backend
         {
             if (TL_MODE == 'BE' && in_array($this->Input->get('do'), $arrAllowedLocations) && $this->Database->tableExists('tl_clipboard'))
             {
+                $objCurCl = $this->_objDatabase->getCurrentClipboard($this->Input->get('do'), $this->User->id);
+                if($objCurCl->numRows = 0)
+                {
+                    $this->importXmlToClipboard();
+                }
                 return TRUE;
             }
         }
         return FALSE;
+    }
+    
+    public function importXmlToClipboard()
+    {
+        $arrFileMetaInfo = $this->_objClipboardXml->getAllFileMetaInformation();
+        if(count($arrFileMetaInfo) > 0)
+        {
+            foreach($arrFileMetaInfo AS $key => $value)
+            {
+                $arrFileMetaInfo[$key]['user_id'] = $this->User->id;
+                $arrFileMetaInfo[$key]['favorite'] = 0;
+                $this->_objDatabase->copyToClipboardWithoutFavor($arrFileMetaInfo[$key]);
+            }
+        }
+        
+        $this->redirect($this->Environment->request);
+    }
+
+    /**
+     * Create title for content element
+     * 
+     * @param type $intId
+     * return array
+     */
+    public function createContentTitle($intId)
+    {        
+        $objContentElem = $this->_objDatabase->getContentObject($intId);
+                
+        $arrHeadline = deserialize($objContentElem->headline, true);                
+        
+        if (isset($arrHeadline['value']))
+        {
+            $strHeadline = $this->_objString->substr($arrHeadline['value'], 32);
+        }
+        else
+        {
+            $strHeadline = $this->_objString->substr(preg_replace('/[\n\r\t]+/', ' ', $arrHeadline[0]), 20);
+        }
+
+        $strText = $this->_objString->substr(strip_tags(preg_replace('/[\n\r\t]+/', ' ', $objContentElem->text)), 20);        
+            
+        $arrTitle = array();
+        
+        if ($strHeadline != '' && $strHeadline != 'NULL')
+        {
+            $arrTitle[] = $strHeadline;
+        }
+        elseif ($strText != '' && $strText != 'NULL')
+        {
+            $arrTitle[] = $strText;
+        }
+        else
+        {
+            return NULL;
+        }
+        
+        $arrTitle[] = ' (' . $GLOBALS['TL_LANG']['CTE'][$objContentElem->type][0] . ')';
+        
+        return implode('', $arrTitle);
     }
 
 }

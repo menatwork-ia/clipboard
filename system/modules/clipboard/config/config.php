@@ -37,12 +37,12 @@ $arrAllowedLocations = array(
     'content'
 );
 
-if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations))
+if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations) && !Input::getInstance()->get('act'))
 {
     /**
      * Set header informations 
      */
-    $GLOBALS['TL_CSS']['clipboard']         = "system/modules/clipboard/html/clipboard.css";
+    $GLOBALS['TL_CSS']['clipboard']         = "system/modules/clipboard/html/clipboard_src.css";
     $GLOBALS['TL_JAVASCRIPT']['clipboard']  = "system/modules/clipboard/html/clipboard.js";
 
     /**
@@ -58,25 +58,25 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
         // Copy button
         'copy' => array(
             'href'          => 'key=cl_copy',
-            'icon'          => 'featured.gif',
+            'icon'          => 'system/modules/clipboard/html/icons/icon-clipboard.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         // Copy with children button
         'copy_childs' => array(
             'href'          => 'key=cl_copy&amp;childs=1',
-            'icon'          => 'copychilds.gif',
+            'icon'          => 'system/modules/clipboard/html/icons/icon-clipboard-childs.png',
             'attributes'    => 'class="cl_paste" onclick="Backend.getScrollOffset();"'        
         ),
         // Paste into button
         'pasteinto' => array(
             'href'          => 'key=cl_paste_into',            
-            'icon'          => 'pasteafter.gif',
+            'icon'          => 'system/modules/clipboard/html/icons/icon-pasteinto.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         // Paste after button
         'pasteafter' => array(
             'href'          => 'key=cl_paste_after',
-            'icon'          => 'pasteinto.gif',
+            'icon'          => 'system/modules/clipboard/html/icons/icon-pasteafter.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         'locations' => $arrAllowedLocations

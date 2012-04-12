@@ -43,7 +43,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
     // Copy button
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array
         (
-        'label' => &$GLOBALS['TL_LANG']['tl_page']['copy']
+        'label' => &$GLOBALS['TL_LANG']['tl_page']['copy'],
     );
 
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array_merge(

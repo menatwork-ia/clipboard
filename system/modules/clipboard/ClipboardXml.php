@@ -224,6 +224,51 @@ class ClipboardXml extends Backend
 
         return $arrInfo['filename'] . '__' . ++$offset . '.' . $arrInfo['extension'];
     }
+    
+    /**
+     * Return all metainformation for all xml files from current user
+     * 
+     * @return array
+     */
+    public function getAllFileMetaInformation()
+    {
+        $arrAll = scan(TL_ROOT . '/' . $this->getFolderPath());
+        
+        $arrMetaTags = array();
+        if(is_array($arrAll) && count($arrAll) > 0)
+        {            
+            foreach($arrAll AS $strFilename)
+            {
+                $arrSet = array('filename' => $strFilename);
+
+                $objDomDoc = new DOMDocument();
+                $objDomDoc->load(TL_ROOT . '/' . $this->getFolderPath() . '/' . $strFilename);
+                $objMetaTags = $objDomDoc->getElementsByTagName('metatags')->item(0);            
+                $objMetaChilds = $objMetaTags->childNodes;
+
+                for($i = 0; $i < $objMetaChilds->length; $i++)
+                {
+                    $strNodeName = $objMetaChilds->item($i)->nodeName;
+                    switch ($strNodeName)
+                    {
+                        case 'title':
+                            $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
+                            break;
+
+                        case 'childs':
+                            $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
+                            break;
+
+                        case 'str_table':
+                            $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
+                            break;
+                    }
+                }
+                $arrMetaTags[] = $arrSet;
+            }
+        }
+        return $arrMetaTags;
+    }
 
     //--------------------------------------------------------------------------
     // Write to xml
@@ -266,6 +311,8 @@ class ClipboardXml extends Backend
         $objXml->writeElement('create_date', date('Y-m-d', time()));
         $objXml->writeElement('create_time', date('H:i', time()));
         $objXml->writeElement('title', $strTitle);
+        $objXml->writeElement('childs', (($boolHasChilds) ? 1 : 0));
+        $objXml->writeElement('str_table', $strTable);
         $objXml->endElement(); // End metatags
 
         $objXml->startElement('datacontainer');
