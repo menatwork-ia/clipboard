@@ -56,17 +56,20 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('article'))
             $GLOBALS['CLIPBOARD']['copy'], $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_copy']
     );
 
-    // -----------------------------------------------------------------------------
-    // Paste after button
-    $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after'] = array
-        (
-        'label' => &$GLOBALS['TL_LANG']['tl_article']['pasteafter'],
-        'attributes' => 'class="cl_paste"'
-    );
-    
-    $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after'] = array_merge(
-            $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after']
-    );
+    if(Clipboard::getInstance()->hasFavorite())
+    {
+        // -----------------------------------------------------------------------------
+        // Paste after button    
+        $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after'] = array
+            (
+            'label' => &$GLOBALS['TL_LANG']['tl_article']['pasteafter'],
+            'attributes' => 'class="cl_paste"'
+        );
+
+        $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after'] = array_merge(
+                $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after']
+        );
+    }
 }
 
 ?>

@@ -273,6 +273,22 @@ class Clipboard extends Backend
 
         return FALSE;
     }
+    
+    /**
+     * Return if the current clipboard has a favorite
+     * 
+     * @return boolean 
+     */
+    public function hasFavorite()
+    {
+        $objFavorite = $this->getFavorite('tl_' . $this->pageType);
+        
+        if($objFavorite->numRows == 0)
+        {
+            return FALSE;
+        }
+        return TRUE;
+    }
 
     /**
      * Handle all main operations, clean up the url and redirect to itself 

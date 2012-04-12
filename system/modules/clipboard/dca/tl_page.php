@@ -61,29 +61,32 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
             $GLOBALS['CLIPBOARD']['copy_childs'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds']
     );
 
-    // -----------------------------------------------------------------------------
-    // Paste after button
-    $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array
-        (
-        'label' => $GLOBALS['TL_LANG']['tl_page']['pasteafter'],
-        'attributes' => 'class="cl_paste"'
-    );
+    if(Clipboard::getInstance()->hasFavorite())
+    {    
+        // -----------------------------------------------------------------------------
+        // Paste after button
+        $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array
+            (
+            'label' => $GLOBALS['TL_LANG']['tl_page']['pasteafter'],
+            'attributes' => 'class="cl_paste"'
+        );
 
-    $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array_merge(
-            $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after']
-    );
+        $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after'] = array_merge(
+                $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_after']
+        );
 
-    // -----------------------------------------------------------------------------
-    // Paste into button
-    $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array
-        (
-        'label' => $GLOBALS['TL_LANG']['tl_page']['pasteinto'],
-        'attributes' => 'class="cl_paste"'
-    );
+        // -----------------------------------------------------------------------------
+        // Paste into button
+        $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array
+            (
+            'label' => $GLOBALS['TL_LANG']['tl_page']['pasteinto'],
+            'attributes' => 'class="cl_paste"'
+        );
 
-    $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array_merge(
-            $GLOBALS['CLIPBOARD']['pasteinto'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into']
-    );
+        $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into'] = array_merge(
+                $GLOBALS['CLIPBOARD']['pasteinto'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_paste_into']
+        );
+    }
 }
 
 /**

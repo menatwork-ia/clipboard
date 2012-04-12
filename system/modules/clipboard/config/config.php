@@ -26,6 +26,9 @@
  * @license    GNU/LGPL
  * @filesource
  */
+ 
+$GLOBALS['TL_CACHE']['clipboard']= 'tl_clipboard';
+
 
 // Allowed clipboard locations
 $arrAllowedLocations = array(
