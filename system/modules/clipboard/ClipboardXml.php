@@ -96,7 +96,7 @@ class ClipboardXml extends Backend
      */
     public function getFolderPath()
     {
-        return 'tl_files' . '/' . 'clipboard' . '/' . $this->_objBeUser->username;
+        return $GLOBALS['TL_CONFIG']['uploadPath'] . '/' . 'clipboard' . '/' . $this->_objBeUser->username;
     }
 
     /**
