@@ -142,6 +142,10 @@
     border-color: #bbb;
 }
 
+.cl_header_pastenew {
+    background: url(icons/icon-pasteinto.png) no-repeat scroll left center transparent;
+}
+
 /*------------------------------------------------------------------------*/
 
 /**

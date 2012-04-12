@@ -61,12 +61,18 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
         // Paste after button    
         $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array
             (
-            'label' => $GLOBALS['TL_LANG']['tl_content']['cl_pasteafter'],
-            'attributes' => 'class="cl_paste"'
+            'label' => $GLOBALS['TL_LANG']['tl_content']['cl_pasteafter']
         );
 
         $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after'] = array_merge(
                 $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after']
+        );
+        
+        $GLOBALS['TL_DCA']['tl_content']['list']['global_operations']['cl_paste_into'] = array(            
+            'label'         => &$GLOBALS['TL_LANG']['tl_content']['cl_header_pastenew'],
+            'href'          => 'key=cl_header_pastenew',
+            'class'         => 'header_clipboard cl_header_pastenew',
+            'attributes'    => 'onclick="Backend.getScrollOffset()" accesskey="p"'            
         );
     }
 }
