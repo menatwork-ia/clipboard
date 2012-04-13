@@ -4,7 +4,7 @@
  * @copyright  MEN AT WORK 2012
  */
  
-#clipboard {
+  #clipboard {
     width:938px;
     margin:18px auto;
     text-align:left;
@@ -17,9 +17,9 @@
     -webkit-box-shadow:0px 3px 6px 0px #CCCCCC;
     -moz-box-shadow:0px 3px 6px 0px #CCCCCC;
     box-shadow:0px 3px 6px 0px #CCCCCC; 
-}
-
-#clipboard h1 {
+  }
+  
+  #clipboard h1 {
     -webkit-border-radius:3px 3px 0 0;
     -moz-border-radius:3px 3px 0 0;
     border-radius:3px 3px 0 0;
@@ -27,28 +27,28 @@
     margin:1px;
     padding:4px 8px 6px;
     background:#b3b6b3 url("../../../themes/default/images/headline.gif") repeat-x;
-}
-
-#clipboard div {
+  }
+  
+  #clipboard div {
     margin:0;
     padding:10px 8px 5px;
     color:#666966;
     overflow:hidden;
     position:relative;
-}
-
-#clipboard .button {
+  }
+  
+  #clipboard .button {
     position:absolute;
     right:25px;
     top:20px;
-}
-
-#clipboard #hide.button {
+  }
+  
+  #clipboard #hide.button {
     top:14px;
-}
-
-#clipboard .button a, 
-#clipboard .button button {
+  }
+  
+  #clipboard .button a, 
+  #clipboard .button button {
     padding:2px 12px 2px 13px;
     background: #eeeeee;
     background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%);
@@ -65,70 +65,70 @@
     line-height:1;
     padding:5px 12px 5px 13px;
     text-shadow:1px 1px 0 #EEEEEE;
-}
-
-#clipboard .button a:focus,
-#clipboard .button a:hover,
-#clipboard .button button:focus, 
-#clipboard .button button:hover {
+  }
+  
+  #clipboard .button a:focus,
+  #clipboard .button a:hover,
+  #clipboard .button button:focus, 
+  #clipboard .button button:hover {
     -webkit-box-shadow: 0px 0px 3px 0px #aaaaaa;
     -moz-box-shadow: 0px 0px 3px 0px #aaaaaa;
     box-shadow: 0px 0px 3px 0px #aaaaaa; 
-}
-
-#clipboard .button button {
+  }
+  
+  #clipboard .button button {
     padding-top:6px;
     padding-bottom:6px;
-}
-
-#clipboard .button a:hover {
+  }
+  
+  #clipboard .button a:hover {
     color:#666966 !important;
-}
-
-#clipboard .button.inactive {
+  }
+  
+  #clipboard .button.inactive {
     opacity:0;
-}
-
-#clipboard .button.active {
+  }
+  
+  #clipboard .button.active {
     opacity:1;
-}
-
-#clipboard button {
+  }
+  
+  #clipboard button {
     border:0;
     font-family:Verdana, sans-serif;
     background-color:transparent;
     padding:0;
     font-size:11px;
     color:#666966;
-}
-
-#clipboard ul {
+  }
+  
+  #clipboard ul {
     list-style:none;
     padding:0 8px;
     margin:5px 0;
-}
-
-#clipboard li {
+  }
+  
+  #clipboard li {
     overflow:hidden;
     width:auto;
-}
-
-#clipboard li p {
+  }
+  
+  #clipboard li p {
     float:left;
     margin-right:10px;
     margin-bottom:5px;
-}
-
-#clipboard li p.edit {
+  }
+  
+  #clipboard li p.edit {
     padding-top:4px;
-}  
-
-#clipboard li span, 
-#clipboard li input.empty {
+  }  
+  
+  #clipboard li span, 
+  #clipboard li input.empty {
     color:#aaaaaa;
-}
-
-#clipboard li input.text {
+  }
+  
+  #clipboard li input.text {
     width:400px;
     font-family:Verdana, sans-serif;
     border:1px solid #fff;
@@ -136,15 +136,19 @@
     -webkit-border-radius:3px;
     -moz-border-radius:3px;
     border-radius:3px;
-}
-
-#clipboard li input.edit {
+  }
+  
+  #clipboard li input.edit {
     border-color: #bbb;
-}
-
-.cl_header_pastenew {
+  }
+  
+  .cl_header_pastenew {
     background: url(icons/icon-pasteinto.png) no-repeat scroll left center transparent;
-}
+  }
+
+  body.clipboard .tl_listing .tl_left { 
+    width:auto;
+  }
 
 /*------------------------------------------------------------------------*/
 
@@ -152,7 +156,7 @@
  * Context menu
 */
 
-#clipboardmenu {
+  #clipboardmenu {
     display:block;
     position:absolute;
     z-index:99999999;
@@ -163,16 +167,16 @@
     -webkit-border-radius:4px;
     border-radius:4px;
     margin-right:12px;
-}
-
-#clipboardmenu a {
+  }
+  
+  #clipboardmenu a {
     display:block;
     line-height:1;
     padding:3px 0 2px 0;
     white-space:nowrap;
-}
-
-#clipboardmenu img {
+  }
+  
+  #clipboardmenu img {
     padding-bottom:1px;
     vertical-align:middle;
-}
+  }

@@ -30,7 +30,7 @@
 /**
  * Fields
  */
-$GLOBALS['TL_LANG']['tl_user']['clipboard']     = array('Clipboard verwenden', 'Das erweiterte Clipboard verwenden.');
-$GLOBALS['TL_LANG']['tl_user']['cl_context']    = array('Clipboard Kontextmenü verwenden', 'Das erweiterte Kontextmenü von Clipboard verwenden.');
+$GLOBALS['TL_LANG']['tl_user']['clipboard']             = array('Clipboard verwenden', 'Das erweiterte Clipboard verwenden.');
+$GLOBALS['TL_LANG']['tl_user']['clipboard_context']     = array('Clipboard Kontextmenü deaktivieren', 'Das Clipboard Kontextmenü (Rechter Mausklick) deaktivieren.');
 
 ?>

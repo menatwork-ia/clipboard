@@ -118,8 +118,13 @@ class Clipboard extends Backend
             $objTemplate->isContext = $this->objHelper->isContext();
             $objTemplate->action = $this->Environment->request . '&key=cl_edit';
 
-            $strNewContent = preg_replace("/<div.*id=\"container\".*>/", $objTemplate->parse() . "\n$0", $strContent, 1);
-
+            if(!$this->objHelper->isContext())
+            {
+                $strContent = preg_replace('/<body.*class="/', "$0clipboard ", $strContent, 1);
+            }
+            
+            $strNewContent = preg_replace('/<div.*id="container".*>/', $objTemplate->parse() . "\n$0", $strContent, 1);
+            
             if ($strNewContent == "")
             {
                 return $strContent;

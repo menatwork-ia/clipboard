@@ -32,5 +32,5 @@ CREATE TABLE `tl_clipboard` (
 
 CREATE TABLE `tl_user` (
   `clipboard` char(1) NOT NULL default '0',
-  `cl_context` char(1) NOT NULL default '1',
+  `clipboard_context` char(1) NOT NULL default '0',
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

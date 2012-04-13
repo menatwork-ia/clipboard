@@ -238,7 +238,7 @@ class ClipboardHelper extends Backend
      */
     public function isContext()
     {
-        return $this->User->cl_context;
+        return !$this->User->clipboard_context;
     }
 
     /**

@@ -42,7 +42,7 @@ foreach ($GLOBALS['TL_DCA']['tl_user']['palettes'] as $key => $row)
     {        
         if(strstr($arrPalette, '{backend_legend}'))
         {
-            $arrPalettes[$k] = $arrPalette . ',clipboard,cl_context';
+            $arrPalettes[$k] = $arrPalette . ',clipboard,clipboard_context';
         }
         
     }
@@ -59,8 +59,8 @@ $GLOBALS['TL_DCA']['tl_user']['fields']['clipboard'] = array(
     'eval' => array('tl_class' => 'w50')
 );
 
-$GLOBALS['TL_DCA']['tl_user']['fields']['cl_context'] = array(
-    'label' => &$GLOBALS['TL_LANG']['tl_user']['cl_context'],
+$GLOBALS['TL_DCA']['tl_user']['fields']['clipboard_context'] = array(
+    'label' => &$GLOBALS['TL_LANG']['tl_user']['clipboard_context'],
     'inputType' => 'checkbox',
     'eval' => array('tl_class' => 'w50')
 );
