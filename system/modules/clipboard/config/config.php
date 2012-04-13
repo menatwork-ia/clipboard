@@ -42,7 +42,7 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
     /**
      * Set header informations 
      */
-    $GLOBALS['TL_CSS']['clipboard']         = "system/modules/clipboard/html/clipboard_src.css";
+    $GLOBALS['TL_CSS']['clipboard']         = "system/modules/clipboard/html/clipboard.css";
     $GLOBALS['TL_JAVASCRIPT']['clipboard']  = "system/modules/clipboard/html/clipboard.js";
 
     /**

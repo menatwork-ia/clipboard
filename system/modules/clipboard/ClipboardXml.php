@@ -222,43 +222,48 @@ class ClipboardXml extends Backend
     /**
      * Return all metainformation for all xml files from current user
      * 
+     * @param string $strDo
      * @return array
      */
-    public function getAllFileMetaInformation()
+    public function getAllFileMetaInformation($strDo)
     {
-        $arrAll = scan(TL_ROOT . '/' . $this->getFolderPath());
+        $arrAll = scan(TL_ROOT . '/' . $this->getFolderPath());        
         
         $arrMetaTags = array();
         if(is_array($arrAll) && count($arrAll) > 0)
         {            
             foreach($arrAll AS $strFilename)
             {
-                $arrSet = array('filename' => $strFilename);
-
-                $objDomDoc = new DOMDocument();
-                $objDomDoc->load(TL_ROOT . '/' . $this->getFolderPath() . '/' . $strFilename);
-                $objMetaTags = $objDomDoc->getElementsByTagName('metatags')->item(0);            
-                $objMetaChilds = $objMetaTags->childNodes;
-
-                for($i = 0; $i < $objMetaChilds->length; $i++)
+                $arrFileName = explode('_', $strFilename);
+                if($arrFileName[0] == $strDo)
                 {
-                    $strNodeName = $objMetaChilds->item($i)->nodeName;
-                    switch ($strNodeName)
+                    $arrSet = array('filename' => $strFilename);
+
+                    $objDomDoc = new DOMDocument();
+                    $objDomDoc->load(TL_ROOT . '/' . $this->getFolderPath() . '/' . $strFilename);
+                    $objMetaTags = $objDomDoc->getElementsByTagName('metatags')->item(0);            
+                    $objMetaChilds = $objMetaTags->childNodes;
+
+                    for($i = 0; $i < $objMetaChilds->length; $i++)
                     {
-                        case 'title':
-                            $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
-                            break;
+                        $strNodeName = $objMetaChilds->item($i)->nodeName;
+                        switch ($strNodeName)
+                        {
+                            case 'title':
+                                $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
+                                break;
 
-                        case 'childs':
-                            $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
-                            break;
+                            case 'childs':
+                                $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
+                                break;
 
-                        case 'str_table':
-                            $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
-                            break;
+                            case 'str_table':
+                                $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
+                                break;
+                        }
                     }
+                    $arrMetaTags[] = $arrSet;
                 }
-                $arrMetaTags[] = $arrSet;
             }
         }
         return $arrMetaTags;

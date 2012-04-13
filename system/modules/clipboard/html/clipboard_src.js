@@ -181,17 +181,3 @@ var Clipboard =
         $$('p.button').removeClass('active').addClass('inactive');
     } 
 };
-
-window.addEvent('domready', function(){
-
-    ClipboardMenu.initialize();
-    Clipboard.initialize();  
-	
-});
-
-window.addEvent('structure', function(){
-
-    ClipboardMenu.initialize();    
-	
-});
-

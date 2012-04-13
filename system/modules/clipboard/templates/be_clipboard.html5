@@ -31,4 +31,24 @@
         </form>  
     </div>
 </div>
+
+<script>
+    window.addEvent('domready', function(){
+
+        <?php if($this->isContext): ?>
+        ClipboardMenu.initialize();
+        <?php endif; ?>
+        Clipboard.initialize();  
+
+    });
+
+    window.addEvent('structure', function(){
+
+        <?php if($this->isContext): ?>
+        ClipboardMenu.initialize();
+        <?php endif; ?>
+
+    });
+</script>
+
 <?php endif; ?>

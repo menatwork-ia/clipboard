@@ -192,20 +192,33 @@ class ClipboardHelper extends Backend
         {
             if (TL_MODE == 'BE' && in_array($this->Input->get('do'), $arrAllowedLocations) && $this->Database->tableExists('tl_clipboard'))
             {
-                $objCurCl = $this->_objDatabase->getCurrentClipboard($this->Input->get('do'), $this->User->id);
-                if($objCurCl->numRows = 0)
+                $objCurCl = $this->_objDatabase->getCurrentClipboard($this->Input->get('do'), $this->User->id);                
+                
+                if($objCurCl->numRows == 0)
                 {
-                    $this->importXmlToClipboard();
+                    $this->importXmlToClipboard($this->Input->get('do'));
                 }
+                
+                if(!$this->isContext())
+                {
+                    foreach($GLOBALS['CLIPBOARD'] AS $key => $arrClConfig)
+                    {
+                        if(array_key_exists('attributes', $GLOBALS['CLIPBOARD'][$key]))
+                        {
+                            $GLOBALS['CLIPBOARD'][$key]['attributes'] = 'onclick="Backend.getScrollOffset();"';
+                        }
+                    }                    
+                }
+                
                 return TRUE;
             }
         }
         return FALSE;
     }
     
-    public function importXmlToClipboard()
+    public function importXmlToClipboard($strDo)
     {
-        $arrFileMetaInfo = $this->_objClipboardXml->getAllFileMetaInformation();
+        $arrFileMetaInfo = $this->_objClipboardXml->getAllFileMetaInformation($strDo);
         if(count($arrFileMetaInfo) > 0)
         {
             foreach($arrFileMetaInfo AS $key => $value)
@@ -214,9 +227,18 @@ class ClipboardHelper extends Backend
                 $arrFileMetaInfo[$key]['favorite'] = 0;
                 $this->_objDatabase->copyToClipboardWithoutFavor($arrFileMetaInfo[$key]);
             }
+            $this->redirect($this->Environment->request);
         }
-        
-        $this->redirect($this->Environment->request);
+    }
+    
+    /**
+     * Return if context checkbox is true or false
+     * 
+     * @return boolean
+     */
+    public function isContext()
+    {
+        return $this->User->cl_context;
     }
 
     /**

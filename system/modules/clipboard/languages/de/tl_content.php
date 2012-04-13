@@ -30,6 +30,6 @@
 /**
  * Buttons
  */
-$GLOBALS['TL_LANG']['tl_content']['cl_header_pastenew'] = array('Clipboardelement einfügen', '')
+$GLOBALS['TL_LANG']['tl_content']['cl_header_pastenew'] = array('Clipboardelement einfügen', '');
 
 ?>

@@ -62,7 +62,8 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('article'))
         // Paste after button    
         $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after'] = array
             (
-            'label' => &$GLOBALS['TL_LANG']['tl_article']['pasteafter']
+            'label' => &$GLOBALS['TL_LANG']['tl_article']['pasteafter'],
+            'attributes' => 'class="cl_paste"'
         );
 
         $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_paste_after'] = array_merge(

@@ -30,6 +30,6 @@
 /**
  * Buttons
  */
-$GLOBALS['TL_LANG']['tl_content']['cl_header_pastenew'] = array('Paste clipboard element', '')
+$GLOBALS['TL_LANG']['tl_content']['cl_header_pastenew'] = array('Paste clipboard element', '');
 
 ?>
