@@ -43,7 +43,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
     // Copy button
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array
         (
-        'label' => &$GLOBALS['TL_LANG']['tl_page']['copy'],
+        'label' => &$GLOBALS['TL_LANG']['tl_page']['copy']
     );
 
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copy'] = array_merge(
@@ -54,7 +54,8 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
     // Copy with childs button
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds'] = array
         (
-        'label' => &$GLOBALS['TL_LANG']['tl_page']['copyChilds']
+        'label' => &$GLOBALS['TL_LANG']['tl_page']['copyChilds'],
+        'button_callback' => array('tl_page_cl', 'cl_copyPageWithSubpages')
     );
 
     $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds'] = array_merge(
@@ -102,37 +103,6 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
  */
 class tl_page_cl extends tl_page
 {
-
-    /**
-     * Initialize the object
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->import('ClipboardHelper');
-    }
-
-    /**
-     * Return the paste button
-     * 
-     * @param array $row
-     * @param string $href
-     * @param string $label
-     * @param string $title
-     * @param string $icon
-     * @param string $attributes
-     * @param string $table
-     * @return string 
-     */
-    public function cl_pastePage($row, $href, $label, $title, $icon, $attributes, $table)
-    {
-        if ($GLOBALS['TL_DCA'][$table]['config']['closed'])
-        {
-            return '';
-        }
-        return $this->ClipboardHelper->getPasteButton($row, $href, $label, $title, $icon, $attributes, $table);
-    }
-
     /**
      * Return the copy page with subpages button
      * 
@@ -152,7 +122,7 @@ class tl_page_cl extends tl_page
             return '';
         }
 
-        $objSubpages = $this->Database->prepare("SELECT * FROM tl_page WHERE pid=?")
+        $objSubpages = $this->Database->prepare("SELECT * FROM `tl_page` WHERE pid=?")
                 ->limit(1)
                 ->execute($row['id']);
 
