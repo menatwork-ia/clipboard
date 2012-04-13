@@ -153,14 +153,17 @@ class Clipboard extends Backend
      * Return the title for the given id
      * 
      * @param integer $id
-     * @param string $do
+     * @param array $arrSet
      * @return string 
      */
-    public function getTitle($intId)
+    public function getTitle($intId, $arrSet)
     {
         switch ($this->pageType)
         {
             case 'page':
+                $objElem = $this->objDatabase->getPageObject($intId);
+                return (($arrSet['childs']) ? $objElem->title . ' ' . $GLOBALS['TL_LANG']['MSC']['titleChild'] : $objElem->title);
+                break;
             case 'article':
                 return call_user_func_array(array($this->objDatabase, 'get' . $this->pageType . 'Object'), array($intId))->title;
                 break;
@@ -182,7 +185,7 @@ class Clipboard extends Backend
      */
     public function copy()
     {
-        $boolHasChilds = (($this->Input->get('childs') == 1) ? TRUE : FALSE);
+        $boolHasChilds = (($this->Input->get('childs') == 1) ? 1 : 0);
 
         $arrSet = array(
             'user_id' => $this->User->id,
@@ -191,7 +194,7 @@ class Clipboard extends Backend
             'elem_id' => $this->Input->get('id'),
         );
 
-        $objClipboard = $this->objDatabase->getClipboardEntryFromElemId($this->pageType, $this->User->id, $this->Input->get('id'));
+        $objClipboard = $this->objDatabase->getClipboardEntryFromArray($arrSet);
 
         if ($objClipboard->numRows && $objClipboard->filename != '' && $this->objClipboardXml->fileExists($objClipboard->filename))
         {
@@ -200,8 +203,8 @@ class Clipboard extends Backend
         }
         else
         {
-            $arrSet['title'] = $this->getTitle($this->Input->get('id'));
-            $arrSet['filename'] = $this->objClipboardXml->getFileName('tl_' . $this->pageType, $this->getTitle($this->Input->get('id')), FALSE);
+            $arrSet['title'] = $this->getTitle($this->Input->get('id'), $arrSet);
+            $arrSet['filename'] = $this->objClipboardXml->getFileName('tl_' . $this->pageType, $this->getTitle($this->Input->get('id'), $arrSet), FALSE);
         }
 
         $this->objDatabase->copyToClipboard($arrSet);

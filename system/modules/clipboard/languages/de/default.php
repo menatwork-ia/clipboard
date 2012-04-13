@@ -37,5 +37,6 @@ $GLOBALS['TL_LANG']['MSC']['clipboard'] = 'Clipboard';
  */
 $GLOBALS['TL_LANG']['MSC']['featureSelected'] = 'Favorit';
 $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] = 'Keine Beschreibung';
+$GLOBALS['TL_LANG']['MSC']['titleChild'] = '(childs)';
 
 ?>

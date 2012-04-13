@@ -740,7 +740,6 @@ class ClipboardXml extends Backend
         }        
     }
 
-
     /**
      * Create article elements
      * 

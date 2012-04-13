@@ -273,22 +273,28 @@ class ClipboardDatabase extends Backend
     /**
      * Return clipboard entry for given params
      * 
-     * @param string $strPageType
-     * @param integer $intUserId
-     * @param integer $intElemId
+     * @param array $arrSet
      * @return DB_Mysql_Result 
      */
-    public function getClipboardEntryFromElemId($strPageType, $intUserId, $intElemId)
+    public function getClipboardEntryFromArray($arrSet)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT * 
-                    FROM `tl_clipboard` 
-                    WHERE str_table = ? 
-                    AND user_id = ?
-                    AND elem_id = ?")
-                ->limit(1)
-                ->execute('tl_' . $strPageType, $intUserId, $intElemId);
-
+        $query = "SELECT * FROM `tl_clipboard` WHERE ";
+        
+        $i = 0;
+        foreach($arrSet AS $key => $value)
+        {     
+            if($i == 0)
+            {
+               $query .= $key . " = '" . $value . "' ";
+               $i++;
+               continue;
+            }            
+            $query .= " AND " . $key . " = '" . $value . "' ";
+            $i++;
+        }
+        
+        $objDb = $this->Database->query($query);
+        
         return $objDb;
     }
     
@@ -397,6 +403,13 @@ class ClipboardDatabase extends Backend
         return $objDb;
     }    
     
+    /**
+     * Get the min sorting from given pid
+     * 
+     * @param string $strTable
+     * @param integer $intId
+     * @return DB_Mysql_Result
+     */
     public function getSorting($strTable, $intId)
     {
         $objDb = $this->Database
@@ -427,7 +440,8 @@ class ClipboardDatabase extends Backend
      * Get elements sorting from given pid ordert by sorting
      * 
      * @param string $strTable
-     * @param interer $intId 
+     * @param interer $intId
+     * @return DB_Mysql_Result
      */
     public function getSortingElem($strTable, $intId)
     {
