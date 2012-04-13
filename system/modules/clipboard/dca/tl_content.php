@@ -73,7 +73,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
         );
         
         $GLOBALS['TL_DCA']['tl_content']['list']['global_operations']['cl_paste_into'] = array(            
-            'label'         => &$GLOBALS['TL_LANG']['tl_content']['cl_header_pastenew'],
+            'label'         => &$GLOBALS['TL_LANG']['tl_content']['pasteafter'],
             'href'          => 'key=cl_header_pastenew',
             'class'         => 'header_clipboard cl_header_pastenew',
             'attributes'    => 'onclick="Backend.getScrollOffset()" accesskey="p"'            
