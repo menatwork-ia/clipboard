@@ -35,8 +35,8 @@ $GLOBALS['TL_LANG']['MSC']['clipboard'] = 'Clipboard';
 /**
  * Miscellaneous
  */
-$GLOBALS['TL_LANG']['MSC']['featureSelected'] = 'Favorit';
-$GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] = 'Keine Beschreibung';
-$GLOBALS['TL_LANG']['MSC']['titleChild'] = ' (inklusive Kindelemente)';
+$GLOBALS['TL_LANG']['MSC']['featureSelected'] = 'Favorito';
+$GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] = 'Nenhuma descrição';
+$GLOBALS['TL_LANG']['MSC']['titleChild'] = ' (incluindo elementos filho)';
 
 ?>
