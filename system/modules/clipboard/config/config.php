@@ -70,13 +70,13 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
         // Paste into button
         'pasteinto' => array(
             'href'          => 'key=cl_paste_into',            
-            'icon'          => 'system/modules/clipboard/html/icons/icon-pasteinto.png',
+            'icon'          => 'system/modules/clipboard/html/icons/icon-pasteafter.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         // Paste after button
         'pasteafter' => array(
             'href'          => 'key=cl_paste_after',
-            'icon'          => 'system/modules/clipboard/html/icons/icon-pasteafter.png',
+            'icon'          => 'system/modules/clipboard/html/icons/icon-pasteinto.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         'locations' => $arrAllowedLocations
