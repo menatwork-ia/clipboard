@@ -190,13 +190,22 @@ class ClipboardHelper extends Backend
 
         if (in_array($dca, $arrAllowedLocations))
         {
-            if (TL_MODE == 'BE' && in_array($this->Input->get('do'), $arrAllowedLocations) && $this->Database->tableExists('tl_clipboard'))
+            if ($this->Input->get('table') == 'tl_content')
             {
-                $objCurCl = $this->_objDatabase->getCurrentClipboard($this->Input->get('do'), $this->User->id);                
+                $pageType = 'content';
+            }
+            else
+            {
+                $pageType = $this->Input->get('do');
+            }            
+            
+            if (TL_MODE == 'BE' && in_array($pageType, $arrAllowedLocations) && $this->Database->tableExists('tl_clipboard'))
+            {
+                $objCurCl = $this->_objDatabase->getCurrentClipboard($pageType, $this->User->id);                                         
                 
                 if($objCurCl->numRows == 0)
-                {
-                    $this->importXmlToClipboard($this->Input->get('do'));
+                {                       
+                    $this->importXmlToClipboard($pageType);
                 }
                 
                 if(!$this->isContext())
@@ -218,6 +227,8 @@ class ClipboardHelper extends Backend
     
     public function importXmlToClipboard($strDo)
     {
+
+        
         $arrFileMetaInfo = $this->_objClipboardXml->getAllFileMetaInformation($strDo);
         if(count($arrFileMetaInfo) > 0)
         {

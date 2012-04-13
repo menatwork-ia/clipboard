@@ -45,10 +45,30 @@ class ClipboardXml extends Backend
     protected $_objBeUser;
     protected $_objDatabase;
     protected $_objFiles;
+    
+    /**
+     * Search for special chars
+     * 
+     * @var array 
+     */
+    protected $arrSearchFor = array(
+        "\\",
+        "'"
+    );
 
     /**
-     * Variables 
+     * Replace special chars with
+     * 
+     * @var array 
      */
+    protected $arrReplaceWith = array(
+        "\\\\",
+        "\\'"
+    );
+    
+    /**
+     * Variables 
+     */    
     protected $_strPageTable = 'tl_page';
     protected $_strArticleTable = 'tl_article';
     protected $_strContentTable = 'tl_content';
@@ -296,7 +316,9 @@ class ClipboardXml extends Backend
         $objXml->writeElement('create_unix', time());
         $objXml->writeElement('create_date', date('Y-m-d', time()));
         $objXml->writeElement('create_time', date('H:i', time()));
-        $objXml->writeElement('title', $strTitle);
+        $objXml->startElement('title');
+        $objXml->writeCdata($strTitle);
+        $objXml->endElement(); // End title
         $objXml->writeElement('childs', (($boolHasChilds) ? 1 : 0));
         $objXml->writeElement('str_table', $strTable);
         $objXml->endElement(); // End metatags
@@ -481,53 +503,83 @@ class ClipboardXml extends Backend
                         case 'pid':
                             break;
                         default:
-                            $objXml->startElement('field');
-                            $objXml->writeAttribute("name", $field_key);
+
 
                             if (!isset($field_data))
                             {
+                                $objXml->startElement('field');
+                                $objXml->writeAttribute("name", $field_key);
+                                
                                 $objXml->writeAttribute("type", "null");
-                                $objXml->writeCdata("NULL");
+                                $objXml->text("NULL");
+                                
+                                $objXml->endElement(); // End field
                             }
                             else if ($field_data != "")
                             {
+                                $objXml->startElement('field');
+                                $objXml->writeAttribute("name", $field_key);
+                                
                                 switch (strtolower($arrFieldMeta[$field_key]['type']))
                                 {
-                                    case 'blob':
-                                    case 'tinyblob':
-                                    case 'mediumblob':
-                                    case 'longblob':
-                                        $objXml->writeAttribute("type", "blob");
-                                        $objXml->writeCdata("0x" . bin2hex($field_data));
-                                        break;
+                                case 'binary':
+                                case 'varbinary':
+                                case 'blob':
+                                case 'tinyblob':
+                                case 'mediumblob':
+                                case 'longblob':
+                                    $objXml->writeAttribute("type", "blob");
+                                    $objXml->text("0x" . bin2hex($field_data));
+                                    break;
 
-                                    case 'smallint':
-                                    case 'int':
-                                        $objXml->writeAttribute("type", "int");
-                                        $objXml->writeCdata($field_data);
-                                        break;
+                                case 'tinyint':
+                                case 'smallint':
+                                case 'mediumint':
+                                case 'int':
+                                case 'integer':
+                                case 'bigint':
+                                    $objXml->writeAttribute("type", "int");
+                                    $objXml->text($field_data);
+                                    break;
 
-                                    case 'text':
-                                    case 'mediumtext':
-                                        if (strpos($field_data, "'") != false)
-                                        {
-                                            $objXml->writeAttribute("type", "text");
-                                            $objXml->writeCdata("0x" . bin2hex($field_data));
-                                            break;
-                                        }
-                                    default:
-                                        $objXml->writeAttribute("type", "default");
-                                        $objXml->writeCdata("'" . str_replace(array("\\", "'", "\r", "\n"), array("\\\\", "\\'", "\\r", "\\n"), $field_data) . "'");
-                                        break;
+                                case 'float':
+                                case 'double':
+                                case 'real':
+                                case 'decimal':
+                                case 'numeric':
+                                    $objXml->writeAttribute("type", "decimal");
+                                    $objXml->text($field_data);
+                                    break;
+
+                                case 'date':
+                                case 'datetime':
+                                case 'timestamp':
+                                case 'time':
+                                case 'year':
+                                    $objXml->writeAttribute("type", "date");
+                                    $objXml->text($field_data);
+                                    break;
+
+                                case 'char':
+                                case 'varchar':
+                                case 'text':
+                                case 'tinytext':
+                                case 'mediumtext':
+                                case 'longtext':
+                                case 'enum':
+                                case 'set':
+                                    $objXml->writeAttribute("type", "text");
+                                    $objXml->writeCdata(str_replace($this->arrSearchFor, $this->arrReplaceWith, $field_data));
+                                    break;
+
+                                default:
+                                    $objXml->writeAttribute("type", "default");
+                                    $objXml->writeCdata(str_replace($this->arrSearchFor, $this->arrReplaceWith, $field_data));
+                                    break;
                                 }
+                                $objXml->endElement(); // End field  
                             }
-                            else
-                            {
-                                $objXml->writeAttribute("type", "empty");
-                                $objXml->writeCdata("''");
-                            }
-
-                            $objXml->endElement(); // End field                            
+                                                      
                             break;
                     }
                 }
@@ -808,6 +860,7 @@ class ClipboardXml extends Backend
             switch ($objXml->nodeType)
             {
                 case XMLReader::CDATA:
+                case XMLReader::TEXT:
                     if (in_array($strFieldName, $arrFields))
                     {
                         switch ($strFieldName)
@@ -831,14 +884,10 @@ class ClipboardXml extends Backend
 
                             default:
                                 switch ($strFieldType)
-                                {
-                                    case 'empty':
-                                        $arrSet[$strFieldName] = '';
-                                        break;
-                                    
+                                {                                    
                                     case 'default':
-                                        $strValue = str_replace(array("\\\\", "\\'", "\\r", "\\n"), array("\\", "'", "\r", "\n"), $objXml->value);
-                                        $arrSet[$strFieldName] = substr($strValue, 1, (strlen($strValue) - 2));
+                                        $strValue = str_replace($this->arrReplaceWith, $this->arrSearchFor, $objXml->value);
+                                        $arrSet[$strFieldName] = $strValue;
                                         break;
                                     
                                     default:
