@@ -72,6 +72,7 @@ class ClipboardXml extends Backend
     protected $_strPageTable = 'tl_page';
     protected $_strArticleTable = 'tl_article';
     protected $_strContentTable = 'tl_content';
+    protected $_strEncryptionKey = '';
 
     /**
      * Prevent constructing the object (Singleton)
@@ -110,7 +111,8 @@ class ClipboardXml extends Backend
      */
     public function getFolderPath()
     {
-        return $GLOBALS['TL_CONFIG']['uploadPath'] . '/clipboard/' . $this->_objBeUser->username;
+        $objUserFolder = new Folder($GLOBALS['TL_CONFIG']['uploadPath'] . '/clipboard/' . $this->_objBeUser->username);
+        return $objUserFolder->value;
     }
 
     /**
@@ -321,6 +323,7 @@ class ClipboardXml extends Backend
         $objXml->endElement(); // End title
         $objXml->writeElement('childs', (($boolHasChilds) ? 1 : 0));
         $objXml->writeElement('str_table', $strTable);
+        $objXml->writeElement('encryptionKey', $GLOBALS['TL_CONFIG']['encryptionKey']);
         $objXml->endElement(); // End metatags
 
         $objXml->startElement('datacontainer');
@@ -342,8 +345,7 @@ class ClipboardXml extends Backend
 
         $strXml = $objXml->outputMemory();
 
-        $objUserFolder = new Folder($this->getFolderPath());
-        $objFile = new File($objUserFolder->value . '/' . $strFilename);
+        $objFile = new File($this->getFolderPath() . '/' . $strFilename);
         $write = $objFile->write($strXml);
         if ($write)
         {
@@ -651,6 +653,11 @@ class ClipboardXml extends Backend
                     case XMLReader::ELEMENT:
                         switch ($objXml->localName)
                         {
+                            case 'encryptionKey':
+                                $objXml->read();
+                                $this->_strEncryptionKey = $objXml->value;
+                                break;
+                                    
                             case 'page':
                                 $this->createPage($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
                                 break;
@@ -821,8 +828,32 @@ class ClipboardXml extends Backend
                     switch ($objXml->localName)
                     {
                         case 'row':
-                            $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild));
-                            break;
+                            $arrSet = $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild);
+                            if (array_key_exists('type', $arrSet))
+                            {
+                                if($this->existsContentType($arrSet))
+                                {
+                                    if($GLOBALS['TL_CONFIG']['encryptionKey'] != $this->_strEncryptionKey)
+                                    {                                     
+                                        if(!array_key_exists($arrSet['type'], $GLOBALS['TL_CTE']['includes']))
+                                        {
+                                            $this->_objDatabase->insertInto($strTable, $arrSet);
+                                        }
+                                        else
+                                        {
+                                            $this->log('Clipboard skip the paste from contentelement because it is an includeElement', __FUNCTION__, TL_GENERAL);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        $this->_objDatabase->insertInto($strTable, $arrSet);
+                                    }
+                                }
+                                else
+                                {
+                                    $this->log('Clipboard skip the paste from contentelement because element type dosn`t exists in this system', __FUNCTION__, TL_GENERAL);
+                                }
+                            }
                     }
                     break;
                 case XMLReader::END_ELEMENT:
@@ -1018,6 +1049,27 @@ class ClipboardXml extends Backend
         }
 
         return array('pid' => intval($newPid), 'sorting' => intval($newSorting));
+    }
+    
+    /**
+     * Check if the content type exists in this system and return true or false 
+     * 
+     * @param array $arrSet
+     * @return boolean 
+     */
+    protected function existsContentType($arrSet)
+    {        
+        foreach ($GLOBALS['TL_CTE'] AS $group => $arrCElems)
+        {
+            foreach ($arrCElems AS $strCType => $strCDesc)
+            {
+                if ($arrSet['type'] == $strCType)
+                {
+                    return TRUE;
+                }
+            }
+        }
+        return FALSE;
     }
 
 }
