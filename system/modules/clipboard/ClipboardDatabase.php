@@ -383,10 +383,16 @@ class ClipboardDatabase extends Backend
      */
     public function insertInto($strTable, $arrSet)
     {        
-        $objDb = $this->Database
-                ->prepare("INSERT INTO `$strTable` %s")
-                ->set($arrSet)
-                ->execute();
+        $query = vsprintf(
+            "INSERT IGNORE INTO `%s` (`%s`) VALUES \n(%s)",
+            array(
+                $strTable,
+                implode('`, `', array_keys($arrSet)),
+                implode(',', $arrSet)
+            )
+        );
+        
+        $objDb = $this->Database->query($query);
         
         return $objDb;
     }    

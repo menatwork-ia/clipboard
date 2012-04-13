@@ -559,7 +559,7 @@ class ClipboardXml extends Backend
                                 case 'time':
                                 case 'year':
                                     $objXml->writeAttribute("type", "date");
-                                    $objXml->text($field_data);
+                                    $objXml->text("'" . $field_data . "'");
                                     break;
 
                                 case 'char':
@@ -571,12 +571,12 @@ class ClipboardXml extends Backend
                                 case 'enum':
                                 case 'set':
                                     $objXml->writeAttribute("type", "text");
-                                    $objXml->writeCdata(str_replace($this->arrSearchFor, $this->arrReplaceWith, $field_data));
+                                    $objXml->writeCdata("'" . str_replace($this->arrSearchFor, $this->arrReplaceWith, $field_data) . "'");
                                     break;
 
                                 default:
                                     $objXml->writeAttribute("type", "default");
-                                    $objXml->writeCdata(str_replace($this->arrSearchFor, $this->arrReplaceWith, $field_data));
+                                    $objXml->writeCdata("'" . str_replace($this->arrSearchFor, $this->arrReplaceWith, $field_data) . "'");
                                     break;
                                 }
                                 $objXml->endElement(); // End field  
@@ -835,7 +835,7 @@ class ClipboardXml extends Backend
                                 {
                                     if($GLOBALS['TL_CONFIG']['encryptionKey'] != $this->_strEncryptionKey)
                                     {                                     
-                                        if(!array_key_exists($arrSet['type'], $GLOBALS['TL_CTE']['includes']))
+                                        if(!array_key_exists(substr($arrSet['type'], 1, -1), $GLOBALS['TL_CTE']['includes']))
                                         {
                                             $this->_objDatabase->insertInto($strTable, $arrSet);
                                         }
@@ -915,7 +915,7 @@ class ClipboardXml extends Backend
 
                             default:
                                 switch ($strFieldType)
-                                {                                    
+                                {                                
                                     case 'default':
                                         $strValue = str_replace($this->arrReplaceWith, $this->arrSearchFor, $objXml->value);
                                         $arrSet[$strFieldName] = $strValue;
@@ -1058,12 +1058,12 @@ class ClipboardXml extends Backend
      * @return boolean 
      */
     protected function existsContentType($arrSet)
-    {        
+    {
         foreach ($GLOBALS['TL_CTE'] AS $group => $arrCElems)
         {
             foreach ($arrCElems AS $strCType => $strCDesc)
             {
-                if ($arrSet['type'] == $strCType)
+                if (substr($arrSet['type'], 1, -1) == $strCType)
                 {
                     return TRUE;
                 }
