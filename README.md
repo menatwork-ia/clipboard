@@ -1,6 +1,9 @@
 Clipboard
 ======================
 
+![Site structure](http://img6.imagebanana.com/img/f75eb9dy/tl_page.jpg)
+
+
 System requirements
 -------------------
 
