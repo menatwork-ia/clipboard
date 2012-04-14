@@ -14,8 +14,10 @@ System requirements
 Installation & Configuration
 ----------------------------
 
-* Install the extension with the Contao extension repository
-* Activate the clipboard functionality in the personal data
+* Unpack the archive on your server
+* Open the installation directory in your web browser
+* Update the database
+* Activate the clipboard functionality in your personal data
 
 
 Troubleshooting
