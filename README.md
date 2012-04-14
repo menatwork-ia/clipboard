@@ -1,7 +1,7 @@
 Clipboard
 ======================
 
-![Site structure](http://img6.imagebanana.com/img/f75eb9dy/tl_page.jpg)
+![Site structure (Extended context menu)](http://img7.imagebanana.com/img/jryp1k9p/tl_pageextendedcontext.jpg)
 
 
 System requirements
