@@ -30,7 +30,7 @@
 /**
  * Fields
  */
-$GLOBALS['TL_LANG']['tl_user']['clipboard']             = array('Ativar clipboard', 'Ativar a funcionalidade área de transferência estendida.');
-$GLOBALS['TL_LANG']['tl_user']['clipboard_context']     = array('Desativar menu de contexto da clipboard', 'Desativar menu de contexto da área de transferência (clique direito).');
+$GLOBALS['TL_LANG']['tl_user']['clipboard']             = array('Ativar clipboard', 'Ativar a funcionalidade &aacute;rea de transfer&ecirc;ncia estendida.');
+$GLOBALS['TL_LANG']['tl_user']['clipboard_context']     = array('Desativar menu de contexto da clipboard', 'Desativar menu de contexto da &aacute;rea de transfer&ecirc;ncia (clique direito).');
 
 ?>
