@@ -30,8 +30,13 @@
 /**
  * Create DCA if clipboard is ready to use 
  */
-if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
+if (Clipboard::getInstance()->isClipboard('page'))
 {
+    /**
+     * Prepare clipboard contextmenu 
+     */
+    Clipboard::getInstance()->prepareContext();    
+    
     /**
      * Config 
      */
@@ -62,7 +67,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('page'))
             $GLOBALS['CLIPBOARD']['copy_childs'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds']
     );
 
-    if(Clipboard::getInstance()->hasFavorite())
+    if(Clipboard::getInstance()->cb()->hasFavorite())
     {    
         // -----------------------------------------------------------------------------
         // Paste after button

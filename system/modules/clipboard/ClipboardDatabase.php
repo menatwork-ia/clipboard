@@ -35,6 +35,7 @@ class ClipboardDatabase extends Backend
 
     /**
      * Current object instance (Singleton)
+     * 
      * @var ClipboardDatabase
      */
     protected static $objInstance;
@@ -53,9 +54,10 @@ class ClipboardDatabase extends Backend
     final private function __clone(){}
 
     /**
+     * Get instanz of the object (Singelton) 
      *
      * @return ClipboardDatabase 
-     */
+     */    
     public static function getInstance()
     {
         if (!is_object(self::$objInstance))
@@ -188,7 +190,7 @@ class ClipboardDatabase extends Backend
 
         return $objDb;
     }
-    
+
     /**
      * Return object from given table and his id
      * 
@@ -207,180 +209,6 @@ class ClipboardDatabase extends Backend
     }
 
     /**
-     * Return the current favorite as object
-     * 
-     * @param string $strTable
-     * @param integer $intUserId
-     * @return DB_Mysql_Result 
-     */
-    public function getFavorite($strTable, $intUserId)
-    {
-        $objDb = $this->Database
-                ->prepare("SELECT * 
-                    FROM `tl_clipboard` 
-                    WHERE str_table = ? 
-                    AND favorite = 1 
-                    AND `user_id` = ?")
-                ->limit(1)
-                ->execute($strTable, $intUserId);
-
-        return $objDb;
-    }
-
-    /**
-     * Set clipboardentry to favorite and reset the old one
-     * 
-     * @param integer $intId
-     * @param string $strPageType
-     * @param integer $intUserId 
-     */
-    public function setNewFavorite($intId, $strPageType, $intUserId)
-    {
-        $this->Database
-                ->prepare("UPDATE `tl_clipboard` 
-                    SET favorite = 0 
-                    WHERE str_table = ? 
-                    AND `user_id` = ?")
-                ->execute('tl_' . $strPageType, $intUserId);
-
-        $this->Database
-                ->prepare("UPDATE `tl_clipboard` 
-                    SET favorite = 1 
-                    WHERE id  = ? 
-                    AND `user_id` = ?")
-                ->execute($intId, $intUserId);
-    }
-
-    /**
-     * Return the current clipboard as object
-     * 
-     * @param string $strPageType
-     * @param integer $intUserId
-     * @return DB_Mysql_Result
-     */
-    public function getCurrentClipboard($strPageType, $intUserId)
-    {
-        $objDb = $this->Database
-                ->prepare("SELECT * 
-                    FROM `tl_clipboard` 
-                    WHERE str_table = ? 
-                    AND user_id = ?")
-                ->execute('tl_' . $strPageType, $intUserId);
-
-        return $objDb;
-    }
-
-    /**
-     * Return clipboard entry for given params
-     * 
-     * @param array $arrSet
-     * @return DB_Mysql_Result 
-     */
-    public function getClipboardEntryFromArray($arrSet)
-    {
-        $query = "SELECT * FROM `tl_clipboard` WHERE ";
-        
-        $i = 0;
-        foreach($arrSet AS $key => $value)
-        {     
-            if($i == 0)
-            {
-               $query .= $key . " = '" . $value . "' ";
-               $i++;
-               continue;
-            }            
-            $query .= " AND " . $key . " = '" . $value . "' ";
-            $i++;
-        }
-        
-        $objDb = $this->Database->query($query);
-        
-        return $objDb;
-    }
-    
-    /**
-     * Return clipboard entry for given id
-     * 
-     * @param integer $intId
-     * @return DB_Mysql_Result 
-     */
-    public function getClipboardEntryFromId($intId)
-    {
-        $objDb = $this->Database
-                ->prepare("SELECT * FROM `tl_clipboard` WHERE id = ?")
-                ->limit(1)
-                ->execute($intId);
-
-        return $objDb;        
-    }
-
-    /**
-     * Copy given array set to clipboard and update favorite and xml filename
-     * 
-     * @param array $arrSet
-     */
-    public function copyToClipboard($arrSet)
-    {
-        $this->Database
-                ->prepare("UPDATE `tl_clipboard`
-                    SET favorite = 0
-                    WHERE str_table = ?
-                    AND user_id = ?")
-                ->execute($arrSet['str_table'], $arrSet['user_id']);
-
-        $this->Database
-                ->prepare("INSERT INTO `tl_clipboard` 
-                    %s ON DUPLICATE KEY 
-                    UPDATE favorite = 1, filename = ?")
-                ->set($arrSet)
-                ->execute($arrSet['filename']);
-    }
-    
-    /**
-     * Copy given array set to clipboard
-     * 
-     * @param array $arrSet
-     */
-    public function copyToClipboardWithoutFavor($arrSet)
-    {
-        $this->Database
-                ->prepare("INSERT INTO `tl_clipboard` %s")
-                ->set($arrSet)
-                ->execute();
-    }    
-
-    /**
-     * Update the specific given clipboard element title
-     * 
-     * @param string $strTitle
-     * @param integer $intId
-     * @param integer $intUserId 
-     * @param string $strFilename
-     */
-    public function editClipboardElemTitle($strTitle, $intId, $intUserId, $strFilename)
-    {
-        $this->Database
-                ->prepare("UPDATE `tl_clipboard` 
-                    SET title = ?, filename = ?
-                    WHERE id = ? 
-                    AND `user_id` = ?")
-                ->execute($strTitle, $strFilename, $intId, $intUserId);
-    }
-
-    /**
-     * Delete the entry with the given id
-     * 
-     * @param integer $intId
-     * @param integer $intUserId
-     */
-    public function deleteFromClipboard($intId, $intUserId)
-    {
-        $this->Database
-                ->prepare("DELETE FROM `tl_clipboard` WHERE `id` = ? AND `user_id` = ?")
-                ->execute($intId, $intUserId);
-    }
-    
-    /**
      * Insert array set to given table
      * 
      * @param string $strTable
@@ -388,21 +216,20 @@ class ClipboardDatabase extends Backend
      * @return DB_Mysql_Result
      */
     public function insertInto($strTable, $arrSet)
-    {        
+    {
         $query = vsprintf(
-            "INSERT IGNORE INTO `%s` (`%s`) VALUES \n(%s)",
-            array(
+            "INSERT IGNORE INTO `%s` (`%s`) VALUES \n(%s)", array(
                 $strTable,
                 implode('`, `', array_keys($arrSet)),
                 implode(',', $arrSet)
             )
         );
-        
+
         $objDb = $this->Database->query($query);
-        
+
         return $objDb;
-    }    
-    
+    }
+
     /**
      * Get the min sorting from given pid
      * 
@@ -415,10 +242,10 @@ class ClipboardDatabase extends Backend
         $objDb = $this->Database
                 ->prepare("SELECT MIN(sorting) AS sorting FROM " . $strTable . " WHERE pid=?")
                 ->executeUncached($intId);
-        
-        return $objDb;        
+
+        return $objDb;
     }
-    
+
     /**
      * Get the next sorting from given id
      * 
@@ -432,10 +259,10 @@ class ClipboardDatabase extends Backend
         $objDb = $this->Database
                 ->prepare("SELECT MIN(sorting) AS sorting FROM " . $strTable . " WHERE pid = ? AND sorting > ?")
                 ->executeUncached($intId, $intSorting);
-        
+
         return $objDb;
-    }    
-    
+    }
+
     /**
      * Get elements sorting from given pid ordert by sorting
      * 
@@ -448,10 +275,10 @@ class ClipboardDatabase extends Backend
         $objDb = $this->Database
                 ->prepare("SELECT id, sorting FROM " . $strTable . " WHERE pid = ? ORDER BY sorting")
                 ->executeUncached($intId);
-        
+
         return $objDb;
     }
-    
+
     /**
      * Update sorting
      * 
@@ -463,7 +290,7 @@ class ClipboardDatabase extends Backend
     {
         $this->Database
                 ->prepare("UPDATE " . $strTable . " SET sorting = ? WHERE id = ?")
-                ->execute($intSorting, $intId);            
+                ->execute($intSorting, $intId);
     }
 
 }

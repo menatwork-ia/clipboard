@@ -37,14 +37,48 @@ class ClipboardHelper extends Backend
      * Current object instance (Singleton)
      * @var ClipboardHelper
      */
-    protected static $objInstance = NULL;
+    protected static $_objInstance = NULL;
 
     /**
-     * Objects 
+     * Contains specific database request
+     * 
+     * @var ClipboardDatabase
      */
     protected $_objDatabase;
+
+    /**
+     * Contains some string functions
+     * 
+     * @var String
+     */
     protected $_objString;
-    protected $_objClipboardXml;
+
+    /**
+     * Pagetype
+     * 
+     * @var string
+     */
+    protected $_strPageType;
+
+    /**
+     * Search for special chars
+     * 
+     * @var array 
+     */
+    public $arrSearchFor = array(
+        "\\",
+        "'"
+    );
+
+    /**
+     * Replace special chars with
+     * 
+     * @var array 
+     */
+    public $arrReplaceWith = array(
+        "\\\\",
+        "\\'"
+    );
 
     /**
      * Prevent constructing the object (Singleton)
@@ -52,17 +86,17 @@ class ClipboardHelper extends Backend
     protected function __construct()
     {
         parent::__construct();
-
         $this->import('BackendUser', 'User');
         $this->_objDatabase = ClipboardDatabase::getInstance();
         $this->_objString = String::getInstance();
-        $this->_objClipboardXml = ClipboardXml::getInstance();
+        $this->_setPageType();
+        
     }
 
     /**
      * Prevent cloning of the object (Singleton)
      */
-    final private function __clone() {}
+    final private function __clone(){}
 
     /**
      * Get instanz of the object (Singelton) 
@@ -71,11 +105,56 @@ class ClipboardHelper extends Backend
      */
     public static function getInstance()
     {
-        if (self::$objInstance == NULL)
+        if (self::$_objInstance == NULL)
         {
-            self::$objInstance = new ClipboardHelper();
+            self::$_objInstance = new ClipboardHelper();
         }
-        return self::$objInstance;
+        return self::$_objInstance;
+    }
+
+    /**
+     * Get the current pagetype
+     * 
+     * @return string
+     */
+    public function getPageType()
+    {
+        return $this->_strpageType;
+    }
+
+    /**
+     * Get the page type as database name
+     * 
+     * @return string
+     */
+    public function getDbPageType()
+    {
+        return 'tl_' . $this->_strpageType;
+    }
+
+    /**
+     * Set the current page type 
+     */
+    protected function _setPageType()
+    {
+        if ($this->Input->get('table') == 'tl_content')
+        {
+            $this->_strpageType = 'content';
+        }
+        else
+        {
+            $this->_strpageType = $this->Input->get('do');
+        }
+    }
+
+    /**
+     * Return if context checkbox is true or false
+     * 
+     * @return boolean
+     */
+    public function isContext()
+    {
+        return !$this->User->clipboard_context;
     }
 
     /**
@@ -92,7 +171,7 @@ class ClipboardHelper extends Backend
      */
     public function getPasteButton($row, $href, $label, $title, $icon, $attributes, $table)
     {
-        $objFavorit = Clipboard::getInstance()->getFavorite($table);
+        $objFavorit = Clipboard::getInstance()->cb()->getFavorite();
 
         if ($objFavorit->numRows)
         {
@@ -144,7 +223,7 @@ class ClipboardHelper extends Backend
      */
     public function clipboardButtons(DataContainer $dc, $row, $table, $cr, $arrClipboard = false, $childs)
     {
-        $objFavorit = Clipboard::getInstance()->getFavorite($table);
+        $objFavorit = Clipboard::getInstance()->cb()->getFavorite();
 
         if ($dc->table == 'tl_article' && $table == 'tl_page')
         {
@@ -172,86 +251,7 @@ class ClipboardHelper extends Backend
             return $return;
         }
     }
-
-    /**
-     * Check if the current site is in backend, allowed for clipboard and the clipboard table exists 
-     * 
-     * @param string $dca
-     * @return boolean 
-     */
-    public function isClipboardReadyToUse($dca = NULL)
-    {                
-        if ($dca == NULL || !isset($GLOBALS['CLIPBOARD']['locations']) || !$this->User->clipboard)
-        {
-            return FALSE;
-        }
-
-        $arrAllowedLocations = $GLOBALS['CLIPBOARD']['locations'];
-
-        if (in_array($dca, $arrAllowedLocations))
-        {
-            if ($this->Input->get('table') == 'tl_content')
-            {
-                $pageType = 'content';
-            }
-            else
-            {
-                $pageType = $this->Input->get('do');
-            }            
-            
-            if (TL_MODE == 'BE' && in_array($pageType, $arrAllowedLocations) && $this->Database->tableExists('tl_clipboard'))
-            {
-                $objCurCl = $this->_objDatabase->getCurrentClipboard($pageType, $this->User->id);                                         
-                
-                if($objCurCl->numRows == 0)
-                {                       
-                    $this->importXmlToClipboard($pageType);
-                }
-                
-                if(!$this->isContext())
-                {
-                    foreach($GLOBALS['CLIPBOARD'] AS $key => $arrClConfig)
-                    {
-                        if(array_key_exists('attributes', $GLOBALS['CLIPBOARD'][$key]))
-                        {
-                            $GLOBALS['CLIPBOARD'][$key]['attributes'] = 'onclick="Backend.getScrollOffset();"';
-                        }
-                    }                    
-                }
-                
-                return TRUE;
-            }
-        }
-        return FALSE;
-    }
     
-    public function importXmlToClipboard($strDo)
-    {
-
-        
-        $arrFileMetaInfo = $this->_objClipboardXml->getAllFileMetaInformation($strDo);
-        if(count($arrFileMetaInfo) > 0)
-        {
-            foreach($arrFileMetaInfo AS $key => $value)
-            {
-                $arrFileMetaInfo[$key]['user_id'] = $this->User->id;
-                $arrFileMetaInfo[$key]['favorite'] = 0;
-                $this->_objDatabase->copyToClipboardWithoutFavor($arrFileMetaInfo[$key]);
-            }
-            $this->redirect($this->Environment->request);
-        }
-    }
-    
-    /**
-     * Return if context checkbox is true or false
-     * 
-     * @return boolean
-     */
-    public function isContext()
-    {
-        return !$this->User->clipboard_context;
-    }
-
     /**
      * Create title for content element
      * 
@@ -259,11 +259,11 @@ class ClipboardHelper extends Backend
      * return array
      */
     public function createContentTitle($intId)
-    {        
+    {
         $objContentElem = $this->_objDatabase->getContentObject($intId);
-                
-        $arrHeadline = deserialize($objContentElem->headline, true);                
-        
+
+        $arrHeadline = deserialize($objContentElem->headline, true);
+
         if (isset($arrHeadline['value']))
         {
             $strHeadline = $this->_objString->substr($arrHeadline['value'], 32);
@@ -273,10 +273,10 @@ class ClipboardHelper extends Backend
             $strHeadline = $this->_objString->substr(preg_replace('/[\n\r\t]+/', ' ', $arrHeadline[0]), 20);
         }
 
-        $strText = $this->_objString->substr(strip_tags(preg_replace('/[\n\r\t]+/', ' ', $objContentElem->text)), 20);        
-            
+        $strText = $this->_objString->substr(strip_tags(preg_replace('/[\n\r\t]+/', ' ', $objContentElem->text)), 20);
+
         $arrTitle = array();
-        
+
         if ($strHeadline != '' && $strHeadline != 'NULL')
         {
             $arrTitle[] = $strHeadline;
@@ -289,10 +289,178 @@ class ClipboardHelper extends Backend
         {
             return NULL;
         }
-        
+
         $arrTitle[] = ' (' . $GLOBALS['TL_LANG']['CTE'][$objContentElem->type][0] . ')';
-        
+
         return implode('', $arrTitle);
+    }
+
+    /**
+     * Get field array with all fields from given array
+     * 
+     * @param string $strTable
+     * @return array 
+     */
+    public function getFields($strTable)
+    {
+        $arrTableMetaFields = $this->getTableMetaFields($strTable);
+        $arrFields = array();
+        foreach ($arrTableMetaFields AS $key => $value)
+        {
+            $arrFields[] = $key;
+        }
+        return $arrFields;
+    }
+
+    /**
+     * Write the field information from the given table string to an array and return it
+     * 
+     * @param string $strTable
+     * @return array 
+     */
+    public function getTableMetaFields($strTable)
+    {
+        $fields = $this->_objDatabase->getFields($strTable);
+
+        $arrFieldMeta = array();
+
+        foreach ($fields as $value)
+        {
+            if ($value["type"] == "index")
+            {
+                continue;
+            }
+
+            $arrFieldMeta[$value["name"]] = $value;
+        }
+
+        return $arrFieldMeta;
+    }
+
+    /**
+     * Get pid and new sorting for new element
+     * 
+     * @param string $strTable
+     * @param int $intPid
+     * @param string $strPastePos
+     * @return array
+     */
+    public function getNewPosition($strTable, $intPid, $strPastePos)
+    {
+        // Insert the current record at the beginning when inserting into the parent record
+        if ($strPastePos == 'pasteInto')
+        {
+            $newPid = $intPid;
+            $objSorting = $this->_objDatabase->getSorting($strTable, $intPid);
+
+            // Select sorting value of the first record
+            if ($objSorting->numRows)
+            {
+                $intCurSorting = $objSorting->sorting;
+
+                // Resort if the new sorting value is not an integer or smaller than 1
+                if (($intCurSorting % 2) != 0 || $intCurSorting < 1)
+                {
+                    $objNewSorting = $this->_objDatabase->getSortingElem($strTable, $intPid);
+
+                    $count = 2;
+                    $newSorting = 128;
+
+                    while ($objNewSorting->next())
+                    {
+                        $this->_objDatabase->updateSorting($strTable, ($count++ * 128), $objNewSorting->id);
+                    }
+                }
+
+                // Else new sorting = (current sorting / 2)
+                else
+                    $newSorting = ($intCurSorting / 2);
+            }
+
+            // Else new sorting = 128
+            else
+                $newSorting = 128;
+        }
+        // Else insert the current record after the parent record
+        elseif ($strPastePos == 'pasteAfter' && $intPid > 0)
+        {
+            $objSorting = $this->_objDatabase->getDynamicObject($strTable, $intPid);
+
+            // Set parent ID of the current record as new parent ID
+            if ($objSorting->numRows)
+            {
+                $newPid = $objSorting->pid;
+                $intCurSorting = $objSorting->sorting;
+
+                // Do not proceed without a parent ID
+                if (is_numeric($newPid))
+                {
+                    $objNextSorting = $this->_objDatabase->getNextSorting($strTable, $newPid, $intCurSorting);
+
+                    // Select sorting value of the next record
+                    if ($objNextSorting->sorting !== null)
+                    {
+                        $intNextSorting = $objNextSorting->sorting;
+
+                        // Resort if the new sorting value is no integer or bigger than a MySQL integer
+                        if ((($intCurSorting + $intNextSorting) % 2) != 0 || $intNextSorting >= 4294967295)
+                        {
+                            $count = 1;
+
+                            $objNewSorting = $this->_objDatabase->getSortingElem($strTable, $newPid);
+
+                            while ($objNewSorting->next())
+                            {
+                                $this->_objDatabase->updateSorting($strTable, ($count++ * 128), $objNewSorting->id);
+
+                                if ($objNewSorting->sorting == $intCurSorting)
+                                {
+                                    $newSorting = ($count++ * 128);
+                                }
+                            }
+                        }
+
+                        // Else new sorting = (current sorting + next sorting) / 2
+                        else
+                            $newSorting = (($intCurSorting + $intNextSorting) / 2);
+                    }
+
+                    // Else new sorting = (current sorting + 128)
+                    else
+                        $newSorting = ($intCurSorting + 128);
+                }
+            }
+
+            // Use the given parent ID as parent ID
+            else
+            {
+                $newPid = $intPid;
+                $newSorting = 128;
+            }
+        }
+
+        return array('pid' => intval($newPid), 'sorting' => intval($newSorting));
+    }
+
+    /**
+     * Check if the content type exists in this system and return true or false 
+     * 
+     * @param array $arrSet
+     * @return boolean 
+     */
+    public function existsContentType($arrSet)
+    {
+        foreach ($GLOBALS['TL_CTE'] AS $group => $arrCElems)
+        {
+            foreach ($arrCElems AS $strCType => $strCDesc)
+            {
+                if (substr($arrSet['type'], 1, -1) == $strCType)
+                {
+                    return TRUE;
+                }
+            }
+        }
+        return FALSE;
     }
 
 }

@@ -30,14 +30,19 @@
 /**
  * Create DCA if clipboard is ready to use 
  */
-if (ClipboardHelper::getInstance()->isClipboardReadyToUse('article'))
+if (Clipboard::getInstance()->isClipboard('article'))
 {
+    /**
+     * Prepare clipboard contextmenu 
+     */
+    Clipboard::getInstance()->prepareContext();
+    
     /**
      * Config 
      */
     $GLOBALS['TL_DCA']['tl_article']['config']['onload_callback'][] = array('clipboard', 'init');
 
-    if (Clipboard::getInstance()->isClipboard())
+    if (Clipboard::getInstance()->cb()->hasElements())
     {
         $GLOBALS['TL_DCA']['tl_article']['config']['dataContainer'] = 'Clipboard';
     }
@@ -56,7 +61,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('article'))
             $GLOBALS['CLIPBOARD']['copy'], $GLOBALS['TL_DCA']['tl_article']['list']['operations']['cl_copy']
     );
 
-    if(Clipboard::getInstance()->hasFavorite())
+    if(Clipboard::getInstance()->cb()->hasFavorite())
     {
         // -----------------------------------------------------------------------------
         // Paste after button    

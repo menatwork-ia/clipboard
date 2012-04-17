@@ -28,7 +28,7 @@
  */
 
 /**
- * Class ClipboardXml 
+ * Class ClipboardXml
  */
 class ClipboardXml extends Backend
 {
@@ -37,67 +37,69 @@ class ClipboardXml extends Backend
      * Current object instance (Singleton)
      * @var ClipboardXml
      */
-    protected static $_objInstance;
+    protected static $_objInstance = NULL;
 
     /**
-     * Objects
+     * Contains some helper functions
+     * 
+     * @var object 
      */
-    protected $_objBeUser;
-    protected $_objDatabase;
+    protected $_objHelper;
+
+    /**
+     * Contains all function to write xml
+     * 
+     * @var ClipboardXmlWriter
+     */
+    protected $_objXmlWriter;
+
+    /**
+     * Contains all functions to read xml
+     * 
+     * @var ClipboardXmlReader
+     */
+    protected $_objXmlReader;
+
+    /**
+     * Contains all file operations
+     * 
+     * @var Files
+     */
     protected $_objFiles;
-    
-    /**
-     * Search for special chars
-     * 
-     * @var array 
-     */
-    protected $arrSearchFor = array(
-        "\\",
-        "'"
-    );
 
-    /**
-     * Replace special chars with
-     * 
-     * @var array 
-     */
-    protected $arrReplaceWith = array(
-        "\\\\",
-        "\\'"
-    );
-    
     /**
      * Variables 
-     */    
-    protected $_strPageTable = 'tl_page';
-    protected $_strArticleTable = 'tl_article';
-    protected $_strContentTable = 'tl_content';
-    protected $_strEncryptionKey = '';
+     */
+    protected $_arrClipboardElements;
 
     /**
      * Prevent constructing the object (Singleton)
      */
     protected function __construct()
     {
-        $this->_objBeUser = BackendUser::getInstance();
-        $this->_objDatabase = ClipboardDatabase::getInstance();
+        parent::__construct();
+        $this->import('BackendUser', 'User');
+        $this->_objXmlReader = ClipboardXmlReader::getInstance();
+        $this->_objXmlWriter = ClipboardXmlWriter::getInstance();
+        $this->_objHelper = ClipboardHelper::getInstance();
         $this->_objFiles = Files::getInstance();
+
+        $this->_createClipboardFromFiles();
     }
 
     /**
      * Prevent cloning of the object (Singleton)
      */
-    final private function __clone()
-    {
-        
-    }
+    final private function __clone(){}
 
     /**
-     * @return ClipboardXml
+     * Get instanz of the object (Singelton) 
+     *
+     * @return ClipboardXml 
      */
     public static function getInstance()
     {
-        if (!is_object(self::$_objInstance))
+        if (self::$_objInstance == NULL)
         {
             self::$_objInstance = new ClipboardXml();
         }
@@ -105,970 +107,230 @@ class ClipboardXml extends Backend
     }
 
     /**
-     * Return path to xml file for current backend user
+     * Set the current favorite to the given position in action with the id
+     * 
+     * @param string $strPastePos
+     * @param integer $intId 
+     */
+    public function read($strPastePos, $intId)
+    {
+        $this->_objXmlReader->readXml($this->getFavorite(), $strPastePos, $intId);
+    }
+
+    /**
+     * Unfavor all clipboard elements and write given array to xml file
+     * 
+     * @param array $arrSet
+     */
+    public function write($arrSet)
+    {
+        $this->unFavorAll();
+        $arrSet['filename'] = $this->_getFileName($arrSet);
+        $arrSet['path'] = $this->getPath();
+        $this->_objXmlWriter->writeXml($arrSet);
+    }
+
+    /**
+     * Delete xml file
+     * 
+     * @param string $strHash 
+     */
+    public function deleteFile($strHash)
+    {
+        if (is_object($this->_arrClipboardElements[$strHash]))
+        {
+            $objFile = $this->_arrClipboardElements[$strHash];
+            if ($this->_fileExists($objFile->getFileName()))
+            {
+                $this->_objFiles->delete($this->getPath() . '/' . $objFile->getFileName());
+            }
+        }
+    }
+
+    /**
+     * Edit all given titles
+     * 
+     * @param array $arrTitles 
+     */
+    public function editTitle($arrTitles)
+    {
+        foreach ($arrTitles AS $hash => $strTitle)
+        {
+            if (isset($this->_arrClipboardElements[$hash]))
+            {
+                $this->_arrClipboardElements[$hash]->setTitle($strTitle);
+            }
+        }
+    }
+
+    /**
+     * Check if the given file exists and return boolean
+     * 
+     * @param string $strFileName
+     * @return boolean 
+     */
+    protected function _fileExists($strFileName)
+    {
+        if (file_exists(TL_ROOT . '/' . $this->getPath() . '/' . $strFileName))
+        {
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    /**
+     * Return if clipboard has elements or not
+     * 
+     * @return boolean 
+     */
+    public function hasElements()
+    {
+        if (count($this->_arrClipboardElements) > 0)
+        {
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    /**
+     * Return if clipboard has favorite elements 
+     * 
+     * return boolean
+     */
+    public function hasFavorite()
+    {
+        if (is_object($this->getFavorite()))
+        {
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    /**
+     * Get favorite
+     * 
+     * @return ClipboardXmlElement
+     */
+    public function getFavorite()
+    {
+        if ($this->hasElements())
+        {
+            foreach ($this->_arrClipboardElements AS $objFile)
+            {
+                if ($objFile->getFavorite())
+                {
+                    return $objFile;
+                }
+            }
+        }
+        return FALSE;
+    }
+
+    /**
+     * Set given file hast to favorite and unfavor all other
+     * 
+     * @param type $hash 
+     */
+    public function setFavor($hash)
+    {
+        $this->unFavorAll();
+        $this->_arrClipboardElements[$hash]->setFavorite(TRUE);
+    }
+
+    /**
+     * Unfavor all clipboard elements 
+     */
+    public function unFavorAll()
+    {
+        if ($this->hasElements())
+        {
+            foreach ($this->_arrClipboardElements AS $objFile)
+            {
+                $objFile->setFavorite(FALSE);
+            }
+        }
+    }
+
+    /**
+     * Get all clipboard elements
+     * 
+     * @return array
+     */
+    public function getElements()
+    {
+        return $this->_arrClipboardElements;
+    }
+
+    /**
+     * Fill the clipboard from files 
+     */
+    protected function _createClipboardFromFiles()
+    {
+        $arrFiles = scan(TL_ROOT . '/' . $this->getPath());
+        if (is_array($arrFiles) && count($arrFiles) > 0)
+        {
+            foreach ($arrFiles AS $strFileName)
+            {
+                $arrFile = explode('_', $strFileName);
+                if ($arrFile[0] != $this->_objHelper->getPageType())
+                {
+                    continue;
+                }
+
+                if ($this->_fileExists($strFileName))
+                {
+                    $objFile = new ClipboardXmlElement($strFileName, $this->getPath());
+                }
+                $this->_arrClipboardElements[$objFile->getHash()] = $objFile;
+            }
+        }
+    }
+
+    /**
+     * Return path to clipboard files for current user
      * 
      * @return string
      */
-    public function getFolderPath()
+    public function getPath()
     {
-        $objUserFolder = new Folder($GLOBALS['TL_CONFIG']['uploadPath'] . '/clipboard/' . $this->_objBeUser->username);
+        $objUserFolder = new Folder($GLOBALS['TL_CONFIG']['uploadPath'] . '/clipboard/' . $this->User->username);
+        $this->_protect($objUserFolder->value);
         return $objUserFolder->value;
     }
 
     /**
-     * Create filename and return it. You can allow to overwrite the file by
-     * setting the third parameter to TRUE
-     * 
-     * @param string $strPageType
-     * @param string $strTitle
-     * @param boolean $strOverwrite
-     * @return string 
+     * Protect the folder by adding an .htaccess file
      */
-    public function getFileName($strPageType, $strTitle, $boolOverwrite = FALSE)
+    protected function _protect($strFolder)
     {
-        $strFilename = substr($strPageType, 3) . '_' . time() . '_' . standardize(strtolower($strTitle)) . '.xml';
-        if ($this->fileExists($strFilename) && $boolOverwrite)
+        if (!file_exists(TL_ROOT . '/' . $strFolder . '/.htaccess'))
         {
-            return $this->doNotOverwrite($strFilename);
-        }
-
-        return $strFilename;
-    }
-
-    /**
-     * Replace title from given filename with new given title
-     * 
-     * @param string $strOldFilename
-     * @param string $strNewTitle
-     * @return string 
-     */
-    public function updateFileNameTitle($strOldFilename, $strNewTitle)
-    {
-        $arrOldFileName = explode('_', $strOldFilename);
-        $arrNewFileName = array(
-            $arrOldFileName[0],
-            $arrOldFileName[1],
-            standardize(strtolower($strNewTitle))
-        );
-
-        return implode('_', $arrNewFileName) . '.xml';
-    }
-
-    /**
-     * Check if the given file exists and return TRUE or FALSE
-     * 
-     * @param string $strFilename
-     * @return boolean 
-     */
-    public function fileExists($strFilename)
-    {
-        if (file_exists(TL_ROOT . '/' . $this->getFolderPath() . '/' . $strFilename))
-        {
-            return TRUE;
-        }
-        else
-        {
-            return FALSE;
+            $objFile = new File($strFolder . '/.htaccess');
+            $objFile->write("order deny,allow\ndeny from all");
+            $objFile->close();
         }
     }
 
     /**
-     * Delete the given file
-     * 
-     * @param string $strFilename 
-     */
-    public function deleteFile($strFilename)
-    {
-        if ($this->fileExists($strFilename))
-        {
-            $this->_objFiles->delete($this->getFolderPath() . '/' . $strFilename);
-        }
-    }
-
-    /**
-     * Edit the title tag in the given file and rename 
-     * 
-     * @param string $strFilename
-     * @param string $strTitle
-     * @return boolean 
-     */
-    public function editTitle($strOldFilename, $strNewFilename, $strTitle)
-    {
-        if ($this->fileExists($strOldFilename))
-        {
-            $objDomDoc = new DOMDocument();
-            $objDomDoc->load(TL_ROOT . '/' . $this->getFolderPath() . '/' . $strOldFilename);
-            $nodeTitle = $objDomDoc->getElementsByTagName('metatags')->item(0)->getElementsByTagName('title')->item(0);
-            $nodeTitle->nodeValue = $strTitle;
-            $strDomDoc = $objDomDoc->saveXML();
-
-            $objUserFolder = new Folder($this->getFolderPath());
-            $objFile = new File($objUserFolder->value . '/' . $strOldFilename);
-            $write = $objFile->write($strDomDoc);
-            if ($write)
-            {
-                $objFile->close;
-                return $this->_objFiles->rename($objUserFolder->value . '/' . $strOldFilename, $objUserFolder->value . '/' . $strNewFilename);
-            }
-        }
-        return FALSE;
-    }
-
-    /**
-     * Check all filenames and return new with suffix if exists
-     * 
-     * @param string $strFilename
-     * @return string 
-     */
-    private function doNotOverwrite($strFilename)
-    {
-        $arrInfo = pathinfo(TL_ROOT . '/' . $this->getFolderPath() . '/' . $strFilename);
-
-        $offset = 1;
-        $arrAll = scan(TL_ROOT . '/' . $this->getFolderPath());
-        $arrFiles = preg_grep('/^' . preg_quote($arrInfo['filename'], '/') . '.*\.' . preg_quote($arrInfo['extension'], '/') . '/', $arrAll);
-
-        foreach ($arrFiles as $strFile)
-        {
-            if (preg_match('/__[0-9]+\.' . preg_quote($arrInfo['extension'], '/') . '$/', $strFile))
-            {
-                $strFile = str_replace('.' . $arrInfo['extension'], '', $strFile);
-                $intValue = intval(substr($strFile, (strrpos($strFile, '_') + 1)));
-                $offset = max($offset, $intValue);
-            }
-        }
-
-        return $arrInfo['filename'] . '__' . ++$offset . '.' . $arrInfo['extension'];
-    }
-    
-    /**
-     * Return all metainformation for all xml files from current user
-     * 
-     * @param string $strDo
-     * @return array
-     */
-    public function getAllFileMetaInformation($strDo)
-    {
-        $arrAll = scan(TL_ROOT . '/' . $this->getFolderPath());        
-        
-        $arrMetaTags = array();
-        if(is_array($arrAll) && count($arrAll) > 0)
-        {            
-            foreach($arrAll AS $strFilename)
-            {
-                $arrFileName = explode('_', $strFilename);
-                if($arrFileName[0] == $strDo)
-                {
-                    $arrSet = array('filename' => $strFilename);
-
-                    $objDomDoc = new DOMDocument();
-                    $objDomDoc->load(TL_ROOT . '/' . $this->getFolderPath() . '/' . $strFilename);
-                    $objMetaTags = $objDomDoc->getElementsByTagName('metatags')->item(0);            
-                    $objMetaChilds = $objMetaTags->childNodes;
-
-                    for($i = 0; $i < $objMetaChilds->length; $i++)
-                    {
-                        $strNodeName = $objMetaChilds->item($i)->nodeName;
-                        switch ($strNodeName)
-                        {
-                            case 'title':
-                                $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
-                                break;
-
-                            case 'childs':
-                                $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
-                                break;
-
-                            case 'str_table':
-                                $arrSet[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
-                                break;
-                        }
-                    }
-                    $arrMetaTags[] = $arrSet;
-                }
-            }
-        }
-        return $arrMetaTags;
-    }
-
-    /**
-     * Create xml file for the given element and all his childs
-     * 
-     * @param string $strTable
-     * @param integer $intId
-     * @param string $strTitle
-     * @param string $strFilename
-     * @param boolean $boolHasChilds
-     * @return booleana 
-     */
-    public function writeXml($strTable, $intId, $strTitle, $strFilename, $boolHasChilds = FALSE)
-    {
-        // Create XML File
-        $objXml = new XMLWriter();
-        $objXml->openMemory();
-        $objXml->setIndent(TRUE);
-        $objXml->setIndentString("\t");
-
-        // XML Start
-        $objXml->startDocument('1.0', 'UTF-8');
-        $objXml->startElement('clipboard');
-
-        // Write meta (header)        
-        $objXml->startElement('metatags');
-        $objXml->writeElement('create_unix', time());
-        $objXml->writeElement('create_date', date('Y-m-d', time()));
-        $objXml->writeElement('create_time', date('H:i', time()));
-        $objXml->startElement('title');
-        $objXml->writeCdata($strTitle);
-        $objXml->endElement(); // End title
-        $objXml->writeElement('childs', (($boolHasChilds) ? 1 : 0));
-        $objXml->writeElement('str_table', $strTable);
-        $objXml->writeElement('encryptionKey', $GLOBALS['TL_CONFIG']['encryptionKey']);
-        $objXml->endElement(); // End metatags
-
-        $objXml->startElement('datacontainer');
-        switch ($strTable)
-        {
-            case 'tl_page':
-                $this->writePage($intId, $objXml, $boolHasChilds);
-                break;
-            case 'tl_article':
-                $this->writeArticle($intId, $objXml, FALSE);
-                break;
-            case 'tl_content':
-                $this->writeContent($intId, $objXml, FALSE);
-                break;
-        }
-        $objXml->endElement(); // End datacontainer
-
-        $objXml->endElement(); // End clipboard
-
-        $strXml = $objXml->outputMemory();
-
-        $objFile = new File($this->getFolderPath() . '/' . $strFilename);
-        $write = $objFile->write($strXml);
-        if ($write)
-        {
-            $objFile->close;
-            return TRUE;
-        }
-        return FALSE;
-    }
-
-    /**
-     * Write page informations to xml object
-     * 
-     * @param integer $intId
-     * @param XMLWriter $objXml
-     * @param bool $boolChilds
-     * @return XMLWriter 
-     */
-    protected function writePage($intId, $objXml, $boolHasChilds)
-    {
-        $objXml->startElement('page');
-        $objXml->writeAttribute('table', $this->_strPageTable);
-
-        $arrPageRows = $this->_objDatabase->getPageObject($intId)->fetchAllAssoc();
-
-        $this->writeGivenDbTableRows($this->_strPageTable, $arrPageRows, $objXml);
-
-        $objXml->startElement('articles');
-        $this->writeArticle($intId, $objXml, TRUE);
-        $objXml->endElement(); // End articles
-
-        if ($boolHasChilds)
-        {
-            $this->writeSubpages($intId, $objXml);
-        }
-
-        $objXml->endElement(); // End page
-    }
-
-    /**
-     * Write subpage informations to xml object
-     * 
-     * @param type $intId
-     * @param XMLWriter $objXml
-     */
-    protected function writeSubpages($intId, $objXml)
-    {
-        $arrPageRows = $this->_objDatabase->getSubpagesObject($intId)->fetchAllAssoc();
-
-        if (count($arrPageRows) > 0)
-        {
-            $objXml->startElement('subpage');
-            $objXml->writeAttribute('table', $this->_strPageTable);
-
-            foreach ($arrPageRows AS $arrRow)
-            {
-                $this->writeGivenDbTableRows($this->_strPageTable, array($arrRow), $objXml);
-
-                $objXml->startElement('articles');
-                $this->writeArticle($arrRow['id'], $objXml, TRUE);
-                $objXml->endElement(); // End articles
-
-                $this->writeSubpages($arrRow['id'], $objXml);
-            }
-            $objXml->endElement(); // End subpage
-        }
-    }
-
-    /**
-     * Write article informations to xml object
-     * 
-     * @param integer $intId
-     * @param XMLWriter $objXml
-     * @param boolean $boolIsChild
-     */
-    protected function writeArticle($intId, $objXml, $boolIsChild)
-    {
-        if ($boolIsChild)
-        {
-            $arrRows = $this->_objDatabase->getArticleObjectFromPid($intId)->fetchAllAssoc();
-        }
-        else
-        {
-            $arrRows = $this->_objDatabase->getArticleObject($intId)->fetchAllAssoc();
-        }
-
-        if (count($arrRows) < 1)
-        {
-            return;
-        }
-
-        $objXml->startElement('article');
-        $objXml->writeAttribute('table', $this->_strArticleTable);
-
-        foreach ($arrRows AS $arrRow)
-        {
-            $this->writeGivenDbTableRows($this->_strArticleTable, array($arrRow), $objXml);
-
-            $this->writeContent($arrRow['id'], $objXml, TRUE);
-        }
-
-        $objXml->endElement(); // End article
-    }
-
-    /**
-     * Write content informations to xml object
-     * 
-     * @param integer $intId
-     * @param XMLWriter $objXml
-     * @param boolean $boolIsChild 
-     */
-    protected function writeContent($intId, $objXml, $boolIsChild)
-    {
-        if ($boolIsChild)
-        {
-            $arrRows = $this->_objDatabase->getContentObjectFromPid($intId)->fetchAllAssoc();
-        }
-        else
-        {
-            $arrRows = $this->_objDatabase->getContentObject($intId)->fetchAllAssoc();
-        }
-
-        if (count($arrRows) < 1)
-        {
-            return;
-        }
-
-        $objXml->startElement('content');
-        $objXml->writeAttribute('table', $this->_strContentTable);
-
-        $this->writeGivenDbTableRows($this->_strContentTable, $arrRows, $objXml);
-
-        $objXml->endElement(); // End content
-    }
-
-    /**
-     * Write the given database rows to the xml object
-     * 
-     * @param string $strTable
-     * @param array $arrRows
-     * @param XMLWriter $objXml 
-     */
-    protected function writeGivenDbTableRows($strTable, $arrRows, $objXml)
-    {
-        $arrFieldMeta = $this->getTableMetaFields($strTable);
-
-        if (count($arrRows) > 0)
-        {
-            foreach ($arrRows AS $row)
-            {
-                $objXml->startElement('row');
-
-                foreach ($row as $field_key => $field_data)
-                {
-                    switch ($field_key)
-                    {
-                        case 'id':
-                        case 'pid':
-                            break;
-                        default:
-
-
-                            if (!isset($field_data))
-                            {
-                                $objXml->startElement('field');
-                                $objXml->writeAttribute("name", $field_key);
-                                
-                                $objXml->writeAttribute("type", "null");
-                                $objXml->text("NULL");
-                                
-                                $objXml->endElement(); // End field
-                            }
-                            else if ($field_data != "")
-                            {
-                                $objXml->startElement('field');
-                                $objXml->writeAttribute("name", $field_key);
-                                
-                                switch (strtolower($arrFieldMeta[$field_key]['type']))
-                                {
-                                case 'binary':
-                                case 'varbinary':
-                                case 'blob':
-                                case 'tinyblob':
-                                case 'mediumblob':
-                                case 'longblob':
-                                    $objXml->writeAttribute("type", "blob");
-                                    $objXml->text("0x" . bin2hex($field_data));
-                                    break;
-
-                                case 'tinyint':
-                                case 'smallint':
-                                case 'mediumint':
-                                case 'int':
-                                case 'integer':
-                                case 'bigint':
-                                    $objXml->writeAttribute("type", "int");
-                                    $objXml->text($field_data);
-                                    break;
-
-                                case 'float':
-                                case 'double':
-                                case 'real':
-                                case 'decimal':
-                                case 'numeric':
-                                    $objXml->writeAttribute("type", "decimal");
-                                    $objXml->text($field_data);
-                                    break;
-
-                                case 'date':
-                                case 'datetime':
-                                case 'timestamp':
-                                case 'time':
-                                case 'year':
-                                    $objXml->writeAttribute("type", "date");
-                                    $objXml->text("'" . $field_data . "'");
-                                    break;
-
-                                case 'char':
-                                case 'varchar':
-                                case 'text':
-                                case 'tinytext':
-                                case 'mediumtext':
-                                case 'longtext':
-                                case 'enum':
-                                case 'set':
-                                    $objXml->writeAttribute("type", "text");
-                                    $objXml->writeCdata("'" . str_replace($this->arrSearchFor, $this->arrReplaceWith, $field_data) . "'");
-                                    break;
-
-                                default:
-                                    $objXml->writeAttribute("type", "default");
-                                    $objXml->writeCdata("'" . str_replace($this->arrSearchFor, $this->arrReplaceWith, $field_data) . "'");
-                                    break;
-                                }
-                                $objXml->endElement(); // End field  
-                            }
-                                                      
-                            break;
-                    }
-                }
-
-                $objXml->endElement(); // End row            
-            }
-        }
-    }
-
-    /**
-     * Write the field information from the given table string to an array and return it
-     * 
-     * @param string $strTable
-     * @return array 
-     */
-    protected function getTableMetaFields($strTable)
-    {
-        $fields = $this->_objDatabase->getFields($strTable);
-
-        $arrFieldMeta = array();
-
-        foreach ($fields as $value)
-        {
-            if ($value["type"] == "index")
-            {
-                continue;
-            }
-
-            $arrFieldMeta[$value["name"]] = $value;
-        }
-
-        return $arrFieldMeta;
-    }
-
-    /**
-     * Get field array with all fields from given array
-     * 
-     * @param string $strTable
-     * @return array 
-     */
-    protected function getFields($strTable)
-    {
-        $arrTableMetaFields = $this->getTableMetaFields($strTable);
-        $arrFields = array();
-        foreach ($arrTableMetaFields AS $key => $value)
-        {
-            $arrFields[] = $key;
-        }
-        return $arrFields;
-    }
-
-    /**
-     * Read xml file and create elements
-     * 
-     * @param string $strFilename
-     * @param string $strPastePos
-     * @param integer $intElemId 
-     */
-    public function readXml($strFilename, $strPastePos, $intElemId)
-    {
-        if ($this->fileExists($strFilename))
-        {
-            $objXml = new XMLReader();
-            $objXml->open(TL_ROOT . '/' . $this->getFolderPath() . '/' . $strFilename);
-            while ($objXml->read())
-            {
-                switch ($objXml->nodeType)
-                {
-                    case XMLReader::ELEMENT:
-                        switch ($objXml->localName)
-                        {
-                            case 'encryptionKey':
-                                $objXml->read();
-                                $this->_strEncryptionKey = $objXml->value;
-                                break;
-                                    
-                            case 'page':
-                                $this->createPage($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
-                                break;
-                        
-                            case 'article':
-                                $this->createArticle($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
-                                break;
-                            
-                            case 'content':
-                                $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
-                                break;
-                            
-                            default:
-                                break;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-            $objXml->close();
-        }
-    }
-
-    /**
-     * Create page elements
-     * 
-     * @param XMLReader $objXml
-     * @param string $strTable
-     * @param string $strPastePos
-     * @param integer $intElemId
-     * @param bool $boolIsChild
-     */    
-    public function createPage($objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
-    {
-        $intLastInsertId = 0;
-        
-        if ($boolIsChild == TRUE)
-        {
-            $intId = $intElemId;
-        }
-        else
-        {
-            if ($strPastePos == 'pasteAfter')
-            {
-                $objElem = $this->_objDatabase->getPageObject($intElemId);
-                $intId = $objElem->pid;
-            }
-        }        
-
-        while ($objXml->read())
-        {
-            switch ($objXml->nodeType)
-            {
-                case XMLReader::ELEMENT:
-                    switch ($objXml->localName)
-                    {
-                        case 'article':
-                            $this->createArticle($objXml, $objXml->getAttribute("table"), $strPastePos, $intLastInsertId, TRUE);
-                            break;
-                        
-                        case 'row':
-                            $objDb = $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild));
-                            $intLastInsertId = $objDb->insertId;
-                            break;
-                        
-                        case 'subpage':
-                            $this->createPage($objXml, $objXml->getAttribute("table"), $strPastePos, $intLastInsertId, TRUE);
-                    }
-                    break;
-                case XMLReader::END_ELEMENT:
-                    switch ($objXml->localName)
-                    {
-                        case 'page':
-                            return;
-                            break;
-                    }
-                    break;
-            }
-        }        
-    }
-
-    /**
-     * Create article elements
-     * 
-     * @param XMLReader $objXml
-     * @param string $strTable
-     * @param string $strPastePos
-     * @param integer $intElemId
-     * @param bool $boolIsChild
-     */
-    public function createArticle($objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
-    {
-        $intLastInsertId = 0;
-
-        if ($boolIsChild == TRUE)
-        {
-            $intId = $intElemId;
-        }
-        else
-        {
-            if ($strPastePos == 'pasteAfter')
-            {
-                $objElem = $this->_objDatabase->getContentObject($intElemId);
-                $intId = $objElem->pid;
-            }
-        }
-
-        while ($objXml->read())
-        {
-            switch ($objXml->nodeType)
-            {
-                case XMLReader::ELEMENT:
-                    switch ($objXml->localName)
-                    {
-                        case 'content':
-                            $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intLastInsertId, TRUE);
-                            break;
-                        
-                        case 'row':
-                            $objDb = $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild));
-                            $intLastInsertId = $objDb->insertId;
-                            break;
-                    }
-                    break;
-                case XMLReader::END_ELEMENT:
-                    switch ($objXml->localName)
-                    {
-                        case 'article':
-                            return;
-                            break;
-                    }
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Create Content elements
-     * 
-     * @param XMLReader $objXml
-     * @param string $strTable
-     * @param string $strPastePos
-     * @param integer $intElemId
-     * @param bool $boolIsChild
-     */
-    protected function createContent($objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
-    {
-        if ($boolIsChild == TRUE)
-        {
-            $intId = $intElemId;
-        }
-        else
-        {
-            if ($strPastePos == 'pasteAfter')
-            {
-                $objElem = $this->_objDatabase->getContentObject($intElemId);
-                $intId = $objElem->pid;
-            }
-        }
-
-        while ($objXml->read())
-        {
-            switch ($objXml->nodeType)
-            {
-                case XMLReader::ELEMENT:
-                    switch ($objXml->localName)
-                    {
-                        case 'row':
-                            $arrSet = $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild);
-                            if (array_key_exists('type', $arrSet))
-                            {
-                                if($this->existsContentType($arrSet))
-                                {
-                                    if($GLOBALS['TL_CONFIG']['encryptionKey'] != $this->_strEncryptionKey)
-                                    {                                     
-                                        if(!array_key_exists(substr($arrSet['type'], 1, -1), $GLOBALS['TL_CTE']['includes']))
-                                        {
-                                            $this->_objDatabase->insertInto($strTable, $arrSet);
-                                        }
-                                        else
-                                        {
-                                            $this->log('Clipboard skip the paste from contentelement because it is an includeElement', __FUNCTION__, TL_GENERAL);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        $this->_objDatabase->insertInto($strTable, $arrSet);
-                                    }
-                                }
-                                else
-                                {
-                                    $this->log('Clipboard skip the paste from contentelement because element type dosn`t exists in this system', __FUNCTION__, TL_GENERAL);
-                                }
-                            }
-                    }
-                    break;
-                case XMLReader::END_ELEMENT:
-                    switch ($objXml->localName)
-                    {
-                        case 'content':
-                            return;
-                            break;
-                    }
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Create array set for insert query
-     * 
-     * @param XMLReader $objXml
-     * @param integer $intId
-     * @param string $strTable
-     * @param string $strPastePos
-     * @param integer $intElemId
-     * @param bool $boolIsChild
-     * @return array
-     */
-    protected function createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
-    {
-        $arrFields = $this->getFields($strTable);
-        $arrSet = array();
-        $strFieldType = '';
-        $strFieldName = '';
-
-        while ($objXml->read())
-        {
-            switch ($objXml->nodeType)
-            {
-                case XMLReader::CDATA:
-                case XMLReader::TEXT:
-                    if (in_array($strFieldName, $arrFields))
-                    {
-                        switch ($strFieldName)
-                        {
-                            case 'pid':
-                            case 'id':
-                                break;
-
-                            case 'sorting':
-                                if ($boolIsChild == TRUE)
-                                {
-                                    $arrSet['pid'] = $intId;
-                                }
-                                else
-                                {
-                                    $arrSorting = $this->getNewPosition($strTable, $intElemId, $strPastePos);
-                                    $arrSet['pid'] = $arrSorting['pid'];
-                                    $arrSet['sorting'] = $arrSorting['sorting'];
-                                    break;
-                                }
-
-                            default:
-                                switch ($strFieldType)
-                                {                                
-                                    case 'default':
-                                        $strValue = str_replace($this->arrReplaceWith, $this->arrSearchFor, $objXml->value);
-                                        $arrSet[$strFieldName] = $strValue;
-                                        break;
-                                    
-                                    default:
-                                        $arrSet[$strFieldName] = $objXml->value;
-                                        break;
-                                }
-                                break;
-                        }
-                    }
-                case XMLReader::ELEMENT:
-                    if ($objXml->localName == 'field')
-                    {
-                        $strFieldName = $objXml->getAttribute("name");
-                        $strFieldType = $objXml->getAttribute("type");
-                    }
-                    break;
-                    
-                case XMLReader::END_ELEMENT:
-                    if ($objXml->localName == 'row')
-                    {
-                        return $arrSet;
-                    }
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Get pid and new sorting for new element
-     * 
-     * @param string $strTable
-     * @param int $intPid
-     * @param string $strPastePos
-     * @return array
-     */
-    protected function getNewPosition($strTable, $intPid, $strPastePos)
-    {
-        // Insert the current record at the beginning when inserting into the parent record
-        if ($strPastePos == 'pasteInto')
-        {
-            $newPid = $intPid;
-            $objSorting = $this->_objDatabase->getSorting($strTable, $intPid);
-
-            // Select sorting value of the first record
-            if ($objSorting->numRows)
-            {
-                $intCurSorting = $objSorting->sorting;
-
-                // Resort if the new sorting value is not an integer or smaller than 1
-                if (($intCurSorting % 2) != 0 || $intCurSorting < 1)
-                {
-                    $objNewSorting = $this->_objDatabase->getSortingElem($strTable, $intPid);
-
-                    $count = 2;
-                    $newSorting = 128;
-
-                    while ($objNewSorting->next())
-                    {
-                        $this->_objDatabase->updateSorting($strTable, ($count++ * 128), $objNewSorting->id);
-                    }
-                }
-
-                // Else new sorting = (current sorting / 2)
-                else
-                    $newSorting = ($intCurSorting / 2);
-            }
-
-            // Else new sorting = 128
-            else
-                $newSorting = 128;
-        }
-        // Else insert the current record after the parent record
-        elseif ($strPastePos == 'pasteAfter' && $intPid > 0)
-        {
-            $objSorting = $this->_objDatabase->getDynamicObject($strTable, $intPid);
-
-            // Set parent ID of the current record as new parent ID
-            if ($objSorting->numRows)
-            {
-                $newPid = $objSorting->pid;
-                $intCurSorting = $objSorting->sorting;
-
-                // Do not proceed without a parent ID
-                if (is_numeric($newPid))
-                {
-                    $objNextSorting = $this->_objDatabase->getNextSorting($strTable, $newPid, $intCurSorting);
-
-                    // Select sorting value of the next record
-                    if ($objNextSorting->sorting !== null)
-                    {
-                        $intNextSorting = $objNextSorting->sorting;
-
-                        // Resort if the new sorting value is no integer or bigger than a MySQL integer
-                        if ((($intCurSorting + $intNextSorting) % 2) != 0 || $intNextSorting >= 4294967295)
-                        {
-                            $count = 1;
-
-                            $objNewSorting = $this->_objDatabase->getSortingElem($strTable, $newPid);
-
-                            while ($objNewSorting->next())
-                            {
-                                $this->_objDatabase->updateSorting($strTable, ($count++ * 128), $objNewSorting->id);
-
-                                if ($objNewSorting->sorting == $intCurSorting)
-                                {
-                                    $newSorting = ($count++ * 128);
-                                }
-                            }
-                        }
-
-                        // Else new sorting = (current sorting + next sorting) / 2
-                        else
-                            $newSorting = (($intCurSorting + $intNextSorting) / 2);
-                    }
-
-                    // Else new sorting = (current sorting + 128)
-                    else
-                        $newSorting = ($intCurSorting + 128);
-                }
-            }
-
-            // Use the given parent ID as parent ID
-            else
-            {
-                $newPid = $intPid;
-                $newSorting = 128;
-            }
-        }
-
-        return array('pid' => intval($newPid), 'sorting' => intval($newSorting));
-    }
-    
-    /**
-     * Check if the content type exists in this system and return true or false 
+     * Get new filename
      * 
      * @param array $arrSet
-     * @return boolean 
+     * @return string 
      */
-    protected function existsContentType($arrSet)
+    protected function _getFileName($arrSet)
     {
-        foreach ($GLOBALS['TL_CTE'] AS $group => $arrCElems)
-        {
-            foreach ($arrCElems AS $strCType => $strCDesc)
-            {
-                if (substr($arrSet['type'], 1, -1) == $strCType)
-                {
-                    return TRUE;
-                }
-            }
-        }
-        return FALSE;
-    }
+        $arrFileName = array(
+            $this->_objHelper->getPageType(),
+            time(),
+            'F',
+            (($arrSet['childs']) ? 'C' : 'NC'),
+            base64_encode($arrSet['title']),
+            '.xml'
+        );
 
+        return implode('_', $arrFileName);
+    }
+    
 }
+
+?>

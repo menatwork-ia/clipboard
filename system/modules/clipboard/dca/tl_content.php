@@ -33,14 +33,19 @@
  
 $this->loadLanguageFile('tl_page');
 
-if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
+if (Clipboard::getInstance()->isClipboard('content'))
 {
+    /**
+     * Prepare clipboard contextmenu 
+     */
+    Clipboard::getInstance()->prepareContext();    
+    
     /**
      * Config 
      */
     $GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = array('Clipboard', 'init');
 
-    if (Clipboard::getInstance()->isClipboard())
+    if (Clipboard::getInstance()->cb()->hasElements())
     {
         $GLOBALS['TL_DCA']['tl_content']['config']['dataContainer'] = 'Clipboard';
     }
@@ -58,7 +63,7 @@ if (ClipboardHelper::getInstance()->isClipboardReadyToUse('content'))
             $GLOBALS['CLIPBOARD']['copy'], $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy']
     );
 
-    if(Clipboard::getInstance()->hasFavorite())
+    if(Clipboard::getInstance()->cb()->hasFavorite())
     {
         // -----------------------------------------------------------------------------
         // Paste after button    

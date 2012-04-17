@@ -79,6 +79,9 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
             'icon'          => 'system/modules/clipboard/html/icons/icon-pasteinto.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
+        'childs' => array(
+            'icon'          => 'system/modules/clipboard/html/icons/icon-childs.png'
+        ),
         'locations' => $arrAllowedLocations
     );
 }
