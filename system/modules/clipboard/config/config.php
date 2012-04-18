@@ -82,6 +82,9 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
         'childs' => array(
             'icon'          => 'system/modules/clipboard/html/icons/icon-childs.png'
         ),
+        'imported' => array(
+            'icon'          => 'system/modules/clipboard/html/icons/icon-imported.png'
+        ),
         'locations' => $arrAllowedLocations
     );
 }

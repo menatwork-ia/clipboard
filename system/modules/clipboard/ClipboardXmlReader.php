@@ -52,6 +52,13 @@ class ClipboardXmlReader extends Backend
      * @var ClipboardDatabase
      */
     protected $_objDatabase;
+    
+    /**
+     * Encryption key from file
+     * 
+     * @var type 
+     */
+    protected $_strEncryptionKey;
 
     /**
      * Prevent constructing the object (Singleton)
@@ -278,7 +285,7 @@ class ClipboardXmlReader extends Backend
                             {
                                 if ($this->_objHelper->existsContentType($arrSet))
                                 {
-                                    if ($GLOBALS['TL_CONFIG']['encryptionKey'] != $this->_strEncryptionKey)
+                                    if (md5($GLOBALS['TL_CONFIG']['encryptionKey']) != $this->_strEncryptionKey)
                                     {
                                         if (!array_key_exists(substr($arrSet['type'], 1, -1), $GLOBALS['TL_CTE']['includes']))
                                         {
@@ -397,7 +404,7 @@ class ClipboardXmlReader extends Backend
      * @param string $strDo
      * @return array
      */
-    public function getDetailtFileInfo($strFilePath)
+    public function getDetailFileInfo($strFilePath)
     {
         $arrMetaInformation = array();
         

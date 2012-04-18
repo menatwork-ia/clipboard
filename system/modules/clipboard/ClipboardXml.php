@@ -157,7 +157,7 @@ class ClipboardXml extends Backend
      * @param array $arrTitles 
      */
     public function editTitle($arrTitles)
-    {
+    {            
         foreach ($arrTitles AS $hash => $strTitle)
         {
             if (isset($this->_arrClipboardElements[$hash]))
@@ -348,7 +348,7 @@ class ClipboardXml extends Backend
             time(),
             'F',
             (($arrSet['childs']) ? 'C' : 'NC'),
-            base64_encode($arrSet['title'])            
+            standardize($arrSet['title'])
         );
 
         return implode(',', $arrFileName) . '.xml';

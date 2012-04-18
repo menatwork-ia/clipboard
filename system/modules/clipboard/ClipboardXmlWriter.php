@@ -130,9 +130,13 @@ class ClipboardXmlWriter extends Backend
         $objXml->writeElement('create_unix', time());
         $objXml->writeElement('create_date', date('Y-m-d', time()));
         $objXml->writeElement('create_time', date('H:i', time()));
-        $objXml->writeElement('table', $arrSet['table']);
+        $objXml->startElement('title');
+        $objXml->writeCdata($arrSet['title']);
+        $objXml->endElement(); // End title
+        $objXml->writeElement('childs', (($arrSet['childs']) ? 1 : 0));
+        $objXml->writeElement('table', $arrSet['table']);        
         $objXml->writeElement('checksum', $strMd5Checksum);
-        $objXml->writeElement('encryptionKey', $GLOBALS['TL_CONFIG']['encryptionKey']);
+        $objXml->writeElement('encryptionKey', md5($GLOBALS['TL_CONFIG']['encryptionKey']));
         $objXml->endElement(); // End metatags
 
         $objXml->startElement('datacontainer');
@@ -478,7 +482,34 @@ class ClipboardXmlWriter extends Backend
                 }
         }
         return md5(serialize($arrChecksum));
-    }    
+    }
+    
+    /**
+     * Set new value for title in metatags of given file
+     * 
+     * @param string $strFilePath
+     * @param string $strTitle
+     * @return boolean 
+     */
+    public function setNewTitle($strFullFilePath, $strFilePath, $strTitle)
+    {
+        $objDomDoc = new DOMDocument();
+        $objDomDoc->load($strFullFilePath);
+        $nodeTitle = $objDomDoc->getElementsByTagName('metatags')->item(0)->getElementsByTagName('title')->item(0);
+        $nodeTitle->nodeValue = '';
+        $cdata = $objDomDoc->createCDATASection($strTitle);
+        $nodeTitle->appendChild($cdata);
+        $strDomDoc = $objDomDoc->saveXML();
+        
+        $objFile = new File($strFilePath);
+        if ($objFile->write($strDomDoc))
+        {
+            $objFile->close;
+            return TRUE;
+        }
+        $objFile->close;
+        return FALSE;
+    }
 
 }
 

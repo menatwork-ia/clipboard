@@ -8,7 +8,6 @@
             <?php foreach ($this->clipboard as $id => $item): ?>
                 <li<?php echo ($item->getFavorite()) ? ' class="featured"' : ''; ?>>
                     <p class="edit">
-                        
                         <a title="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" href="<?php echo $this->addToUrl('key=cl_favor&amp;cl_id=' . $id); ?>">
                             <img height="16" width="16" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" src="system/themes/default/images/featured<?php echo ((!$item->getFavorite()) ? '_' : ''); ?>.gif" />
                         </a>
@@ -18,9 +17,12 @@
                         <?php if($item->getChilds()): ?>
                             <img title="<?php echo $GLOBALS['TL_LANG']['MSC']['titleChild']; ?>" height="16" width="14" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['titleChild']; ?>" src="<?php echo $GLOBALS['CLIPBOARD']['childs']['icon']; ?>" />
                         <?php endif; ?>
+                        <?php if($item->getEncryptionKey() != md5($GLOBALS['TL_CONFIG']['encryptionKey'])): ?>
+                            <img title="<?php echo $GLOBALS['TL_LANG']['MSC']['importedClipboard']; ?>" height="16" width="18" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['importedClipboard']; ?>" src="<?php echo $GLOBALS['CLIPBOARD']['imported']['icon']; ?>" />
+                        <?php endif; ?>
                     </p>
                     <p class="cl_title">
-                        <input class="<?php echo ((strlen($item->getTitle())) ? '' : 'empty '); ?>text" readonly="readonly" type="text" name="title[<?php echo $id; ?>]" value="<?php echo $item->getTitle(); ?>" />
+                        <input maxlength="50" class="<?php echo ((strlen($item->getTitle())) ? '' : 'empty '); ?>text" readonly="readonly" type="text" name="title[<?php echo $id; ?>]" value="<?php echo $item->getTitle(); ?>" />
                     </p>
                 </li>
             <?php endforeach; ?>

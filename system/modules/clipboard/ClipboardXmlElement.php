@@ -41,6 +41,13 @@ class ClipboardXmlElement
     protected $_objHelper;    
     
     /**
+     * Contains all function to write xml
+     * 
+     * @var ClipboardXmlWriter
+     */
+    protected $_objXmlWriter;    
+    
+    /**
      * Contains all functions to read xml
      * 
      * @var ClipboardXmlReader
@@ -65,6 +72,7 @@ class ClipboardXmlElement
     protected $_path = NULL;
     protected $_checksum = NULL;
     protected $_timeStemp = NULL;
+    protected $_encryptionKey = NULL;
 
     /**
      * Construct object
@@ -75,6 +83,7 @@ class ClipboardXmlElement
     public function __construct($strFileName, $strPath)
     {
         $this->_objHelper = ClipboardHelper::getInstance();
+        $this->_objXmlWriter = ClipboardXmlWriter::getInstance();
         $this->_objXmlReader = ClipboardXmlReader::getInstance();
         $this->_objFiles = Files::getInstance();
 
@@ -91,7 +100,7 @@ class ClipboardXmlElement
     {
         if (is_null($this->_title))
         {
-            $this->_setFileInfo();
+            $this->_setDetailFileInfo();
         }
         return $this->_title;
     }
@@ -104,14 +113,15 @@ class ClipboardXmlElement
      */
     public function setTitle($title)
     {
-        if (!is_null($this->_title) && $this->_title != $title)
+        if (!is_null($this->_title) || $this->_title != $title)
         {
+            $this->_setNewTitle($title);
             $strNewFileName = $this->_setNewFileName('title', $title);
             $this->_objFiles->rename(
                     $this->_path . '/' . $this->_filename, $this->_path . '/' . $strNewFileName
             );
             $this->_filename = $strNewFileName;
-            $this->_setFileInfo();
+            $this->_setFileInfo();            
         }
         $this->_title = $title;
         return $this;
@@ -165,7 +175,7 @@ class ClipboardXmlElement
      */
     public function setFavorite($favorite)
     {
-        if (!is_null($this->_favorite) && $this->_favorite != $favorite)
+        if (!is_null($this->_favorite) || $this->_favorite != $favorite)
         {
             $strNewFileName = $this->_setNewFileName('favorite', (($favorite) ? 'F' : 'N'));
             $this->_objFiles->rename(
@@ -218,6 +228,20 @@ class ClipboardXmlElement
         return $this->_timeStemp;
     }
     
+    /**
+     * Get encryptionKey
+     * 
+     * @return string
+     */
+    public function getEncryptionKey()
+    {
+        if (is_null($this->_encryptionKey))
+        {
+            $this->_setDetailFileInfo();
+        }
+        return $this->_encryptionKey;
+    }
+        
     /**
      * Get filename
      * 
@@ -277,7 +301,7 @@ class ClipboardXmlElement
     {
         if (is_null($this->_checksum))
         {
-            $this->_setDetailtFileInfo();
+            $this->_setDetailFileInfo();
         }
         return $this->_checksum;
     }
@@ -298,7 +322,7 @@ class ClipboardXmlElement
                 $arrFileName[2] = $strValue;
                 break;
             case 'title':
-                $arrFileName[4] = base64_encode($strValue);
+                $arrFileName[4] = standardize($strValue);
                 break;
         }
 
@@ -315,16 +339,25 @@ class ClipboardXmlElement
         $this->_timeStemp = $arrFileName[1];
         $this->_favorite = (($arrFileName[2] == 'F') ? 1 : 0);
         $this->_childs = (($arrFileName[3] == 'C') ? 1 : 0);
-        $this->_title = base64_decode($arrFileName[4]);
     }
     
     /**
      * Set detailt information from file meta description 
      */
-    protected function _setDetailtFileInfo()
+    protected function _setDetailFileInfo()
     {
-        $arrMetaInformation = $this->_objXmlReader->getDetailtFileInfo($this->getFilePath('full'));
+        $arrMetaInformation = $this->_objXmlReader->getDetailFileInfo($this->getFilePath('full'));
+        $this->_title = $arrMetaInformation['title'];
         $this->_checksum = $arrMetaInformation['checksum'];
+        $this->_encryptionKey = $arrMetaInformation['encryptionKey'];
+    }
+    
+    /**
+     * Set new title in file header
+     */
+    protected function _setNewTitle($title)
+    {
+        $this->_objXmlWriter->setNewTitle($this->getFilePath('full'), $this->getFilePath(), $title);
     }
 
 }
