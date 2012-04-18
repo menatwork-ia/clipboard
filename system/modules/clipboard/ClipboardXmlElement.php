@@ -64,6 +64,7 @@ class ClipboardXmlElement
     protected $_filename = NULL;
     protected $_path = NULL;
     protected $_checksum = NULL;
+    protected $_timeStemp = NULL;
 
     /**
      * Construct object
@@ -202,7 +203,21 @@ class ClipboardXmlElement
         $this->_childs = $childs;
         return $this;
     }
-
+    
+    /**
+     * Get timestemp
+     * 
+     * @return string
+     */
+    public function getTimeStemp()
+    {
+        if (is_null($this->_timeStemp))
+        {
+            $this->_setFileInfo();
+        }
+        return $this->_timeStemp;
+    }
+    
     /**
      * Get filename
      * 
@@ -297,6 +312,7 @@ class ClipboardXmlElement
     {
         $arrFileName = $this->_objHelper->getArrFromFileName($this->getFilePath());
         $this->_table = 'tl_' . $arrFileName[0];
+        $this->_timeStemp = $arrFileName[1];
         $this->_favorite = (($arrFileName[2] == 'F') ? 1 : 0);
         $this->_childs = (($arrFileName[3] == 'C') ? 1 : 0);
         $this->_title = base64_decode($arrFileName[4]);

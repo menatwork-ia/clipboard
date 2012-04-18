@@ -217,14 +217,34 @@ class ClipboardXml extends Backend
      */
     public function getFavorite()
     {
+        $arrFavorits = array();
         if ($this->hasElements())
         {
             foreach ($this->_arrClipboardElements AS $objFile)
             {
                 if ($objFile->getFavorite())
                 {
-                    return $objFile;
+                    $arrFavorits[] =  $objFile;
                 }
+            }
+            
+            if(count($arrFavorits) == 1)
+            {
+                return $arrFavorits[0];
+            }
+            else
+            {
+                $objFileNewest = reset($this->_arrClipboardElements);
+                foreach ($this->_arrClipboardElements AS $objFile)
+                {
+                    if($objFileNewest->getTimeStemp() < $objFile->getTimeStemp())
+                    {
+                        $objFileNewest = $objFile;
+                    }
+                }
+                $this->unFavorAll();
+                $objFileNewest->setFavorite(TRUE);                
+                return $objFileNewest;
             }
         }
         return FALSE;
