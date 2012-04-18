@@ -191,7 +191,7 @@ class DC_Clipboard extends DC_Table
         }
 
         // Added by Patrick Kahl
-        // HOOK: call the hooks for independently buttons
+        // HOOK: call the hooks for clipboardButtons
         if (isset($GLOBALS['TL_HOOKS']['clipboardButtons']) && is_array($GLOBALS['TL_HOOKS']['clipboardButtons']))
         {
             foreach ($GLOBALS['TL_HOOKS']['clipboardButtons'] as $callback)

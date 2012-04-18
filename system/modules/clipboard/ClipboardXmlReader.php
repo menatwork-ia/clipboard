@@ -390,6 +390,30 @@ class ClipboardXmlReader extends Backend
             }
         }
     }
+
+    /**
+     * Return all metainformation for all xml files from current user
+     * 
+     * @param string $strDo
+     * @return array
+     */
+    public function getDetailtFileInfo($strFilePath)
+    {
+        $arrMetaInformation = array();
+        
+        $objDomDoc = new DOMDocument();
+        $objDomDoc->load($strFilePath);
+        $objMetaTags = $objDomDoc->getElementsByTagName('metatags')->item(0);            
+        $objMetaChilds = $objMetaTags->childNodes;
+
+        for($i = 0; $i < $objMetaChilds->length; $i++)
+        {
+            $strNodeName = $objMetaChilds->item($i)->nodeName;
+            $arrMetaInformation[$strNodeName] = $objMetaChilds->item($i)->nodeValue;
+        }
+        return $arrMetaInformation;
+    }    
+
 }
 
 ?>

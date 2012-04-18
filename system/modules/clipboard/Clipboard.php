@@ -239,13 +239,13 @@ class Clipboard extends Backend
      * @param boolean $boolChilds
      * @return string 
      */
-    public function getTitle($intId, $boolChilds)
+    public function getTitle($intId)
     {
         switch ($this->_objHelper->getPageType())
         {
             case 'page':
                 $objElem = $this->_objDatabase->getPageObject($intId);
-                return (($boolChilds) ? $objElem->title . ' ' . $GLOBALS['TL_LANG']['MSC']['titleChild'] : $objElem->title);
+                return $objElem->title;
                 break;
             case 'article':
                 return call_user_func_array(array($this->_objDatabase, 'get' . $this->_objHelper->getPageType() . 'Object'), array($intId))->title;
@@ -275,7 +275,7 @@ class Clipboard extends Backend
             'childs' => $boolHasChilds,
             'table' => $this->_objHelper->getDbPageType(),
             'elem_id' => $this->Input->get('id'),
-            'title' => $this->getTitle($this->Input->get('id'), $boolHasChilds)
+            'title' => $this->getTitle($this->Input->get('id'))
         );
 
         $this->cb()->write($arrSet);

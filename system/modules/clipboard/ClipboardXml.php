@@ -124,10 +124,14 @@ class ClipboardXml extends Backend
      */
     public function write($arrSet)
     {
+        $objFile = $this->getFavorite();
         $this->unFavorAll();
         $arrSet['filename'] = $this->_getFileName($arrSet);
         $arrSet['path'] = $this->getPath();
-        $this->_objXmlWriter->writeXml($arrSet);
+        if(!$this->_objXmlWriter->writeXml($arrSet, $this->_arrClipboardElements))
+        {
+            $objFile->setFavorite(TRUE);
+        }
     }
 
     /**
@@ -271,7 +275,7 @@ class ClipboardXml extends Backend
         {
             foreach ($arrFiles AS $strFileName)
             {
-                $arrFile = explode('_', $strFileName);
+                $arrFile = $this->_objHelper->getArrFromFileName($this->getPath() . '/' . $strFileName);
                 if ($arrFile[0] != $this->_objHelper->getPageType())
                 {
                     continue;
@@ -324,11 +328,10 @@ class ClipboardXml extends Backend
             time(),
             'F',
             (($arrSet['childs']) ? 'C' : 'NC'),
-            base64_encode($arrSet['title']),
-            '.xml'
+            base64_encode($arrSet['title'])            
         );
 
-        return implode('_', $arrFileName);
+        return implode(',', $arrFileName) . '.xml';
     }
     
 }

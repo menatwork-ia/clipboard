@@ -69,6 +69,8 @@ class ClipboardXmlWriter extends Backend
         parent::__construct();
         $this->_objHelper = ClipboardHelper::getInstance();
         $this->_objDatabase = ClipboardDatabase::getInstance();
+        
+        set_time_limit(5);
     }
 
     /**
@@ -89,15 +91,28 @@ class ClipboardXmlWriter extends Backend
         }
         return self::$_objInstance;
     }
-
+    
     /**
      * Create xml file for the given element and all his childs
      * 
      * @param array $arrSet
+     * @param array $arrCbElems
      * @return boolean 
      */
-    public function writeXml($arrSet)
+    public function writeXml($arrSet, $arrCbElems)
     {
+        $strMd5Checksum = $this->_createChecksum($arrSet);
+        if(is_array($arrCbElems))
+        {            
+            foreach($arrCbElems AS $objCbFile)
+            {
+                if($objCbFile->getChecksum() == $strMd5Checksum)
+                {
+                    return FALSE;
+                }
+            }
+        }
+        
         $this->_strPageTable = $arrSet['table'];
 
         // Create XML File
@@ -116,6 +131,7 @@ class ClipboardXmlWriter extends Backend
         $objXml->writeElement('create_date', date('Y-m-d', time()));
         $objXml->writeElement('create_time', date('H:i', time()));
         $objXml->writeElement('table', $arrSet['table']);
+        $objXml->writeElement('checksum', $strMd5Checksum);
         $objXml->writeElement('encryptionKey', $GLOBALS['TL_CONFIG']['encryptionKey']);
         $objXml->endElement(); // End metatags
 
@@ -383,6 +399,86 @@ class ClipboardXmlWriter extends Backend
             }
         }
     }
+    
+    /**
+     * Get checksum as md5 hash from all page, article and content elements 
+     * that need to save in xml
+     * 
+     * @param array $arrSet
+     * @return string 
+     */
+    protected function _createChecksum($arrSet)
+    {
+        $arrChecksum = array();
+        switch ($arrSet['table'])
+        {            
+            case 'tl_page':
+                $arrPage = $this->_objDatabase->getPageObject($arrSet['elem_id'])->fetchAllAssoc();
+                if($arrSet['childs'])
+                {                    
+                    $arrTmp = array($arrPage[0]['id']);
+                    $arrChecksum['page'][] = $arrPage[0];
+                    for($i = 0; TRUE; $i++)
+                    {
+                        if(!isset($arrTmp[$i]))
+                        {
+                            break;
+                        }
+                        $arrSubPages = $this->_objDatabase->getSubpagesObject($arrTmp[$i])->fetchAllAssoc();
+                        foreach($arrSubPages AS $arrSubPage)
+                        {
+                            $arrTmp[] = $arrSubPage['id'];
+                            $arrChecksum['page'][] = $arrSubPage;
+                        }
+                    }
+                }
+                else
+                {
+                   $arrChecksum['page'][] = $arrPage[0]; 
+                }
+            case 'tl_article':
+                if(is_array($arrChecksum['page']))
+                {
+                    foreach($arrChecksum['page'] AS $arrPage)
+                    {
+                        $arrArticles = $this->_objDatabase->getArticleObjectFromPid($arrPage['id'])->fetchAllAssoc();
+                        foreach($arrArticles AS $arrArticle)
+                        {
+                            $arrChecksum['article'][] = $arrArticle;
+                        }
+                    }
+                }
+                else
+                {
+                    $arrArticles = $this->_objDatabase->getArticleObject($arrSet['elem_id'])->fetchAllAssoc();
+                    foreach($arrArticles AS $arrArticle)
+                    {
+                        $arrChecksum['article'][] = $arrArticle;
+                    }                    
+                }
+            case 'tl_content':
+                if(is_array($arrChecksum['article']))
+                {
+                    foreach ($arrChecksum['article'] AS $arrArticle)
+                    {
+                        $arrContents = $this->_objDatabase->getContentObjectFromPid($arrArticle['id'])->fetchAllAssoc();
+                        foreach ($arrContents AS $arrContent)
+                        {
+                            $arrChecksum['content'][] = $arrContent;
+                        }
+                    }
+                }
+                else
+                {
+                    $arrContents = $this->_objDatabase->getContentObject($arrSet['elem_id'])->fetchAllAssoc();
+                    foreach ($arrContents AS $arrContent)
+                    {
+                        $arrChecksum['content'][] = $arrContent;
+                    }                    
+                }
+        }
+        return md5(serialize($arrChecksum));
+    }    
 
 }
 

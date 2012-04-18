@@ -16,7 +16,7 @@
                             <img height="16" width="14" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['deleteSelected']; ?>" src="system/themes/default/images/delete.gif" />
                         </a>
                         <?php if($item->getChilds()): ?>
-                            <img height="16" width="14" alt="" src="<?php echo $GLOBALS['CLIPBOARD']['childs']['icon']; ?>" />
+                            <img title="<?php echo $GLOBALS['TL_LANG']['MSC']['titleChild']; ?>" height="16" width="14" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['titleChild']; ?>" src="<?php echo $GLOBALS['CLIPBOARD']['childs']['icon']; ?>" />
                         <?php endif; ?>
                     </p>
                     <p class="cl_title">
@@ -36,8 +36,6 @@
     </div>
 </div>
 <?php endif; ?>
-
-<?php FB::log($this->isContext); ?>
 
 <script>
 window.addEvent('domready', function(){<?php if($this->isContext): ?>ClipboardMenu.initialize();<?php endif; ?>Clipboard.initialize();});

@@ -34,6 +34,20 @@ class ClipboardXmlElement
 {
 
     /**
+     * Contains some helper functions
+     * 
+     * @var object 
+     */
+    protected $_objHelper;    
+    
+    /**
+     * Contains all functions to read xml
+     * 
+     * @var ClipboardXmlReader
+     */
+    protected $_objXmlReader;    
+    
+    /**
      * Contains all file operations
      * 
      * @var Files
@@ -49,6 +63,7 @@ class ClipboardXmlElement
     protected $_childs = NULL;
     protected $_filename = NULL;
     protected $_path = NULL;
+    protected $_checksum = NULL;
 
     /**
      * Construct object
@@ -58,6 +73,8 @@ class ClipboardXmlElement
      */
     public function __construct($strFileName, $strPath)
     {
+        $this->_objHelper = ClipboardHelper::getInstance();
+        $this->_objXmlReader = ClipboardXmlReader::getInstance();
         $this->_objFiles = Files::getInstance();
 
         $this->_filename = $strFileName;
@@ -92,6 +109,7 @@ class ClipboardXmlElement
             $this->_objFiles->rename(
                     $this->_path . '/' . $this->_filename, $this->_path . '/' . $strNewFileName
             );
+            $this->_filename = $strNewFileName;
             $this->_setFileInfo();
         }
         $this->_title = $title;
@@ -152,6 +170,7 @@ class ClipboardXmlElement
             $this->_objFiles->rename(
                     $this->_path . '/' . $this->_filename, $this->_path . '/' . $strNewFileName
             );
+            $this->_filename = $strNewFileName;
             $this->_setFileInfo();
         }
         $this->_favorite = $favorite;
@@ -229,9 +248,23 @@ class ClipboardXmlElement
      */
     public function getHash()
     {
-        $arrFileName = explode('_', $this->_filename);
+        $arrFileName = $this->_objHelper->getArrFromFileName($this->getFilePath());
         unset($arrFileName[2]);
-        return crc32(implode('_', $arrFileName));
+        return crc32(implode(',', $arrFileName));
+    }
+    
+    /**
+     * Get checksum
+     * 
+     * @return string 
+     */
+    public function getChecksum()
+    {
+        if (is_null($this->_checksum))
+        {
+            $this->_setDetailtFileInfo();
+        }
+        return $this->_checksum;
     }
 
     /**
@@ -242,8 +275,8 @@ class ClipboardXmlElement
      * @return string 
      */
     private function _setNewFileName($strEditType, $strValue)
-    {
-        $arrFileName = explode('_', $this->_filename);
+    {        
+        $arrFileName = $this->_objHelper->getArrFromFileName($this->getFilePath());
         switch ($strEditType)
         {
             case 'favorite':
@@ -254,7 +287,7 @@ class ClipboardXmlElement
                 break;
         }
 
-        return implode('_', $arrFileName);
+        return implode(',', $arrFileName) . '.xml';
     }
 
     /**
@@ -262,11 +295,20 @@ class ClipboardXmlElement
      */
     protected function _setFileInfo()
     {
-        $arrFileName = explode('_', $this->_filename);
+        $arrFileName = $this->_objHelper->getArrFromFileName($this->getFilePath());
         $this->_table = 'tl_' . $arrFileName[0];
         $this->_favorite = (($arrFileName[2] == 'F') ? 1 : 0);
         $this->_childs = (($arrFileName[3] == 'C') ? 1 : 0);
         $this->_title = base64_decode($arrFileName[4]);
+    }
+    
+    /**
+     * Set detailt information from file meta description 
+     */
+    protected function _setDetailtFileInfo()
+    {
+        $arrMetaInformation = $this->_objXmlReader->getDetailtFileInfo($this->getFilePath('full'));
+        $this->_checksum = $arrMetaInformation['checksum'];
     }
 
 }

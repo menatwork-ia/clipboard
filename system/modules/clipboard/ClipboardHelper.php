@@ -171,9 +171,9 @@ class ClipboardHelper extends Backend
      */
     public function getPasteButton($row, $href, $label, $title, $icon, $attributes, $table)
     {
-        $objFavorit = Clipboard::getInstance()->cb()->getFavorite();
+        $boolFavorit = Clipboard::getInstance()->cb()->hasFavorite();
 
-        if ($objFavorit->numRows)
+        if ($boolFavorit)
         {
             $return = '';
             if ($this->User->isAdmin || ($this->User->hasAccess($row['type'], 'alpty') && $this->User->isAllowed(2, $row)))
@@ -228,20 +228,10 @@ class ClipboardHelper extends Backend
         if ($dc->table == 'tl_article' && $table == 'tl_page')
         {
             // Create button title and lable
-            if ($this->pageType == 'content')
-            {
-                $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteafter'][1], array(
-                    $objFavorit->elem_id
-                        )
-                );
-            }
-            else
-            {
-                $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteinto'][1], array(
-                    $objFavorit->elem_id
-                        )
-                );
-            }
+            $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteinto'][1], array(
+                $row['id']
+                    )
+            );
 
             // Create Paste Button
             $return = $this->getPasteButton(
@@ -461,6 +451,24 @@ class ClipboardHelper extends Backend
             }
         }
         return FALSE;
+    }
+    
+    /**
+     * Return given file from path by comme without file extension
+     * 
+     * @param string $strFilePath
+     * @return array
+     */
+    public function getArrFromFileName($strFilePath)
+    {
+        $arrFileInfo = pathinfo($strFilePath);
+        
+        $arrFileName = explode(
+            ',', 
+            $arrFileInfo['filename']
+        );
+        
+        return $arrFileName;
     }
 
 }
