@@ -176,7 +176,7 @@ class ClipboardXmlWriter extends Backend
      * @param bool $boolChilds
      * @return XMLWriter 
      */
-    protected function writePage($intId, $objXml, $boolHasChilds)
+    protected function writePage($intId, &$objXml, $boolHasChilds)
     {
         $objXml->startElement('page');
         $objXml->writeAttribute('table', $this->_strPageTable);
@@ -203,7 +203,7 @@ class ClipboardXmlWriter extends Backend
      * @param type $intId
      * @param XMLWriter $objXml
      */
-    protected function writeSubpages($intId, $objXml)
+    protected function writeSubpages($intId, &$objXml)
     {
         $arrPageRows = $this->_objDatabase->getSubpagesObject($intId)->fetchAllAssoc();
 
@@ -233,7 +233,7 @@ class ClipboardXmlWriter extends Backend
      * @param XMLWriter $objXml
      * @param boolean $boolIsChild
      */
-    protected function writeArticle($intId, $objXml, $boolIsChild)
+    protected function writeArticle($intId, &$objXml, $boolIsChild)
     {
         if ($boolIsChild)
         {
@@ -269,7 +269,7 @@ class ClipboardXmlWriter extends Backend
      * @param XMLWriter $objXml
      * @param boolean $boolIsChild 
      */
-    protected function writeContent($intId, $objXml, $boolIsChild)
+    protected function writeContent($intId, &$objXml, $boolIsChild)
     {
         if ($boolIsChild)
         {
@@ -300,7 +300,7 @@ class ClipboardXmlWriter extends Backend
      * @param array $arrRows
      * @param XMLWriter $objXml 
      */
-    protected function writeGivenDbTableRows($strTable, $arrRows, $objXml)
+    protected function writeGivenDbTableRows($strTable, $arrRows, &$objXml)
     {
         $arrFieldMeta = $this->_objHelper->getTableMetaFields($strTable);
 

@@ -144,7 +144,7 @@ class ClipboardXmlReader extends Backend
      * @param integer $intElemId
      * @param bool $boolIsChild
      */
-    public function createPage($objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
+    public function createPage(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
     {
         $intLastInsertId = 0;
 
@@ -202,7 +202,7 @@ class ClipboardXmlReader extends Backend
      * @param integer $intElemId
      * @param bool $boolIsChild
      */
-    public function createArticle($objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
+    public function createArticle(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
     {
         $intLastInsertId = 0;
 
@@ -257,7 +257,7 @@ class ClipboardXmlReader extends Backend
      * @param integer $intElemId
      * @param bool $boolIsChild
      */
-    protected function createContent($objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
+    protected function createContent(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
     {
         if ($boolIsChild == TRUE)
         {
@@ -331,7 +331,7 @@ class ClipboardXmlReader extends Backend
      * @param bool $boolIsChild
      * @return array
      */
-    protected function createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
+    protected function createArrSetForRow(&$objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
     {
         $arrFields = $this->_objHelper->getFields($strTable);
         $arrSet = array();
