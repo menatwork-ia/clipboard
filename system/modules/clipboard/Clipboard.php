@@ -253,14 +253,14 @@ class Clipboard extends Backend
                 break;
 
             case 'content':
-                $strTitel = $this->_objHelper->createContentTitle($intId);
-                if (!is_object($strTitel))
+                $objTitel = $this->_objHelper->createContentTitle($intId);
+                if (!is_object($objTitel))
                 {
-                    return $strTitel;
+                    return $objTitel;
                 }
                 else
                 {
-                    return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] . ' (' . $strTitel->type . ')';
+                    return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] . ' (' . $GLOBALS['TL_LANG']['CTE'][$objTitel->type][0] . ')';
                 }
                 
             default:
