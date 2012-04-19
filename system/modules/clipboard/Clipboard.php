@@ -247,17 +247,22 @@ class Clipboard extends Backend
                 $objElem = $this->_objDatabase->getPageObject($intId);
                 return $objElem->title;
                 break;
+            
             case 'article':
                 return call_user_func_array(array($this->_objDatabase, 'get' . $this->_objHelper->getPageType() . 'Object'), array($intId))->title;
                 break;
 
             case 'content':
                 $strTitel = $this->_objHelper->createContentTitle($intId);
-                if (!is_null($strTitel))
+                if (!is_object($strTitel))
                 {
                     return $strTitel;
                 }
-
+                else
+                {
+                    return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] . ' (' . $strTitel->type . ')';
+                }
+                
             default:
                 return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'];
         }

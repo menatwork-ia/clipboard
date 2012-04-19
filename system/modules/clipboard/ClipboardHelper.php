@@ -243,10 +243,11 @@ class ClipboardHelper extends Backend
     }
     
     /**
-     * Create title for content element
+     * Create title for content element and return it as string. If no title 
+     * exists return content element as object.
      * 
      * @param type $intId
-     * return array
+     * @return DB_Mysql_Result|string
      */
     public function createContentTitle($intId)
     {
@@ -277,7 +278,7 @@ class ClipboardHelper extends Backend
         }
         else
         {
-            return NULL;
+            return $objContentElem;
         }
 
         $arrTitle[] = ' (' . $GLOBALS['TL_LANG']['CTE'][$objContentElem->type][0] . ')';
