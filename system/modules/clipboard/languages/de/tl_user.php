@@ -26,6 +26,11 @@
  * @license    GNU/LGPL 
  * @filesource
  */
+ 
+/**
+ * Legends
+ */
+$GLOBALS['TL_LANG']['tl_user']['clipboard_legend']      = 'Erweiterte Zwischenablage';
 
 /**
  * Fields

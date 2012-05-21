@@ -22,7 +22,7 @@
  *
  * PHP version 5
  * @copyright  MEN AT WORK 2011
- * @package    valumsFileUploader
+ * @package    clipboard
  * @license    GNU/GPL 2 
  * @filesource
  */
@@ -38,14 +38,7 @@ foreach ($GLOBALS['TL_DCA']['tl_user']['palettes'] as $key => $row)
     }
 
     $arrPalettes = explode(";", $row);
-    foreach($arrPalettes AS $k => $arrPalette)
-    {        
-        if(strstr($arrPalette, '{backend_legend}'))
-        {
-            $arrPalettes[$k] = $arrPalette . ',clipboard,clipboard_context';
-        }
-        
-    }
+    $arrPalettes[] = '{clipboard_legend},clipboard,clipboard_context';
     
     $GLOBALS['TL_DCA']['tl_user']['palettes'][$key] = implode(";", $arrPalettes);
 }

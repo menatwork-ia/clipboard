@@ -28,6 +28,11 @@
  */
 
 /**
+ * Legends
+ */
+$GLOBALS['TL_LANG']['tl_user']['clipboard_legend']      = 'Extended clipboard';
+
+/**
  * Fields
  */
 $GLOBALS['TL_LANG']['tl_user']['clipboard']             = array('Ativar clipboard', 'Ativar a funcionalidade &aacute;rea de transfer&ecirc;ncia estendida.');
