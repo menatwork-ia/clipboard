@@ -41,6 +41,8 @@ if (Clipboard::getInstance()->isClipboard('page'))
      * Config 
      */
     $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = array('Clipboard', 'init');
+    
+    $GLOBALS['TL_DCA']['tl_page']['config']['dataContainer'] = 'Clipboard';
 
     /**
      * List operations 

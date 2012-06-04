@@ -281,6 +281,54 @@ class DC_Clipboard extends DC_Table
 
         $this->Session->setData($session);
         return $return;
+    }   
+
+    /**
+     * List all records of the current table as tree and return them as HTML string
+     * @return string
+     */
+    protected function treeView()
+    {
+        $strTreeView = parent::treeView();
+        
+        $arrButtons = array();
+        
+        // Added by Patrick Kahl
+        // HOOK: call the hooks for clipboardActSelectButtons
+        if (isset($GLOBALS['TL_HOOKS']['clipboardActSelectButtonsTreeView']) && is_array($GLOBALS['TL_HOOKS']['clipboardActSelectButtonsTreeView']))
+        {
+            foreach ($GLOBALS['TL_HOOKS']['clipboardActSelectButtonsTreeView'] as $callback)
+            {
+                $this->import($callback[0]);
+                $arrButtons[] = $this->$callback[0]->$callback[1]($this);
+            }
+        }        
+        
+        return preg_replace('/<div.*class="tl_submit_container".*>/', "$0" . implode('', $arrButtons), $strTreeView, 1);        
+    }    
+    
+    /**
+     * Show header of the parent table and list all records of the current table
+     * @return string
+     */
+    protected function parentView()
+    {
+        $strParentView = parent::parentView();
+        
+        $arrButtons = array();
+        
+        // Added by Patrick Kahl
+        // HOOK: call the hooks for clipboardActSelectButtons
+        if (isset($GLOBALS['TL_HOOKS']['clipboardActSelectButtonsParentView']) && is_array($GLOBALS['TL_HOOKS']['clipboardActSelectButtonsParentView']))
+        {
+            foreach ($GLOBALS['TL_HOOKS']['clipboardActSelectButtonsParentView'] as $callback)
+            {
+                $this->import($callback[0]);
+                $arrButtons[] = $this->$callback[0]->$callback[1]($this);
+            }
+        }        
+        
+        return preg_replace('/<div.*class="tl_submit_container".*>/', "$0" . implode('', $arrButtons), $strParentView, 1);
     }
 
 }

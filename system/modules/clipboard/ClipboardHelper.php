@@ -223,23 +223,31 @@ class ClipboardHelper extends Backend
      */
     public function clipboardButtons(DataContainer $dc, $row, $table, $cr, $arrClipboard = false, $childs)
     {
-        $objFavorit = Clipboard::getInstance()->cb()->getFavorite();
-
-        if ($dc->table == 'tl_article' && $table == 'tl_page')
+        if(!$this->Input->get('act'))
         {
-            // Create button title and lable
-            $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteinto'][1], array(
-                $row['id']
-                    )
-            );
+            $objFavorit = Clipboard::getInstance()->cb()->getFavorite();
 
-            // Create Paste Button
-            $return = $this->getPasteButton(
-                    $row, $GLOBALS['CLIPBOARD']['pasteinto']['href'], $label, $title, $GLOBALS['CLIPBOARD']['pasteinto']['icon'], $GLOBALS['CLIPBOARD']['pasteinto']['attributes'], $dc->table
-            );
+            if ($dc->table == 'tl_article' && $table == 'tl_page')
+            {
+                // Create button title and lable
+                $label = $title = vsprintf($GLOBALS['TL_LANG'][$dc->table]['pasteinto'][1], array(
+                    $row['id']
+                        )
+                );
 
-            return $return;
+                // Create Paste Button
+                $return = $this->getPasteButton(
+                        $row, $GLOBALS['CLIPBOARD']['pasteinto']['href'], $label, $title, $GLOBALS['CLIPBOARD']['pasteinto']['icon'], $GLOBALS['CLIPBOARD']['pasteinto']['attributes'], $dc->table
+                );
+
+                return $return;
+            }
         }
+    }
+    
+    public function clipboardActSelectButtons(DataContainer $dc)
+    {        
+        return '<input id="cl_multiCopy" class="tl_submit" type="submit" value="' . $GLOBALS['TL_LANG']['MSC']['groupSelected'] . '" name="cl_group">';
     }
     
     /**
@@ -270,20 +278,20 @@ class ClipboardHelper extends Backend
 
         if ($strHeadline != '' && $strHeadline != 'NULL')
         {
-            $arrTitle[] = $strHeadline;
+            $arrTitle['title'] = $strHeadline;
         }
         elseif ($strText != '' && $strText != 'NULL')
         {
-            $arrTitle[] = $strText;
+            $arrTitle['title'] = $strText;
         }
         else
         {
             return $objContentElem;
         }
 
-        $arrTitle[] = ' (' . $GLOBALS['TL_LANG']['CTE'][$objContentElem->type][0] . ')';
+        $arrTitle['type'] = ' (' . $GLOBALS['TL_LANG']['CTE'][$objContentElem->type][0] . ')';
 
-        return implode('', $arrTitle);
+        return $arrTitle;
     }
 
     /**

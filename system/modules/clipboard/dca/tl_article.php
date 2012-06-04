@@ -42,10 +42,7 @@ if (Clipboard::getInstance()->isClipboard('article'))
      */
     $GLOBALS['TL_DCA']['tl_article']['config']['onload_callback'][] = array('clipboard', 'init');
 
-    if (Clipboard::getInstance()->cb()->hasElements())
-    {
-        $GLOBALS['TL_DCA']['tl_article']['config']['dataContainer'] = 'Clipboard';
-    }
+    $GLOBALS['TL_DCA']['tl_article']['config']['dataContainer'] = 'Clipboard';
 
     /**
      * List operations 

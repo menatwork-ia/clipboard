@@ -44,7 +44,9 @@ if (Clipboard::getInstance()->isClipboard('content'))
      * Config 
      */
     $GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = array('Clipboard', 'init');
-
+        
+    $GLOBALS['TL_DCA']['tl_content']['config']['dataContainer'] = 'Clipboard';
+    
     /**
      * List operations 
      */
@@ -72,11 +74,17 @@ if (Clipboard::getInstance()->isClipboard('content'))
                 $GLOBALS['CLIPBOARD']['pasteafter'], $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_paste_after']
         );
         
-        $GLOBALS['TL_DCA']['tl_content']['list']['global_operations']['cl_paste_into'] = array(            
-            'label'         => &$GLOBALS['TL_LANG']['tl_content']['pasteafter'][0],
-            'href'          => 'key=cl_header_pastenew',
-            'class'         => 'header_clipboard cl_header_pastenew',
-            'attributes'    => 'onclick="Backend.getScrollOffset()" accesskey="p"'            
+        $arrPasteInto = array(
+            'cl_paste_into' => array(            
+                'label'         => &$GLOBALS['TL_LANG']['tl_content']['pasteafter'][0],
+                'href'          => 'key=cl_header_pastenew',
+                'class'         => 'header_clipboard cl_header_pastenew',
+                'attributes'    => 'onclick="Backend.getScrollOffset()" accesskey="p"'            
+            )
+        );
+        
+        $GLOBALS['TL_DCA']['tl_content']['list']['global_operations'] = array_merge(
+            $arrPasteInto, $GLOBALS['TL_DCA']['tl_content']['list']['global_operations']                
         );
     }
 }
