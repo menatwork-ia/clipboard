@@ -102,6 +102,7 @@ class ClipboardXmlWriter extends Backend
     public function writeXml($arrSet, $arrCbElems)
     {
         $strMd5Checksum = $this->_createChecksum($arrSet);
+
         if(is_array($arrCbElems))
         {            
             foreach($arrCbElems AS $objCbFile)
@@ -112,7 +113,7 @@ class ClipboardXmlWriter extends Backend
                 }
             }
         }
-        
+  
         $this->_strPageTable = $arrSet['table'];
 
         // Create XML File
@@ -171,27 +172,30 @@ class ClipboardXmlWriter extends Backend
     /**
      * Write page informations to xml object
      * 
-     * @param integer $intId
+     * @param mixed $mixedId
      * @param XMLWriter $objXml
      * @param bool $boolChilds
      * @return XMLWriter 
      */
-    protected function writePage($intId, &$objXml, $boolHasChilds)
-    {
+    protected function writePage($mixedId, &$objXml, $boolHasChilds)
+    {        
+        $arrRows = $this->_objDatabase->getPageObject($mixedId)->fetchAllAssoc();
+        
         $objXml->startElement('page');
-        $objXml->writeAttribute('table', $this->_strPageTable);
+        $objXml->writeAttribute('table', $this->_strPageTable);        
 
-        $arrPageRows = $this->_objDatabase->getPageObject($intId)->fetchAllAssoc();
+        foreach ($arrRows AS $arrRow)
+        {        
+            $this->writeGivenDbTableRows($this->_strPageTable, array($arrRow), $objXml);
 
-        $this->writeGivenDbTableRows($this->_strPageTable, $arrPageRows, $objXml);
-
-        $objXml->startElement('articles');
-        $this->writeArticle($intId, $objXml, TRUE);
-        $objXml->endElement(); // End articles
-
+            $objXml->startElement('articles');
+            $this->writeArticle($mixedId, $objXml, TRUE);
+            $objXml->endElement(); // End articles
+        }
+        
         if ($boolHasChilds)
         {
-            $this->writeSubpages($intId, $objXml);
+            $this->writeSubpages($mixedId, $objXml);
         }
 
         $objXml->endElement(); // End page
@@ -229,19 +233,19 @@ class ClipboardXmlWriter extends Backend
     /**
      * Write article informations to xml object
      * 
-     * @param integer $intId
+     * @param mixed $mixedId
      * @param XMLWriter $objXml
      * @param boolean $boolIsChild
      */
-    protected function writeArticle($intId, &$objXml, $boolIsChild)
+    protected function writeArticle($mixedId, &$objXml, $boolIsChild)
     {
         if ($boolIsChild)
         {
-            $arrRows = $this->_objDatabase->getArticleObjectFromPid($intId)->fetchAllAssoc();
+            $arrRows = $this->_objDatabase->getArticleObjectFromPid($mixedId)->fetchAllAssoc();
         }
         else
         {
-            $arrRows = $this->_objDatabase->getArticleObject($intId)->fetchAllAssoc();
+            $arrRows = $this->_objDatabase->getArticleObject($mixedId)->fetchAllAssoc();
         }
 
         if (count($arrRows) < 1)
@@ -265,19 +269,19 @@ class ClipboardXmlWriter extends Backend
     /**
      * Write content informations to xml object
      * 
-     * @param integer $intId
+     * @param integer $mixedId
      * @param XMLWriter $objXml
      * @param boolean $boolIsChild 
      */
-    protected function writeContent($intId, &$objXml, $boolIsChild)
+    protected function writeContent($mixedId, &$objXml, $boolIsChild)
     {
         if ($boolIsChild)
         {
-            $arrRows = $this->_objDatabase->getContentObjectFromPid($intId)->fetchAllAssoc();
+            $arrRows = $this->_objDatabase->getContentObjectFromPid($mixedId)->fetchAllAssoc();
         }
         else
         {
-            $arrRows = $this->_objDatabase->getContentObject($intId)->fetchAllAssoc();
+            $arrRows = $this->_objDatabase->getContentObject($mixedId)->fetchAllAssoc();
         }
 
         if (count($arrRows) < 1)
@@ -417,11 +421,11 @@ class ClipboardXmlWriter extends Backend
         switch ($arrSet['table'])
         {            
             case 'tl_page':
-                $arrPage = $this->_objDatabase->getPageObject($arrSet['elem_id'])->fetchAllAssoc();
+                $arrPages = $this->_objDatabase->getPageObject($arrSet['elem_id'])->fetchAllAssoc();
                 if($arrSet['childs'])
                 {                    
-                    $arrTmp = array($arrPage[0]['id']);
-                    $arrChecksum['page'][] = $arrPage[0];
+                    $arrTmp = array($arrPages[0]['id']);
+                    $arrChecksum['page'][] = $arrPages[0];
                     for($i = 0; TRUE; $i++)
                     {
                         if(!isset($arrTmp[$i]))
@@ -438,7 +442,10 @@ class ClipboardXmlWriter extends Backend
                 }
                 else
                 {
-                   $arrChecksum['page'][] = $arrPage[0]; 
+                    foreach ($arrPages AS $arrPage)
+                    {
+                        $arrChecksum['page'][] = $arrPage;
+                    }
                 }
             case 'tl_article':
                 if(is_array($arrChecksum['page']))

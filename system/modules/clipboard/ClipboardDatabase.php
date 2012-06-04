@@ -81,17 +81,30 @@ class ClipboardDatabase extends Backend
     /**
      * Return page object from given id
      * 
-     * @param integer $intId
+     * @param mixed $mixedId
      * @return DB_Mysql_Result
      */
-    public function getPageObject($intId)
-    {
-        $objDb = $this->Database
-                ->prepare("SELECT * FROM `tl_page` WHERE id = ?")
+    public function getPageObject($mixedId)
+    {        
+        if(is_array($mixedId))
+        {
+            $strQuery = "SELECT * FROM `tl_page` WHERE id IN (" . implode(', ', $mixedId) . ")";
+            
+            $objDb = $this->Database
+                ->prepare($strQuery)
+                ->executeUncached();   
+        }
+        else
+        {
+            $strQuery = "SELECT * FROM `tl_page` WHERE id = ?";
+            
+            $objDb = $this->Database
+                ->prepare($strQuery)
                 ->limit(1)
-                ->execute($intId);
+                ->executeUncached($mixedId);            
+        }               
 
-        return $objDb;
+        return $objDb;        
     }
 
     /**
@@ -112,17 +125,30 @@ class ClipboardDatabase extends Backend
     /**
      * Return article object from given id
      * 
-     * @param integer $intId
+     * @param mixed $mixedId
      * @return DB_Mysql_Result
      */
-    public function getArticleObject($intId)
-    {
-        $objDb = $this->Database
-                ->prepare("SELECT * FROM `tl_article` WHERE id = ?")
+    public function getArticleObject($mixedId)
+    {        
+        if(is_array($mixedId))
+        {
+            $strQuery = "SELECT * FROM `tl_article` WHERE id IN (" . implode(', ', $mixedId) . ")";
+            
+            $objDb = $this->Database
+                ->prepare($strQuery)
+                ->executeUncached();   
+        }
+        else
+        {
+            $strQuery = "SELECT * FROM `tl_article` WHERE id = ?";
+            
+            $objDb = $this->Database
+                ->prepare($strQuery)
                 ->limit(1)
-                ->execute($intId);
+                ->executeUncached($mixedId);            
+        }               
 
-        return $objDb;
+        return $objDb;         
     }
 
     /**
@@ -178,15 +204,28 @@ class ClipboardDatabase extends Backend
     /**
      * Return content object from given id
      * 
-     * @param integer $intId
+     * @param integer $mixedId
      * @return DB_Mysql_Result
      */
-    public function getContentObject($intId)
+    public function getContentObject($mixedId)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT * FROM `tl_content` WHERE id = ?")
+        if(is_array($mixedId))
+        {
+            $strQuery = "SELECT * FROM `tl_content` WHERE id IN (" . implode(', ', $mixedId) . ")";
+            
+            $objDb = $this->Database
+                ->prepare($strQuery)
+                ->executeUncached();   
+        }
+        else
+        {
+            $strQuery = "SELECT * FROM `tl_content` WHERE id = ?";
+            
+            $objDb = $this->Database
+                ->prepare($strQuery)
                 ->limit(1)
-                ->executeUncached($intId);
+                ->executeUncached($mixedId);            
+        }               
 
         return $objDb;
     }

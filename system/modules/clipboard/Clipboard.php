@@ -235,32 +235,79 @@ class Clipboard extends Backend
     /**
      * Return the title for the given id
      * 
-     * @param integer $intId
+     * @param mixed $mixedId
      * @param boolean $boolChilds
      * @return string 
      */
-    public function getTitle($intId)
+    public function getTitle($mixedId)
     {
+        $booClGroup = FALSE;
+        
+        if(is_array($mixedId))
+        {
+            $booClGroup = TRUE;
+        }
+        
         switch ($this->_objHelper->getPageType())
         {
             case 'page':
-                $objElem = $this->_objDatabase->getPageObject($intId);
-                return $objElem->title;
-                break;
-            
-            case 'article':
-                return call_user_func_array(array($this->_objDatabase, 'get' . $this->_objHelper->getPageType() . 'Object'), array($intId))->title;
-                break;
-
-            case 'content':
-                $objTitel = $this->_objHelper->createContentTitle($intId);
-                if (!is_object($objTitel))
+                if(!$booClGroup)
                 {
-                    return $objTitel;
+                    $objElem = $this->_objDatabase->getPageObject($mixedId);
+                    return $objElem->title;
                 }
                 else
                 {
-                    return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] . ' (' . $GLOBALS['TL_LANG']['CTE'][$objTitel->type][0] . ')';
+                    $objElem = $this->_objDatabase->getPageObject($mixedId[0]);
+                    return $objElem->title . ' (' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')';
+                }
+                break;
+            
+            case 'article':
+                if(!$booClGroup)
+                {
+                    return call_user_func_array(array($this->_objDatabase, 'get' . $this->_objHelper->getPageType() . 'Object'), array($mixedId))->title;
+                }
+                else
+                {
+                    return call_user_func_array(array($this->_objDatabase, 'get' . $this->_objHelper->getPageType() . 'Object'), array($mixedId))->title . ' (' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')';
+                }
+                break;
+
+            case 'content':
+                if(!$booClGroup)
+                {                
+                    $mixedTitel = $this->_objHelper->createContentTitle($mixedId);
+                    if (!is_object($mixedTitel) && is_array($mixedTitel))
+                    {
+                        return implode('', $mixedTitel);
+                    }
+                    else
+                    {                    
+                        return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] . ' (' . $GLOBALS['TL_LANG']['CTE'][$mixedTitel->type][0] . ')';
+                    }
+                }
+                else
+                {
+                    $strTitle = '';
+                    foreach($mixedId AS $intId)
+                    {
+                        $mixedTitel = $this->_objHelper->createContentTitle($intId);                        
+                        if (!is_object($mixedTitel) && is_array($mixedTitel))
+                        {
+                            $strTitle = $mixedTitel['title'];
+                            break;
+                        }
+                    }
+                    
+                    if(strlen($strTitle) > 0)
+                    {
+                        return $strTitle . ' (' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')';
+                    }
+                    else
+                    {
+                        return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] . ' (' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')';
+                    }
                 }
                 
             default:
@@ -269,19 +316,36 @@ class Clipboard extends Backend
     }
 
     /**
-     * Copy element to clipboeard and write xml
+     * Copy element to clipboard and write xml
      */
-    public function copy()
+    public function copy($booClGroup = FALSE, $ids = array())
     {
-        $boolHasChilds = (($this->Input->get('childs') == 1) ? 1 : 0);
-
         $arrSet = array(
             'user_id' => $this->User->id,
-            'childs' => $boolHasChilds,
-            'table' => $this->_objHelper->getDbPageType(),
-            'elem_id' => $this->Input->get('id'),
-            'title' => $this->getTitle($this->Input->get('id'))
+            'table' => $this->_objHelper->getDbPageType()            
         );
+        
+        if($booClGroup == TRUE && count($ids) > 1)
+        {
+            $arrSet['childs']   = 0;
+            $arrSet['elem_id']  = $ids;
+            $arrSet['title']    = $this->getTitle($ids);
+        }
+        else
+        {
+            if(count($ids) == 1)
+            {
+                $intId = $ids[0];
+            }
+            else
+            {
+                $intId = $this->Input->get('id');
+            }
+            
+            $arrSet['childs']   = (($this->Input->get('childs') == 1) ? 1 : 0);
+            $arrSet['elem_id']  = $intId;
+            $arrSet['title']    = $this->getTitle($intId);
+        }
 
         $this->cb()->write($arrSet);
     }
@@ -290,8 +354,8 @@ class Clipboard extends Backend
      * Handle all main operations, clean up the url and redirect to itself 
      */
     public function init()
-    {
-        if (stristr($this->Input->get('key'), 'cl_'))
+    {        
+        if (stristr($this->Input->get('key'), 'cl_') || $this->Input->post('FORM_SUBMIT') == 'tl_select' && isset($_POST['cl_group']))
         {
             $arrUnsetParams = array();
             foreach (array_keys($_GET) AS $strGetParam)
@@ -342,8 +406,17 @@ class Clipboard extends Backend
                         }
                         $arrUnsetParams[$strGetParam] = $this->Input->get($strGetParam);
                         break;
-                    case 'childs':
                     case 'act':
+                        // Copy multi edit elements to clipboard
+                        $ids = deserialize($this->Input->post('IDS'));
+                        
+                        if (!is_array($ids) || empty($ids))
+                        {
+                            $this->reload();
+                        }
+                        
+                        $this->copy(TRUE, $ids);
+                    case 'childs':
                     case 'mode':
                     case 'cl_id':
                         $arrUnsetParams[$strGetParam] = $this->Input->get($strGetParam);

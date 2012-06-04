@@ -34,7 +34,8 @@ $arrAllowedLocations = array(
     'content'
 );
 
-if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations) && !Input::getInstance()->get('act'))
+if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations) && !Input::getInstance()->get('act') ||
+    TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations) && Input::getInstance()->get('act') == 'select')
 {
     /**
      * Set header informations 
@@ -46,7 +47,9 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
      * Hooks
      */
     $GLOBALS['TL_HOOKS']['outputBackendTemplate'][]                 = array('Clipboard', 'outputBackendTemplate');
-    $GLOBALS['TL_HOOKS']['clipboardButtons'][]                      = array('ClipboardHelper', 'clipboardButtons');
+    $GLOBALS['TL_HOOKS']['clipboardButtons'][]                      = array('ClipboardHelper', 'clipboardButtons');    
+    $GLOBALS['TL_HOOKS']['clipboardActSelectButtonsTreeView'][]     = array('ClipboardHelper', 'clipboardActSelectButtons');
+    $GLOBALS['TL_HOOKS']['clipboardActSelectButtonsParentView'][]   = array('ClipboardHelper', 'clipboardActSelectButtons');
     
     /**
      * Config
