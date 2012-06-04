@@ -407,15 +407,20 @@ class Clipboard extends Backend
                         $arrUnsetParams[$strGetParam] = $this->Input->get($strGetParam);
                         break;
                     case 'act':
-                        // Copy multi edit elements to clipboard
-                        $ids = deserialize($this->Input->post('IDS'));
-                        
-                        if (!is_array($ids) || empty($ids))
-                        {
-                            $this->reload();
+                        if($this->Input->get('key') != 'cl_delete')
+                        {                        
+                            // Copy multi edit elements to clipboard
+                            $ids = deserialize($this->Input->post('IDS'));
+
+                            if (!is_array($ids) || empty($ids))
+                            {
+                                $this->reload();
+                            }
+
+                            $this->copy(TRUE, $ids);
+                            $arrUnsetParams[$strGetParam] = $this->Input->get($strGetParam);
                         }
-                        
-                        $this->copy(TRUE, $ids);
+                        break;
                     case 'childs':
                     case 'mode':
                     case 'cl_id':
@@ -423,7 +428,7 @@ class Clipboard extends Backend
                         break;
                 }
             }
-
+            
             foreach ($arrUnsetParams AS $k => $v)
             {
                 $this->Input->setGet($k, NULL);
@@ -439,7 +444,7 @@ class Clipboard extends Backend
             );
 
             if (in_array($arrUnsetParams['key'], $arrUnsetKeyParams) && $this->_objHelper->getPageType() == 'content')
-            {
+            {                
                 $objArticle = $this->_objDatabase->getArticleObjectFromContentId($this->Input->get('id'));
 
                 $strRequestWithoutId = str_replace(
@@ -448,7 +453,7 @@ class Clipboard extends Backend
 
                 $this->redirect($strRequestWithoutId . '&id=' . $objArticle->id);
             }
-
+            
             $this->redirect($this->Environment->request);
         }
     }
