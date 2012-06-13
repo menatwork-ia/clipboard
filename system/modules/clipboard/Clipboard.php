@@ -104,7 +104,7 @@ class Clipboard extends Backend
      */
     public function outputBackendTemplate($strContent, $strTemplate)
     {
-        if ($strTemplate == 'be_main' && $this->User->clipboard)
+        if ($strTemplate == 'be_main' && $this->User->clipboard && $this->cb()->hasElements())
         {
             $objTemplate = new BackendTemplate('be_clipboard');
 
@@ -119,16 +119,7 @@ class Clipboard extends Backend
                 $strContent = preg_replace('/<body.*class="/', "$0clipboard ", $strContent, 1);
             }
 
-            $strNewContent = preg_replace('/<div.*id="container".*>/', $objTemplate->parse() . "\n$0", $strContent, 1);
-
-            if ($strNewContent == "")
-            {
-                return $strContent;
-            }
-            else
-            {
-                $strContent = $strNewContent;
-            }
+            return preg_replace('/<div.*id="container".*>/', $objTemplate->parse() . "\n$0", $strContent, 1);
         }
 
         return $strContent;
