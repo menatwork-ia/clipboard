@@ -69,8 +69,6 @@ class ClipboardXmlWriter extends Backend
         parent::__construct();
         $this->_objHelper = ClipboardHelper::getInstance();
         $this->_objDatabase = ClipboardDatabase::getInstance();
-        
-        set_time_limit(5);
     }
 
     /**

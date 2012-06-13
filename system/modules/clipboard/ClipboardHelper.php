@@ -463,7 +463,7 @@ class ClipboardHelper extends Backend
     }
     
     /**
-     * Return given file from path by comme without file extension
+     * Return given file from path without file extension as array
      * 
      * @param string $strFilePath
      * @return array
@@ -476,6 +476,13 @@ class ClipboardHelper extends Backend
             ',', 
             $arrFileInfo['filename']
         );
+        
+        // Add groupflag for older xml filenames
+        if(!in_array($arrFileName[4], array('G', 'NG')))
+        {
+            $arrFileName[5] = $arrFileName[4];
+            $arrFileName[4] = ((stristr($arrFileName[5], standardize($GLOBALS['TL_LANG']['MSC']['clipboardGroup'])) === FALSE) ? 'NG' : 'G');
+        }        
         
         return $arrFileName;
     }
