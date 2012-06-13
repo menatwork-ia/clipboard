@@ -321,6 +321,7 @@ class Clipboard extends Backend
             $arrSet['childs']   = 0;
             $arrSet['elem_id']  = $ids;
             $arrSet['title']    = $this->getTitle($ids);
+            $arrSet['grouped']    = TRUE;
         }
         else
         {
@@ -336,6 +337,7 @@ class Clipboard extends Backend
             $arrSet['childs']   = (($this->Input->get('childs') == 1) ? 1 : 0);
             $arrSet['elem_id']  = $intId;
             $arrSet['title']    = $this->getTitle($intId);
+            $arrSet['grouped']    = FALSE;
         }
 
         $this->cb()->write($arrSet);

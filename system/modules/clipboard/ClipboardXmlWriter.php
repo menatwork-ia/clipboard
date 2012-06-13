@@ -144,13 +144,13 @@ class ClipboardXmlWriter extends Backend
         switch ($arrSet['table'])
         {
             case 'tl_page':
-                $this->writePage($arrSet['elem_id'], $objXml, $arrSet['childs']);
+                $this->writePage($arrSet['elem_id'], $objXml, $arrSet['childs'], $arrSet['grouped']);
                 break;
             case 'tl_article':
-                $this->writeArticle($arrSet['elem_id'], $objXml, FALSE);
+                $this->writeArticle($arrSet['elem_id'], $objXml, FALSE, $arrSet['grouped']);
                 break;
             case 'tl_content':
-                $this->writeContent($arrSet['elem_id'], $objXml, FALSE);
+                $this->writeContent($arrSet['elem_id'], $objXml, FALSE, $arrSet['grouped']);
                 break;
         }
         $objXml->endElement(); // End datacontainer
@@ -174,12 +174,18 @@ class ClipboardXmlWriter extends Backend
      * 
      * @param mixed $mixedId
      * @param XMLWriter $objXml
-     * @param bool $boolChilds
+     * @param boolean $boolChilds
+     * @param boolean $boolGrouped
      * @return XMLWriter 
      */
-    protected function writePage($mixedId, &$objXml, $boolHasChilds)
+    protected function writePage($mixedId, &$objXml, $boolHasChilds, $boolGrouped = FALSE)
     {        
         $arrRows = $this->_objDatabase->getPageObject($mixedId)->fetchAllAssoc();
+        
+        if($boolGrouped)
+        {
+            $arrRows = array_reverse($arrRows);
+        }
         
         $objXml->startElement('page');
         $objXml->writeAttribute('table', $this->_strPageTable);        
@@ -236,8 +242,9 @@ class ClipboardXmlWriter extends Backend
      * @param mixed $mixedId
      * @param XMLWriter $objXml
      * @param boolean $boolIsChild
+     * @param boolean $boolGrouped
      */
-    protected function writeArticle($mixedId, &$objXml, $boolIsChild)
+    protected function writeArticle($mixedId, &$objXml, $boolIsChild, $boolGrouped = FALSE)
     {
         if ($boolIsChild)
         {
@@ -246,6 +253,11 @@ class ClipboardXmlWriter extends Backend
         else
         {
             $arrRows = $this->_objDatabase->getArticleObject($mixedId)->fetchAllAssoc();
+        }
+        
+        if($boolGrouped)
+        {
+            $arrRows = array_reverse($arrRows);
         }
 
         if (count($arrRows) < 1)
@@ -271,9 +283,10 @@ class ClipboardXmlWriter extends Backend
      * 
      * @param integer $mixedId
      * @param XMLWriter $objXml
-     * @param boolean $boolIsChild 
+     * @param boolean $boolIsChild
+     * @param boolean $boolGrouped
      */
-    protected function writeContent($mixedId, &$objXml, $boolIsChild)
+    protected function writeContent($mixedId, &$objXml, $boolIsChild, $boolGrouped = FALSE)
     {
         if ($boolIsChild)
         {
@@ -282,6 +295,11 @@ class ClipboardXmlWriter extends Backend
         else
         {
             $arrRows = $this->_objDatabase->getContentObject($mixedId)->fetchAllAssoc();
+        }
+        
+        if($boolGrouped)
+        {
+            $arrRows = array_reverse($arrRows);
         }
 
         if (count($arrRows) < 1)
