@@ -98,41 +98,52 @@ class ClipboardXmlReader extends Backend
      */
     public function readXml($objFile, $strPastePos, $intElemId)
     {
-        $objXml = new XMLReader();
-        $objXml->open($objFile->getFilePath('full'));
-        while ($objXml->read())
-        {
-            switch ($objXml->nodeType)
+        $this->Session->set('clipboardExt', array('readXML' => TRUE));
+        
+        try
+        {                
+            $objXml = new XMLReader();
+            $objXml->open($objFile->getFilePath('full'));
+            while ($objXml->read())
             {
-                case XMLReader::ELEMENT:
-                    switch ($objXml->localName)
-                    {
-                        case 'encryptionKey':
-                            $objXml->read();
-                            $this->_strEncryptionKey = $objXml->value;
-                            break;
+                switch ($objXml->nodeType)
+                {
+                    case XMLReader::ELEMENT:
+                        switch ($objXml->localName)
+                        {
+                            case 'encryptionKey':
+                                $objXml->read();
+                                $this->_strEncryptionKey = $objXml->value;
+                                break;
 
-                        case 'page':
-                            $this->createPage($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
-                            break;
+                            case 'page':
+                                $this->createPage($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId, FALSE, (($objXml->getAttribute("grouped")) ? TRUE : FALSE));
+                                break;
 
-                        case 'article':
-                            $this->createArticle($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
-                            break;
+                            case 'article':
+                                $this->createArticle($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId, FALSE, (($objXml->getAttribute("grouped")) ? TRUE : FALSE));
+                                break;
 
-                        case 'content':
-                            $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId);
-                            break;
+                            case 'content':
+                                $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId, FALSE, (($objXml->getAttribute("grouped")) ? TRUE : FALSE));
+                                break;
 
-                        default:
-                            break;
-                    }
-                    break;
-                default:
-                    break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
+            $objXml->close();        
         }
-        $objXml->close();
+        catch (Exception $exc)
+        {            
+            $this->Session->set('clipboardExt', array('readXML' => FALSE));
+        }
+        
+        $this->Session->set('clipboardExt', array('readXML' => FALSE));
     }
 
     /**
@@ -141,10 +152,11 @@ class ClipboardXmlReader extends Backend
      * @param XMLReader $objXml
      * @param string $strTable
      * @param string $strPastePos
-     * @param integer $intElemId
-     * @param bool $boolIsChild
+     * @param integer $intElemId     
+     * @param boolean $boolIsChild
+     * @param boolean $isGrouped
      */
-    public function createPage(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
+    public function createPage(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE, $isGrouped = FALSE)
     {
         $intLastInsertId = 0;
 
@@ -175,6 +187,33 @@ class ClipboardXmlReader extends Backend
                         case 'row':
                             $objDb = $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild));
                             $intLastInsertId = $objDb->insertId;
+
+                            $this->loadDataContainer($strTable);
+
+                            $dataContainer = 'DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
+                            $dc = new $dataContainer($strTable);
+
+                            if($isGrouped)
+                            { 
+                                $intElemId = $intLastInsertId;
+                                $strPastePos = 'pasteAfter';
+
+                                $this->Input->setGet('act', 'copyAll');
+                            }
+                            else
+                            {
+                                $this->Input->setGet('act', 'copy');
+                            }
+
+                            if (is_array($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback']))
+                            {
+                                    foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
+                                    {
+                                            $this->import($callback[0]);
+                                            $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
+                                    }
+                            }
+                            $this->Input->setGet('act', NULL);                             
                             break;
 
                         case 'subpage':
@@ -199,10 +238,11 @@ class ClipboardXmlReader extends Backend
      * @param XMLReader $objXml
      * @param string $strTable
      * @param string $strPastePos
-     * @param integer $intElemId
-     * @param bool $boolIsChild
+     * @param integer $intElemId     
+     * @param boolean $boolIsChild
+     * @param boolean $isGrouped
      */
-    public function createArticle(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
+    public function createArticle(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE, $isGrouped = FALSE)
     {
         $intLastInsertId = 0;
 
@@ -233,6 +273,12 @@ class ClipboardXmlReader extends Backend
                         case 'row':
                             $objDb = $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild));
                             $intLastInsertId = $objDb->insertId;
+                            
+                            if($isGrouped)
+                            { 
+                                $intElemId = $intLastInsertId;
+                                $strPastePos = 'pasteAfter';
+                            }                            
                             break;
                     }
                     break;
@@ -240,6 +286,30 @@ class ClipboardXmlReader extends Backend
                     switch ($objXml->localName)
                     {
                         case 'article':
+                            $this->loadDataContainer($strTable);
+
+                            $dataContainer = 'DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
+                            $dc = new $dataContainer($strTable);
+
+                            if($isGrouped)
+                            {
+                                $this->Input->setGet('act', 'copyAll');
+                            }
+                            else
+                            {
+                                $this->Input->setGet('act', 'copy');
+                            }
+                            
+                            if (is_array($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback']))
+                            {
+                                    foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
+                                    {
+                                            $this->import($callback[0]);
+                                            $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
+                                    }
+                            }
+                            $this->Input->setGet('act', NULL);                            
+                            
                             return;
                             break;
                     }
@@ -254,10 +324,11 @@ class ClipboardXmlReader extends Backend
      * @param XMLReader $objXml
      * @param string $strTable
      * @param string $strPastePos
-     * @param integer $intElemId
-     * @param bool $boolIsChild
+     * @param integer $intElemId     
+     * @param boolean $boolIsChild
+     * @param boolean $isGrouped
      */
-    protected function createContent(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE)
+    protected function createContent(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE, $isGrouped = FALSE)
     {
         if ($boolIsChild == TRUE)
         {
@@ -269,6 +340,7 @@ class ClipboardXmlReader extends Backend
             {
                 $objElem = $this->_objDatabase->getContentObject($intElemId);
                 $intId = $objElem->pid;
+                $intElemId = $objElem->id;
             }
         }
 
@@ -289,7 +361,36 @@ class ClipboardXmlReader extends Backend
                                     {
                                         if (!array_key_exists(substr($arrSet['type'], 1, -1), $GLOBALS['TL_CTE']['includes']))
                                         {
-                                            $this->_objDatabase->insertInto($strTable, $arrSet);
+                                            $objDb = $this->_objDatabase->insertInto($strTable, $arrSet);
+                                            $intLastInsertId = $objDb->insertId;
+
+                                            $this->loadDataContainer($strTable);
+
+                                            $dataContainer = 'DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
+                                            $dc = new $dataContainer($strTable);
+
+                                            if($isGrouped)
+                                            { 
+                                                $intElemId = $intLastInsertId;
+                                                $strPastePos = 'pasteAfter';
+
+                                                $this->Input->setGet('act', 'copyAll');
+                                            }
+                                            else
+                                            {
+                                                $this->Input->setGet('act', 'copy');
+                                            }
+
+                                            if (is_array($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback']))
+                                            {
+                                                    foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
+                                                    {
+                                                            $this->import($callback[0]);
+                                                            $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
+                                                    }
+                                            }
+                                            $this->Input->setGet('act', NULL);                                           
+                                            
                                         }
                                         else
                                         {
@@ -298,7 +399,35 @@ class ClipboardXmlReader extends Backend
                                     }
                                     else
                                     {
-                                        $this->_objDatabase->insertInto($strTable, $arrSet);
+                                        $objDb = $this->_objDatabase->insertInto($strTable, $arrSet);
+                                        $intLastInsertId = $objDb->insertId;
+                                        
+                                        $this->loadDataContainer($strTable);
+                                        
+                                        $dataContainer = 'DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
+                                        $dc = new $dataContainer($strTable);
+
+                                        if($isGrouped)
+                                        { 
+                                            $intElemId = $intLastInsertId;
+                                            $strPastePos = 'pasteAfter';
+                                            
+                                            $this->Input->setGet('act', 'copyAll');
+                                        }
+                                        else
+                                        {
+                                            $this->Input->setGet('act', 'copy');
+                                        }
+                                        
+                                        if (is_array($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback']))
+                                        {
+                                                foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
+                                                {
+                                                        $this->import($callback[0]);
+                                                        $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
+                                                }
+                                        }
+                                        $this->Input->setGet('act', NULL);
                                     }
                                 }
                                 else

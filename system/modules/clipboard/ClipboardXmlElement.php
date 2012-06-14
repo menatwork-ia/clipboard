@@ -322,7 +322,7 @@ class ClipboardXmlElement
                 $arrFileName[2] = $strValue;
                 break;
             case 'title':
-                $arrFileName[4] = standardize($strValue);
+                $arrFileName[5] = standardize($strValue);
                 break;
         }
 

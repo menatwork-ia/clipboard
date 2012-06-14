@@ -103,8 +103,10 @@ class Clipboard extends Backend
      * @return string 
      */
     public function outputBackendTemplate($strContent, $strTemplate)
-    {
-        if ($strTemplate == 'be_main' && $this->User->clipboard)
+    {    
+        $this->Session->set('clipboardExt', array('readXML' => FALSE));
+        
+        if ($strTemplate == 'be_main' && $this->User->clipboard && $this->cb()->hasElements())
         {
             $objTemplate = new BackendTemplate('be_clipboard');
 
@@ -119,17 +121,8 @@ class Clipboard extends Backend
                 $strContent = preg_replace('/<body.*class="/', "$0clipboard ", $strContent, 1);
             }
 
-            $strNewContent = preg_replace('/<div.*id="container".*>/', $objTemplate->parse() . "\n$0", $strContent, 1);
-
-            if ($strNewContent == "")
-            {
-                return $strContent;
-            }
-            else
-            {
-                $strContent = $strNewContent;
-            }
-        }
+            return preg_replace('/<div.*id="container".*>/', $objTemplate->parse() . "\n$0", $strContent, 1);
+        }        
 
         return $strContent;
     }
@@ -330,6 +323,7 @@ class Clipboard extends Backend
             $arrSet['childs']   = 0;
             $arrSet['elem_id']  = $ids;
             $arrSet['title']    = $this->getTitle($ids);
+            $arrSet['grouped']    = TRUE;
         }
         else
         {
@@ -345,6 +339,7 @@ class Clipboard extends Backend
             $arrSet['childs']   = (($this->Input->get('childs') == 1) ? 1 : 0);
             $arrSet['elem_id']  = $intId;
             $arrSet['title']    = $this->getTitle($intId);
+            $arrSet['grouped']    = FALSE;
         }
 
         $this->cb()->write($arrSet);
@@ -354,7 +349,14 @@ class Clipboard extends Backend
      * Handle all main operations, clean up the url and redirect to itself 
      */
     public function init()
-    {        
+    {
+        $arrSession = $this->Session->get('clipboardExt');
+        
+        if($arrSession['readXML'])
+        {
+            return;
+        }
+        
         if (stristr($this->Input->get('key'), 'cl_') || $this->Input->post('FORM_SUBMIT') == 'tl_select' && isset($_POST['cl_group']))
         {
             $arrUnsetParams = array();

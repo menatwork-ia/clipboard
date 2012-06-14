@@ -69,8 +69,6 @@ class ClipboardXmlWriter extends Backend
         parent::__construct();
         $this->_objHelper = ClipboardHelper::getInstance();
         $this->_objDatabase = ClipboardDatabase::getInstance();
-        
-        set_time_limit(5);
     }
 
     /**
@@ -144,13 +142,13 @@ class ClipboardXmlWriter extends Backend
         switch ($arrSet['table'])
         {
             case 'tl_page':
-                $this->writePage($arrSet['elem_id'], $objXml, $arrSet['childs']);
+                $this->writePage($arrSet['elem_id'], $objXml, $arrSet['childs'], $arrSet['grouped']);
                 break;
             case 'tl_article':
-                $this->writeArticle($arrSet['elem_id'], $objXml, FALSE);
+                $this->writeArticle($arrSet['elem_id'], $objXml, FALSE, $arrSet['grouped']);
                 break;
             case 'tl_content':
-                $this->writeContent($arrSet['elem_id'], $objXml, FALSE);
+                $this->writeContent($arrSet['elem_id'], $objXml, FALSE, $arrSet['grouped']);
                 break;
         }
         $objXml->endElement(); // End datacontainer
@@ -174,22 +172,27 @@ class ClipboardXmlWriter extends Backend
      * 
      * @param mixed $mixedId
      * @param XMLWriter $objXml
-     * @param bool $boolChilds
+     * @param boolean $boolChilds
+     * @param boolean $boolGrouped
      * @return XMLWriter 
      */
-    protected function writePage($mixedId, &$objXml, $boolHasChilds)
+    protected function writePage($mixedId, &$objXml, $boolHasChilds, $boolGrouped = FALSE)
     {        
-        $arrRows = $this->_objDatabase->getPageObject($mixedId)->fetchAllAssoc();
+        $arrRows = $this->_objDatabase->getPageObject($mixedId)->fetchAllAssoc();       
         
         $objXml->startElement('page');
-        $objXml->writeAttribute('table', $this->_strPageTable);        
-
+        $objXml->writeAttribute('table', $this->_strPageTable);
+        if($boolGrouped)
+        {
+            $objXml->writeAttribute('grouped', TRUE);
+        }        
+        
         foreach ($arrRows AS $arrRow)
         {        
             $this->writeGivenDbTableRows($this->_strPageTable, array($arrRow), $objXml);
 
             $objXml->startElement('articles');
-            $this->writeArticle($mixedId, $objXml, TRUE);
+            $this->writeArticle($arrRow['id'], $objXml, TRUE);
             $objXml->endElement(); // End articles
         }
         
@@ -236,8 +239,9 @@ class ClipboardXmlWriter extends Backend
      * @param mixed $mixedId
      * @param XMLWriter $objXml
      * @param boolean $boolIsChild
+     * @param boolean $boolGrouped
      */
-    protected function writeArticle($mixedId, &$objXml, $boolIsChild)
+    protected function writeArticle($mixedId, &$objXml, $boolIsChild, $boolGrouped = FALSE)
     {
         if ($boolIsChild)
         {
@@ -255,7 +259,11 @@ class ClipboardXmlWriter extends Backend
 
         $objXml->startElement('article');
         $objXml->writeAttribute('table', $this->_strArticleTable);
-
+        if($boolGrouped)
+        {
+            $objXml->writeAttribute('grouped', TRUE);
+        }         
+        
         foreach ($arrRows AS $arrRow)
         {
             $this->writeGivenDbTableRows($this->_strArticleTable, array($arrRow), $objXml);
@@ -271,9 +279,10 @@ class ClipboardXmlWriter extends Backend
      * 
      * @param integer $mixedId
      * @param XMLWriter $objXml
-     * @param boolean $boolIsChild 
+     * @param boolean $boolIsChild
+     * @param boolean $boolGrouped
      */
-    protected function writeContent($mixedId, &$objXml, $boolIsChild)
+    protected function writeContent($mixedId, &$objXml, $boolIsChild, $boolGrouped = FALSE)
     {
         if ($boolIsChild)
         {
@@ -291,6 +300,10 @@ class ClipboardXmlWriter extends Backend
 
         $objXml->startElement('content');
         $objXml->writeAttribute('table', $this->_strContentTable);
+        if($boolGrouped)
+        {
+            $objXml->writeAttribute('grouped', TRUE);
+        }         
 
         $this->writeGivenDbTableRows($this->_strContentTable, $arrRows, $objXml);
 

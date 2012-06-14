@@ -348,6 +348,7 @@ class ClipboardXml extends Backend
             time(),
             'F',
             (($arrSet['childs']) ? 'C' : 'NC'),
+            (($arrSet['grouped']) ? 'G' : 'NG'),
             standardize($arrSet['title'])
         );
 
