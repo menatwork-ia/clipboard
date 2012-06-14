@@ -98,7 +98,7 @@ class ClipboardXmlReader extends Backend
      */
     public function readXml($objFile, $strPastePos, $intElemId)
     {
-        $this->Session->set(__CLASS__ . '_' . __FUNCTION__, 'active');
+        $this->Session->set('clipboardExt', array('readXML' => TRUE));
         
         try
         {                
@@ -140,11 +140,10 @@ class ClipboardXmlReader extends Backend
         }
         catch (Exception $exc)
         {            
-            $this->Session->set(__CLASS__ . '_' . __FUNCTION__, 'idle');
+            $this->Session->set('clipboardExt', array('readXML' => FALSE));
         }
         
-        $this->Session->set(__CLASS__ . '_' . __FUNCTION__, 'idle');
-//        exit();
+        $this->Session->set('clipboardExt', array('readXML' => FALSE));
     }
 
     /**

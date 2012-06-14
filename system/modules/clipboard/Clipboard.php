@@ -104,7 +104,7 @@ class Clipboard extends Backend
      */
     public function outputBackendTemplate($strContent, $strTemplate)
     {    
-        $this->Session->set('ClipboardXmlReader_readXml', 'idle'); 
+        $this->Session->set('clipboardExt', array('readXML' => FALSE));
         
         if ($strTemplate == 'be_main' && $this->User->clipboard && $this->cb()->hasElements())
         {
@@ -350,7 +350,9 @@ class Clipboard extends Backend
      */
     public function init()
     {
-        if($this->Session->get('ClipboardXmlReader_readXml') === 'active')
+        $arrSession = $this->Session->get('clipboardExt');
+        
+        if($arrSession['readXML'])
         {
             return;
         }
