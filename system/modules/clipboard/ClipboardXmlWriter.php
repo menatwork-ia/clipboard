@@ -178,22 +178,21 @@ class ClipboardXmlWriter extends Backend
      */
     protected function writePage($mixedId, &$objXml, $boolHasChilds, $boolGrouped = FALSE)
     {        
-        $arrRows = $this->_objDatabase->getPageObject($mixedId)->fetchAllAssoc();
-        
-        if($boolGrouped)
-        {
-            $arrRows = array_reverse($arrRows);
-        }
+        $arrRows = $this->_objDatabase->getPageObject($mixedId)->fetchAllAssoc();       
         
         $objXml->startElement('page');
-        $objXml->writeAttribute('table', $this->_strPageTable);        
-
+        $objXml->writeAttribute('table', $this->_strPageTable);
+        if($boolGrouped)
+        {
+            $objXml->writeAttribute('grouped', TRUE);
+        }        
+        
         foreach ($arrRows AS $arrRow)
         {        
             $this->writeGivenDbTableRows($this->_strPageTable, array($arrRow), $objXml);
 
             $objXml->startElement('articles');
-            $this->writeArticle($mixedId, $objXml, TRUE);
+            $this->writeArticle($arrRow['id'], $objXml, TRUE);
             $objXml->endElement(); // End articles
         }
         
@@ -252,11 +251,6 @@ class ClipboardXmlWriter extends Backend
         {
             $arrRows = $this->_objDatabase->getArticleObject($mixedId)->fetchAllAssoc();
         }
-        
-        if($boolGrouped)
-        {
-            $arrRows = array_reverse($arrRows);
-        }
 
         if (count($arrRows) < 1)
         {
@@ -265,7 +259,11 @@ class ClipboardXmlWriter extends Backend
 
         $objXml->startElement('article');
         $objXml->writeAttribute('table', $this->_strArticleTable);
-
+        if($boolGrouped)
+        {
+            $objXml->writeAttribute('grouped', TRUE);
+        }         
+        
         foreach ($arrRows AS $arrRow)
         {
             $this->writeGivenDbTableRows($this->_strArticleTable, array($arrRow), $objXml);
@@ -294,11 +292,6 @@ class ClipboardXmlWriter extends Backend
         {
             $arrRows = $this->_objDatabase->getContentObject($mixedId)->fetchAllAssoc();
         }
-        
-        if($boolGrouped)
-        {
-            $arrRows = array_reverse($arrRows);
-        }
 
         if (count($arrRows) < 1)
         {
@@ -307,6 +300,10 @@ class ClipboardXmlWriter extends Backend
 
         $objXml->startElement('content');
         $objXml->writeAttribute('table', $this->_strContentTable);
+        if($boolGrouped)
+        {
+            $objXml->writeAttribute('grouped', TRUE);
+        }         
 
         $this->writeGivenDbTableRows($this->_strContentTable, $arrRows, $objXml);
 

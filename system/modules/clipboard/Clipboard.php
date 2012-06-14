@@ -103,7 +103,9 @@ class Clipboard extends Backend
      * @return string 
      */
     public function outputBackendTemplate($strContent, $strTemplate)
-    {
+    {    
+        $this->Session->set('ClipboardXmlReader_readXml', 'idle'); 
+        
         if ($strTemplate == 'be_main' && $this->User->clipboard && $this->cb()->hasElements())
         {
             $objTemplate = new BackendTemplate('be_clipboard');
@@ -120,7 +122,7 @@ class Clipboard extends Backend
             }
 
             return preg_replace('/<div.*id="container".*>/', $objTemplate->parse() . "\n$0", $strContent, 1);
-        }
+        }        
 
         return $strContent;
     }
@@ -347,7 +349,12 @@ class Clipboard extends Backend
      * Handle all main operations, clean up the url and redirect to itself 
      */
     public function init()
-    {        
+    {
+        if($this->Session->get('ClipboardXmlReader_readXml') === 'active')
+        {
+            return;
+        }
+        
         if (stristr($this->Input->get('key'), 'cl_') || $this->Input->post('FORM_SUBMIT') == 'tl_select' && isset($_POST['cl_group']))
         {
             $arrUnsetParams = array();

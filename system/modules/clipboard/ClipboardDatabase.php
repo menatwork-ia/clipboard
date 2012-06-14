@@ -88,7 +88,7 @@ class ClipboardDatabase extends Backend
     {        
         if(is_array($mixedId))
         {
-            $strQuery = "SELECT * FROM `tl_page` WHERE id IN (" . implode(', ', $mixedId) . ")";
+            $strQuery = "SELECT * FROM `tl_page` WHERE id IN (" . implode(', ', $mixedId) . ") ORDER BY sorting";
             
             $objDb = $this->Database
                 ->prepare($strQuery)
@@ -117,7 +117,7 @@ class ClipboardDatabase extends Backend
     {
         $objDb = $this->Database
                 ->prepare("SELECT * FROM `tl_page` WHERE pid = ?")
-                ->execute($intId);
+                ->executeUncached($intId);
 
         return $objDb;
     }
@@ -132,7 +132,7 @@ class ClipboardDatabase extends Backend
     {        
         if(is_array($mixedId))
         {
-            $strQuery = "SELECT * FROM `tl_article` WHERE id IN (" . implode(', ', $mixedId) . ")";
+            $strQuery = "SELECT * FROM `tl_article` WHERE id IN (" . implode(', ', $mixedId) . ") ORDER BY sorting";
             
             $objDb = $this->Database
                 ->prepare($strQuery)
@@ -160,8 +160,8 @@ class ClipboardDatabase extends Backend
     public function getArticleObjectFromPid($intId)
     {
         $objDb = $this->Database
-                ->prepare("SELECT * FROM `tl_article` WHERE pid = ?")
-                ->execute($intId);
+                ->prepare("SELECT * FROM `tl_article` WHERE pid = ? ORDER BY sorting")
+                ->executeUncached($intId);
 
         return $objDb;
     }
@@ -181,7 +181,7 @@ class ClipboardDatabase extends Backend
                     ON c.pid = a.id
                     WHERE c.id = ?")
                 ->limit(1)
-                ->execute($intId);
+                ->executeUncached($intId);
 
         return $objDb;
     }
@@ -195,8 +195,8 @@ class ClipboardDatabase extends Backend
     public function getContentObjectFromPid($intId)
     {
         $objDb = $this->Database
-                ->prepare("SELECT * FROM `tl_content` WHERE pid = ?")
-                ->execute($intId);
+                ->prepare("SELECT * FROM `tl_content` WHERE pid = ? ORDER BY sorting")
+                ->executeUncached($intId);
 
         return $objDb;
     }
@@ -211,7 +211,7 @@ class ClipboardDatabase extends Backend
     {
         if(is_array($mixedId))
         {
-            $strQuery = "SELECT * FROM `tl_content` WHERE id IN (" . implode(', ', $mixedId) . ")";
+            $strQuery = "SELECT * FROM `tl_content` WHERE id IN (" . implode(', ', $mixedId) . ") ORDER BY sorting";
             
             $objDb = $this->Database
                 ->prepare($strQuery)
