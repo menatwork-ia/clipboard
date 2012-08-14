@@ -21,7 +21,7 @@ https://github.com/menatwork/clipboard/wiki/Screenshots
 System requirements
 -------------------
 
-* Contao 2.10.x or higher
+* Contao 2.9.x or higher
 * php5-xmlwriter (Debian package)
 
 
