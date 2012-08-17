@@ -87,7 +87,7 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
         ),
         'locations' => $arrAllowedLocations
     );
-    $GLOBALS['CLIPBOARD']['favorite']['icon']  = 'system/modules/clipboard/html/icons/icon_favorite.png';
-    $GLOBALS['CLIPBOARD']['favorite_']['icon'] = 'system/modules/clipboard/html/icons/icon_favorite_.png'; 
+    $GLOBALS['CLIPBOARD']['favorite']['icon']  = 'system/modules/clipboard/html/icons/icon-favorite.png';
+    $GLOBALS['CLIPBOARD']['favorite_']['icon'] = 'system/modules/clipboard/html/icons/icon-favorite_.png'; 
 }
 ?>
