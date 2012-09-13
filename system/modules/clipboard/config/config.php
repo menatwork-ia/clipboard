@@ -88,12 +88,14 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
         'group' => array(
             'icon'          => 'system/modules/clipboard/html/icons/icon-group.png'
         ),
+        'favorite' => array(
+            'icon'          => 'system/modules/clipboard/html/icons/icon-favorite.png'
+            'icon_'          => 'system/modules/clipboard/html/icons/icon-favorite_.png'
+        ),
         'attribute' => array(
             'icon'          => 'system/modules/clipboard/html/icons/icon-attribute.png'
         ),
         'locations' => $arrAllowedLocations
     );
-    $GLOBALS['CLIPBOARD']['favorite']['icon']  = 'system/modules/clipboard/html/icons/icon-favorite.gif';
-    $GLOBALS['CLIPBOARD']['favorite_']['icon'] = 'system/modules/clipboard/html/icons/icon-favorite_.gif'; 
 }
 ?>
