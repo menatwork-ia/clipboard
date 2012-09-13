@@ -5,8 +5,20 @@
  */
  
   #clipboard {
-    width:938px;
     margin:18px auto;
+  }
+  
+  #clipboard.toolbox {
+    z-index:111;
+    width:270px;
+    position:fixed;
+    top:0;
+    left:18px;
+  }
+
+  #clipboard .inside {
+    width:938px;
+    margin:0 auto;
     text-align:left;
     background:#fff;
     border:1px solid #bbb;
@@ -16,7 +28,13 @@
     border-radius:3px;
     -webkit-box-shadow:0px 3px 6px 0px #CCCCCC;
     -moz-box-shadow:0px 3px 6px 0px #CCCCCC;
-    box-shadow:0px 3px 6px 0px #CCCCCC; 
+    box-shadow:0px 3px 6px 0px #CCCCCC;
+  }
+ 
+  #clipboard.toolbox .inside {
+    width:270px;
+    margin-left:0;
+    margin-right:0;
   }
   
   #clipboard h1 {
@@ -28,13 +46,16 @@
     padding:4px 8px 6px;
     background:#b3b6b3 url("../../../themes/default/images/headline.gif") repeat-x;
   }
-  
-  #clipboard div {
+
+  #clipboard .inside div {
     margin:0;
-    padding:10px 8px 5px;
+    padding:10px 8px 8px;
     color:#666966;
-    overflow:hidden;
     position:relative;
+  }
+  
+  #clipboard form {
+    height:auto;
   }
   
   #clipboard .button {
@@ -43,11 +64,20 @@
     top:20px;
   }
   
+  #clipboard.toolbox .button {
+    top:-21px;
+    right:10px;
+  }
+  
   #clipboard #hide.button {
     top:14px;
   }
   
-  #clipboard .button a, 
+  #clipboard.toolbox #hide.button {
+    top:-21px;
+  }
+  
+  #clipboard .button a,
   #clipboard .button button {
     padding:2px 12px 2px 13px;
     background: #eeeeee;
@@ -67,6 +97,17 @@
     text-shadow:1px 1px 0 #EEEEEE;
   }
   
+  #clipboard.toolbox .button a,
+  #clipboard.toolbox .button button {
+    padding:0;
+    background-image:none;
+    background-color:transparent;
+    border:0;
+    color:#fff;
+    padding:0;
+    text-shadow:none;
+  }
+  
   #clipboard .button a:focus,
   #clipboard .button a:hover,
   #clipboard .button button:focus, 
@@ -81,7 +122,8 @@
     padding-bottom:6px;
   }
   
-  #clipboard .button a:hover {
+  #clipboard .button a:hover, 
+  #clipboard.toolbox .button button:hover {
     color:#666966 !important;
   }
   
@@ -121,7 +163,11 @@
   
   #clipboard li p.edit {
     padding-top:4px;
-  }  
+  }
+  
+  #clipboard li p.cl_title {
+    margin-right:0;
+  }
   
   #clipboard li span, 
   #clipboard li input.empty {
@@ -129,17 +175,41 @@
   }
   
   #clipboard li input.text {
-    width:400px;
+    width:200px;
     font-family:Verdana, sans-serif;
-    border:1px solid #fff;
-    padding:2px 2px;
+    border:1px solid #ebebeb;
+    padding:3px 2px;
     -webkit-border-radius:3px;
     -moz-border-radius:3px;
     border-radius:3px;
   }
   
+  #clipboard.toolbox li input.text {
+    width:150px;
+  }
+
+  #clipboard li span,
+  #clipboard li a, 
+  #clipboard li img.icon,
+  #clipboard li img,   
+  #clipboard.toolbox li img.icon {
+    float:left;
+    display:block;
+  }
+  
+  #clipboard.toolbox li span, 
+  #clipboard li img.icon {
+    display:none;
+  }
+
+  #clipboard li a, 
+  #clipboard li img.exception, 
+  #clipboard li span {
+    margin-right:3px;
+  }
+  
   #clipboard li input.edit {
-    border-color: #bbb;
+    border-color:#bbb;
   }
   
   .cl_header_pastenew {

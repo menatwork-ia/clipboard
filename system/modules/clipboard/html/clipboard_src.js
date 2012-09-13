@@ -55,7 +55,7 @@ var ClipboardMenu =
 
         var html = '';
         arrEl.each(function(el, index){
-            html += '<a href="'+ el.href +'" title="'+ el.title +'">'+ el.get('html') +' '+ el.getFirst('img').alt +'</a>';
+            html += '<a href="'+ el.href +'" title="'+ el.title +'" onclick="Backend.getScrollOffset();">'+ el.get('html') +' '+ el.getFirst('img').alt +'</a>';
         });
             
         div.set('html',html);
@@ -181,3 +181,23 @@ var Clipboard =
         $$('p.button').removeClass('active').addClass('inactive');
     } 
 };
+
+window.addEvent('domready',function(){
+
+    if (((window.innerWidth - 980) / 2) > 290) {
+        $('clipboard').addClass('toolbox');
+    } else {
+        $('clipboard').removeClass('toolbox');
+    }
+
+});
+
+window.addEvent('resize', function() {
+
+    if (((window.innerWidth - 980) / 2) > 290) {
+        $('clipboard').addClass('toolbox');
+    } else {
+        $('clipboard').removeClass('toolbox');
+    }
+
+});

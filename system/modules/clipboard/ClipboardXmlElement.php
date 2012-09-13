@@ -68,6 +68,8 @@ class ClipboardXmlElement
     protected $_table = NULL;
     protected $_favorite = NULL;
     protected $_childs = NULL;
+    protected $_group = NULL;
+    protected $_attribute = NULL;
     protected $_filename = NULL;
     protected $_path = NULL;
     protected $_checksum = NULL;
@@ -215,6 +217,34 @@ class ClipboardXmlElement
     }
     
     /**
+     * Get group lable
+     * 
+     * @return string
+     */    
+    public function getGroup()
+    {
+        if (is_null($this->_group))
+        {
+            $this->_setFileInfo();
+        }
+        return (($this->_group) ? $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] : '');
+    }
+    
+    /**
+     * Get attribute lable
+     * 
+     * @return type
+     */
+    public function getAttribute()
+    {
+        if (is_null($this->_attribute))
+        {
+            $this->_setDetailFileInfo();
+        }
+        return $this->_attribute;
+    }
+
+    /**
      * Get timestemp
      * 
      * @return string
@@ -291,7 +321,7 @@ class ClipboardXmlElement
         unset($arrFileName[2]);
         return crc32(implode(',', $arrFileName));
     }
-    
+            
     /**
      * Get checksum
      * 
@@ -339,6 +369,7 @@ class ClipboardXmlElement
         $this->_timeStemp = $arrFileName[1];
         $this->_favorite = (($arrFileName[2] == 'F') ? 1 : 0);
         $this->_childs = (($arrFileName[3] == 'C') ? 1 : 0);
+        $this->_group = (($arrFileName[4] == 'G') ? 1 : 0);
     }
     
     /**
@@ -347,7 +378,11 @@ class ClipboardXmlElement
     protected function _setDetailFileInfo()
     {
         $arrMetaInformation = $this->_objXmlReader->getDetailFileInfo($this->getFilePath('full'));
-        $this->_title = $arrMetaInformation['title'];
+        $tmpTitle = $arrMetaInformation['title'];
+        if(strpos($tmpTitle, '(' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')') !== false) $tmpTitle = trim(str_replace('(' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')', '', $tmpTitle));
+        
+        $this->_title = $tmpTitle;
+        $this->_attribute = $arrMetaInformation['attribute'];
         $this->_checksum = $arrMetaInformation['checksum'];
         $this->_encryptionKey = $arrMetaInformation['encryptionKey'];
     }

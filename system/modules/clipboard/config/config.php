@@ -85,6 +85,12 @@ if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLoca
         'imported' => array(
             'icon'          => 'system/modules/clipboard/html/icons/icon-imported.png'
         ),
+        'group' => array(
+            'icon'          => 'system/modules/clipboard/html/icons/icon-group.png'
+        ),
+        'attribute' => array(
+            'icon'          => 'system/modules/clipboard/html/icons/icon-attribute.png'
+        ),
         'locations' => $arrAllowedLocations
     );
 }

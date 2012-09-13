@@ -54,6 +54,13 @@ class Clipboard extends Backend
      * @var ClipboardXml
      */
     protected $_objCbXml;
+    
+    /**
+     * Contains some string functions
+     * 
+     * @var String
+     */
+    protected $_objString;    
 
     /**
      * Contains specific database request
@@ -72,6 +79,7 @@ class Clipboard extends Backend
         $this->_objHelper = ClipboardHelper::getInstance();
         $this->_objCbXml = ClipboardXml::getInstance();
         $this->_objDatabase = ClipboardDatabase::getInstance();
+        $this->_objString = String::getInstance();
     }
 
     /**
@@ -234,6 +242,8 @@ class Clipboard extends Backend
      */
     public function getTitle($mixedId)
     {
+        $arrTitle = array();
+        
         $booClGroup = FALSE;
         
         if(is_array($mixedId))
@@ -243,41 +253,33 @@ class Clipboard extends Backend
         
         switch ($this->_objHelper->getPageType())
         {
-            case 'page':
-                if(!$booClGroup)
+            case 'page':              
+                if($booClGroup)
                 {
-                    $objElem = $this->_objDatabase->getPageObject($mixedId);
-                    return $objElem->title;
+                    $mixedId = $mixedId[0];
                 }
-                else
-                {
-                    $objElem = $this->_objDatabase->getPageObject($mixedId[0]);
-                    return $objElem->title . ' (' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')';
-                }
+                $objElem = $this->_objDatabase->getPageObject($mixedId);
+                $arrTitle = array('title' => $objElem->title);
                 break;
             
             case 'article':
-                if(!$booClGroup)
-                {
-                    return call_user_func_array(array($this->_objDatabase, 'get' . $this->_objHelper->getPageType() . 'Object'), array($mixedId))->title;
-                }
-                else
-                {
-                    return call_user_func_array(array($this->_objDatabase, 'get' . $this->_objHelper->getPageType() . 'Object'), array($mixedId))->title . ' (' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')';
-                }
+                $arrTitle = array('title' => call_user_func_array(array($this->_objDatabase, 'get' . $this->_objHelper->getPageType() . 'Object'), array($mixedId))->title);
                 break;
 
             case 'content':
                 if(!$booClGroup)
                 {                
-                    $mixedTitel = $this->_objHelper->createContentTitle($mixedId);
-                    if (!is_object($mixedTitel) && is_array($mixedTitel))
+                    $mixedTitle = $this->_objHelper->createContentTitle($mixedId);
+                    if (!is_object($mixedTitle) && is_array($mixedTitle))
                     {
-                        return implode('', $mixedTitel);
+                        $arrTitle = $mixedTitle;
                     }
                     else
-                    {                    
-                        return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] . ' (' . $GLOBALS['TL_LANG']['CTE'][$mixedTitel->type][0] . ')';
+                    {     
+                        $arrTitle = array(
+                            'title' => $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'],
+                            'attribute' => $GLOBALS['TL_LANG']['CTE'][$mixedTitle->type][0]
+                        );
                     }
                 }
                 else
@@ -285,27 +287,32 @@ class Clipboard extends Backend
                     $strTitle = '';
                     foreach($mixedId AS $intId)
                     {
-                        $mixedTitel = $this->_objHelper->createContentTitle($intId);                        
-                        if (!is_object($mixedTitel) && is_array($mixedTitel))
+                        $mixedTitle = $this->_objHelper->createContentTitle($intId);                        
+                        if (!is_object($mixedTitle) && is_array($mixedTitle))
                         {
-                            $strTitle = $mixedTitel['title'];
+                            $strTitle = $mixedTitle['title'];
                             break;
                         }
                     }
                     
                     if(strlen($strTitle) > 0)
                     {
-                        return $strTitle . ' (' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')';
+                        $arrTitle = array('title' => $strTitle);
                     }
                     else
                     {
-                        return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'] . ' (' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')';
+                        $arrTitle = array('title' => $GLOBALS['TL_LANG']['MSC']['noClipboardTitle']);
                     }
                 }
+                break;
                 
             default:
-                return $GLOBALS['TL_LANG']['MSC']['noClipboardTitle'];
+                $arrTitle = array('title' => $GLOBALS['TL_LANG']['MSC']['noClipboardTitle']);
         }
+        
+        $arrTitle['title'] = $this->_objString->substr($arrTitle['title'], '24');
+        
+        return $arrTitle;
     }
 
     /**
@@ -322,8 +329,8 @@ class Clipboard extends Backend
         {
             $arrSet['childs']   = 0;
             $arrSet['elem_id']  = $ids;
-            $arrSet['title']    = $this->getTitle($ids);
             $arrSet['grouped']    = TRUE;
+            $arrSet = array_merge($arrSet,$this->getTitle($ids));
         }
         else
         {
@@ -338,9 +345,11 @@ class Clipboard extends Backend
             
             $arrSet['childs']   = (($this->Input->get('childs') == 1) ? 1 : 0);
             $arrSet['elem_id']  = $intId;
-            $arrSet['title']    = $this->getTitle($intId);
             $arrSet['grouped']    = FALSE;
+            $arrSet = array_merge($arrSet, $this->getTitle($intId));
         }
+        
+        if(!$arrSet['attribute']) $arrSet['attribute'] = '';
 
         $this->cb()->write($arrSet);
     }

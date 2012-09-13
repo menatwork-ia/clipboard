@@ -132,6 +132,9 @@ class ClipboardXmlWriter extends Backend
         $objXml->startElement('title');
         $objXml->writeCdata($arrSet['title']);
         $objXml->endElement(); // End title
+        $objXml->startElement('attribute');
+        $objXml->writeCdata($arrSet['attribute']);
+        $objXml->endElement(); // End title
         $objXml->writeElement('childs', (($arrSet['childs']) ? 1 : 0));
         $objXml->writeElement('table', $arrSet['table']);        
         $objXml->writeElement('checksum', $strMd5Checksum);

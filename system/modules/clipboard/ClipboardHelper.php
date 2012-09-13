@@ -259,39 +259,100 @@ class ClipboardHelper extends Backend
      */
     public function createContentTitle($intId)
     {
-        $objContentElem = $this->_objDatabase->getContentObject($intId);
-
-        $arrHeadline = deserialize($objContentElem->headline, true);
-
-        if (isset($arrHeadline['value']))
-        {
-            $strHeadline = $this->_objString->substr($arrHeadline['value'], 32);
-        }
-        else
-        {
-            $strHeadline = $this->_objString->substr(preg_replace('/[\n\r\t]+/', ' ', $arrHeadline[0]), 20);
-        }
-
-        $strText = $this->_objString->substr(strip_tags(preg_replace('/[\n\r\t]+/', ' ', $objContentElem->text)), 20);
-
+        $objContent = $this->_objDatabase->getContentObject($intId);
+        $strHeadline = $this->_getHeadlineValue($objContent);      
+        
         $arrTitle = array();
-
-        if ($strHeadline != '' && $strHeadline != 'NULL')
+        
+        switch ($objContent->type)
         {
-            $arrTitle['title'] = $strHeadline;
-        }
-        elseif ($strText != '' && $strText != 'NULL')
-        {
-            $arrTitle['title'] = $strText;
-        }
-        else
-        {
-            return $objContentElem;
-        }
+            case 'headline':
+            case 'gallery':
+            case 'downloads':
+                if($strHeadline) $arrTitle['title'] = $strHeadline;
+                break;
+                
+            case 'text':
+                if($strHeadline) $arrTitle['title'] = $strHeadline;
+                elseif($objContent->text) $arrTitle['title'] = $objContent->text;
+                break;
+                
+            case 'html':
+                if($objContent->html) $arrTitle['title'] = $objContent->html;             
+                break;
+                
+            case 'list':
+                $arrList = deserialize($objContent->listitems);
+                if($strHeadline) $arrTitle['title'] = $strHeadline;
+                elseif($arrList[0]) $arrTitle['title'] = $arrList[0];
+                break;
+                
+            case 'table':                
+                $arrTable = deserialize($objContent->tableitems);
+                if($strHeadline) $arrTitle['title'] = $strHeadline;
+                elseif($arrTable[0][0]) $arrTitle['title'] = $arrTable[0][0];
+                break;
+                
+            case 'accordion':
+                if($objContent->mooHeadline) $arrTitle['title'] = $objContent->mooHeadline;
+                break;
+                
+            case 'code':
+                if($strHeadline) $arrTitle['title'] = $strHeadline;
+                elseif($objContent->code) $arrTitle['title'] = $objContent->code;
+                break;
+                
+            case 'hyperlink':
+            case 'download':
+                if($strHeadline) $arrTitle['title'] = $strHeadline;
+                elseif($objContent->linkTitle) $arrTitle['title'] = $objContent->linkTitle;
+                break;
+                
+            case 'toplink':
+                if($objContent->linkTitle) $arrTitle['title'] = $objContent->linkTitle;
+                break;
+                
+            case 'image':
+                if($strHeadline) $arrTitle['title'] = $strHeadline;
+                elseif($objContent->caption) $arrTitle['title'] = $objContent->caption;
+                elseif($objContent->alt) $arrTitle['title'] = $objContent->alt;
+                break;               
+                
+            default:
 
-        $arrTitle['type'] = ' (' . $GLOBALS['TL_LANG']['CTE'][$objContentElem->type][0] . ')';
-
+                // HOOK: call the hooks for clipboardContentTitle
+                if (isset($GLOBALS['TL_HOOKS']['clipboardContentTitle']) && is_array($GLOBALS['TL_HOOKS']['clipboardContentTitle']))
+                {
+                    foreach ($GLOBALS['TL_HOOKS']['clipboardContentTitle'] as $arrCallback)
+                    {
+                        $this->import($arrCallback[0]);                        
+                        $strTmpTitle = $this->$arrCallback[0]->$arrCallback[1]($this, $strHeadline, $objContent);
+                        if($strTmpTitle !== false && !is_null($strTmpTitle)) 
+                        {
+                            $arrTitle['title'] = $strTmpTitle;
+                            break;
+                        }
+                    }
+                }
+                
+                break;
+        }
+        
+        if(!$arrTitle['title']) return $objContent;
+        
+        $arrTitle['attribute'] = $GLOBALS['TL_LANG']['CTE'][$objContent->type][0];
+        
         return $arrTitle;
+    }
+    
+    protected function _getHeadlineValue($objElem)
+    {
+        $arrHeadline = deserialize($objElem->headline, true);
+        if ($arrHeadline['value'])
+        {
+            return $arrHeadline['value'];
+        }
+        return false;
     }
 
     /**
