@@ -22,8 +22,10 @@
                             <img class="exception" title="<?php echo $GLOBALS['TL_LANG']['MSC']['importedClipboard']; ?>" height="16" width="18" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['importedClipboard']; ?>" src="<?php echo $GLOBALS['CLIPBOARD']['imported']['icon']; ?>" />
                         <?php endif; ?>
                         <?php if($item->getGroup()): ?>
-                        <img class="icon" height="16" width="16" title="<?php echo $item->getGroup(); ?>" alt="<?php echo $item->getGroup(); ?>" src="<?php echo $GLOBALS['CLIPBOARD']['group']['icon']; ?>" />
-                        <span title="<?php echo $item->getGroup(); ?>"><?php echo $item->getGroup(); ?></span>
+                        <img class="icon" height="16" width="16" title="<?php echo $item->getGroup(); ?><?php echo (($item->getGroupCount() > 0) ? ' (' . $item->getGroupCount() . ')' : ''); ?>" alt="<?php echo $item->getGroup(); ?>" src="<?php echo $GLOBALS['CLIPBOARD']['group']['icon']; ?>" />
+                        <span title="<?php echo $item->getGroup(); ?>">
+                            <?php echo $item->getGroup(); ?><?php echo (($item->getGroupCount() > 0) ? ' (' . $item->getGroupCount() . ')' : ''); ?>
+                        </span>
                         <?php endif; ?>
                         <?php if($item->getAttribute()): ?>
                         <img class="icon" height="16" width="16" title="<?php echo $item->getAttribute(); ?>" alt="<?php echo $item->getAttribute(); ?>" src="<?php echo $GLOBALS['CLIPBOARD']['attribute']['icon']; ?>" />

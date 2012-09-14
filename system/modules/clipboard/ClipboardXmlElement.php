@@ -69,6 +69,7 @@ class ClipboardXmlElement
     protected $_favorite = NULL;
     protected $_childs = NULL;
     protected $_group = NULL;
+    protected $_groupCount = NULL;
     protected $_attribute = NULL;
     protected $_filename = NULL;
     protected $_path = NULL;
@@ -230,6 +231,15 @@ class ClipboardXmlElement
         return (($this->_group) ? $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] : '');
     }
     
+    public function getGroupCount()
+    {
+        if (is_null($this->_groupCount))
+        {
+            $this->_setDetailFileInfo();
+        }
+        return $this->_groupCount;
+    }
+    
     /**
      * Get attribute lable
      * 
@@ -382,6 +392,7 @@ class ClipboardXmlElement
         if(strpos($tmpTitle, '(' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')') !== false) $tmpTitle = trim(str_replace('(' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')', '', $tmpTitle));
         
         $this->_title = $tmpTitle;
+        $this->_groupCount = $arrMetaInformation['group_count'];
         $this->_attribute = $arrMetaInformation['attribute'];
         $this->_checksum = $arrMetaInformation['checksum'];
         $this->_encryptionKey = $arrMetaInformation['encryptionKey'];

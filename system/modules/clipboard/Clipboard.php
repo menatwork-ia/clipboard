@@ -330,6 +330,7 @@ class Clipboard extends Backend
             $arrSet['childs']   = 0;
             $arrSet['elem_id']  = $ids;
             $arrSet['grouped']    = TRUE;
+            $arrSet['groupCount'] = count($ids);
             $arrSet = array_merge($arrSet,$this->getTitle($ids));
         }
         else
@@ -346,6 +347,7 @@ class Clipboard extends Backend
             $arrSet['childs']   = (($this->Input->get('childs') == 1) ? 1 : 0);
             $arrSet['elem_id']  = $intId;
             $arrSet['grouped']    = FALSE;
+            $arrSet['groupCount'] = 0;
             $arrSet = array_merge($arrSet, $this->getTitle($intId));
         }
         
