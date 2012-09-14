@@ -25,7 +25,7 @@
  * @package    clipboard
  * @license    GNU/GPL 2
  * @filesource
- */
+ */ 
 
 /**
  * Class ClipboardXmlReader
@@ -125,7 +125,7 @@ class ClipboardXmlReader extends Backend
                                 break;
 
                             case 'content':
-                                $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId, FALSE, (($objXml->getAttribute("grouped")) ? TRUE : FALSE));
+                                $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId, FALSE, (($objXml->getAttribute("grouped")) ? TRUE : FALSE));                                                                
                                 break;
 
                             default:
@@ -330,6 +330,8 @@ class ClipboardXmlReader extends Backend
      */
     protected function createContent(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE, $isGrouped = FALSE)
     {
+        $arrIds = array();
+        
         if ($boolIsChild == TRUE)
         {
             $intId = $intElemId;
@@ -389,12 +391,29 @@ class ClipboardXmlReader extends Backend
                                                             $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
                                                     }
                                             }
+                                            
+                                            // HOOK: call the hooks for clipboardCopy
+                                            if (isset($GLOBALS['TL_HOOKS']['clipboardCopy']) && is_array($GLOBALS['TL_HOOKS']['clipboardCopy']))
+                                            {
+                                                foreach ($GLOBALS['TL_HOOKS']['clipboardCopy'] as $arrCallback)
+                                                {
+                                                    $this->import($arrCallback[0]);                        
+                                                    $this->$arrCallback[0]->$arrCallback[1]($intLastInsertId, $dc, $isGrouped);
+                                                }
+                                            }
+                                            
+                                            $objResult = $this->Database
+                                                    ->prepare('SELECT pid FROM tl_content WHERE id = ?')
+                                                    ->execute($intLastInsertId);
+                                                                                                
+                                            $arrIds[$intLastInsertId] = $objResult->pid;
+                                            
                                             $this->Input->setGet('act', NULL);                                           
                                             
                                         }
                                         else
                                         {
-                                            $this->log('Clipboard skip the paste from contentelement because it is an includeElement', __FUNCTION__, TL_GENERAL);
+                                            $this->log('Clipboard skip the paste from content element because it is an includeElement', __FUNCTION__, TL_GENERAL);
                                         }
                                     }
                                     else
@@ -427,12 +446,29 @@ class ClipboardXmlReader extends Backend
                                                         $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
                                                 }
                                         }
+                                        
+                                        // HOOK: call the hooks for clipboardCopy
+                                        if (isset($GLOBALS['TL_HOOKS']['clipboardCopy']) && is_array($GLOBALS['TL_HOOKS']['clipboardCopy']))
+                                        {
+                                            foreach ($GLOBALS['TL_HOOKS']['clipboardCopy'] as $arrCallback)
+                                            {
+                                                $this->import($arrCallback[0]);                        
+                                                $this->$arrCallback[0]->$arrCallback[1]($intLastInsertId, $dc, $isGrouped);
+                                            }
+                                        }
+                                        
+                                        $objResult = $this->Database
+                                                ->prepare('SELECT pid FROM tl_content WHERE id = ?')
+                                                ->execute($intLastInsertId);
+
+                                        $arrIds[$intLastInsertId] = $objResult->pid;
+                                        
                                         $this->Input->setGet('act', NULL);
                                     }
                                 }
                                 else
                                 {
-                                    $this->log('Clipboard skip the paste from contentelement because element type dosn`t exists in this system', __FUNCTION__, TL_GENERAL);
+                                    $this->log('Clipboard skip the paste from content element because element type doesn`t exist in this system', __FUNCTION__, TL_GENERAL);
                                 }
                             }
                     }
@@ -441,6 +477,20 @@ class ClipboardXmlReader extends Backend
                     switch ($objXml->localName)
                     {
                         case 'content':
+                            
+                           if($isGrouped && count($arrIds) > 0)
+                           {                               
+                               // HOOK: call the hooks for clipboardCopyAll
+                                if (isset($GLOBALS['TL_HOOKS']['clipboardCopyAll']) && is_array($GLOBALS['TL_HOOKS']['clipboardCopyAll']))
+                                {
+                                    foreach ($GLOBALS['TL_HOOKS']['clipboardCopyAll'] as $arrCallback)
+                                    {
+                                        $this->import($arrCallback[0]);                        
+                                        $this->$arrCallback[0]->$arrCallback[1]($arrIds);
+                                    }
+                                }
+                           }
+                            
                             return;
                             break;
                     }
