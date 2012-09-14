@@ -254,10 +254,11 @@ class ClipboardHelper extends Backend
      * Create title for content element and return it as string. If no title 
      * exists return content element as object.
      * 
-     * @param type $intId
+     * @param integer $intId
+     * @param boolean $booClGroup
      * @return DB_Mysql_Result|string
      */
-    public function createContentTitle($intId)
+    public function createContentTitle($intId, $booClGroup)
     {
         $objContent = $this->_objDatabase->getContentObject($intId);
         $strHeadline = $this->_getHeadlineValue($objContent);      
@@ -326,7 +327,7 @@ class ClipboardHelper extends Backend
                     foreach ($GLOBALS['TL_HOOKS']['clipboardContentTitle'] as $arrCallback)
                     {
                         $this->import($arrCallback[0]);                        
-                        $strTmpTitle = $this->$arrCallback[0]->$arrCallback[1]($this, $strHeadline, $objContent);
+                        $strTmpTitle = $this->$arrCallback[0]->$arrCallback[1]($this, $strHeadline, $objContent, $booClGroup);
                         if($strTmpTitle !== false && !is_null($strTmpTitle)) 
                         {
                             $arrTitle['title'] = $strTmpTitle;
@@ -543,7 +544,7 @@ class ClipboardHelper extends Backend
         {
             $arrFileName[5] = $arrFileName[4];
             $arrFileName[4] = ((stristr($arrFileName[5], standardize($GLOBALS['TL_LANG']['MSC']['clipboardGroup'])) === FALSE) ? 'NG' : 'G');
-        }        
+        }
         
         return $arrFileName;
     }

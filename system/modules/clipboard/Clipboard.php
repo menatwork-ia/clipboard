@@ -269,7 +269,7 @@ class Clipboard extends Backend
             case 'content':
                 if(!$booClGroup)
                 {                
-                    $mixedTitle = $this->_objHelper->createContentTitle($mixedId);
+                    $mixedTitle = $this->_objHelper->createContentTitle($mixedId, $booClGroup);
                     if (!is_object($mixedTitle) && is_array($mixedTitle))
                     {
                         $arrTitle = $mixedTitle;
@@ -287,7 +287,7 @@ class Clipboard extends Backend
                     $strTitle = '';
                     foreach($mixedId AS $intId)
                     {
-                        $mixedTitle = $this->_objHelper->createContentTitle($intId);                        
+                        $mixedTitle = $this->_objHelper->createContentTitle($intId, $booClGroup);                        
                         if (!is_object($mixedTitle) && is_array($mixedTitle))
                         {
                             $strTitle = $mixedTitle['title'];
