@@ -216,7 +216,7 @@
     background: url(icons/icon-pasteinto.png) no-repeat scroll left center transparent;
   }
 
-  body.clipboard .tl_listing .tl_left { 
+  .tl_listing .tl_left { 
     width:auto;
   }
 
