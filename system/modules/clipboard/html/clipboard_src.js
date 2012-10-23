@@ -184,9 +184,9 @@ var Clipboard =
 
 window.addEvent('domready',function(){
 
-    if (((window.innerWidth - 980) / 2) > 290) {
+    if ($('clipboard') && ((window.innerWidth - 980) / 2) > 290) {
         $('clipboard').addClass('toolbox');
-    } else {
+    } else if($('clipboard')) {
         $('clipboard').removeClass('toolbox');
     }
 
@@ -194,9 +194,9 @@ window.addEvent('domready',function(){
 
 window.addEvent('resize', function() {
 
-    if (((window.innerWidth - 980) / 2) > 290) {
+    if ($('clipboard') && ((window.innerWidth - 980) / 2) > 290) {
         $('clipboard').addClass('toolbox');
-    } else {
+    } else if($('clipboard')) {
         $('clipboard').removeClass('toolbox');
     }
 
