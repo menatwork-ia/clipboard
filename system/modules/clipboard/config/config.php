@@ -34,8 +34,7 @@ $arrAllowedLocations = array(
     'content'
 );
 
-if (TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations) && !Input::getInstance()->get('act') ||
-    TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations) && Input::getInstance()->get('act') == 'select')
+if(TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations) && (!Input::getInstance()->get('act') || Input::getInstance()->get('act') == 'select') )
 {
     /**
      * Set header informations 
