@@ -42,4 +42,13 @@ $GLOBALS['TL_LANG']['MSC']['titleChild']            = 'inklusive Kindelemente';
 $GLOBALS['TL_LANG']['MSC']['importedClipboard']     = 'importiertes Clipboard';
 $GLOBALS['TL_LANG']['MSC']['clipboardGroup']        = 'Clipboard-Gruppe';
 
+/**
+ * Customer messages
+ */
+$GLOBALS['TL_LANG']['MSC']['clContentPasteInfo'] = array(
+    'Clipboard konnte das Inhaltselement nicht einfügen, da das zu inkluriende Element nicht vorhanden ist.',
+    'Clipboard konnte das Inhaltselement nicht einfügen, da der Typ %s in dem System nicht vorhanden ist.'
+);
+$GLOBALS['TL_LANG']['MSC']['clModulePasteInfo'] = 'Clipboard konnte das Frontend-Module nicht einfügen, da der Typ %s in dem System nicht vorhanden ist.';
+
 ?>

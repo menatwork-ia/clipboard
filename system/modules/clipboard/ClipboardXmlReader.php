@@ -417,7 +417,8 @@ class ClipboardXmlReader extends Backend
                                         }
                                         else
                                         {
-                                            $this->log('Clipboard skip the paste from content element because it is an includeElement', __FUNCTION__, TL_GENERAL);
+                                            $strMessage = $GLOBALS['TL_LANG']['MSC']['clContentPasteInfo'][0];
+                                            $this->_objHelper->writeCustomerInfoMessage($strMessage);
                                         }
                                     }
                                     else
@@ -472,7 +473,8 @@ class ClipboardXmlReader extends Backend
                                 }
                                 else
                                 {
-                                    $this->log('Clipboard skip the paste from content element because element type doesn`t exist in this system', __FUNCTION__, TL_GENERAL);
+                                    $strMessage = $GLOBALS['TL_LANG']['MSC']['clContentPasteInfo'][1];
+                                    $this->_objHelper->writeCustomerInfoMessage($strMessage);
                                 }
                             }
                     }
@@ -584,7 +586,8 @@ class ClipboardXmlReader extends Backend
                                 }
                                 else
                                 {
-                                    $this->log('Clipboard skip the paste from module element because element type doesn`t exist in this system', __FUNCTION__, TL_GENERAL);
+                                    $strMessage = sprintf($GLOBALS['TL_LANG']['MSC']['clModulePasteInfo'], $arrSet['type']);
+                                    $this->_objHelper->writeCustomerInfoMessage($strMessage);
                                 }
                             }
                     }

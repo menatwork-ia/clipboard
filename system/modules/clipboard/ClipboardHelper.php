@@ -255,6 +255,30 @@ class ClipboardHelper extends Backend
     }
     
     /**
+     * Write a message to the customer in TL_INFO and the log
+     * 
+     * @param string $strMessage
+     */
+    public function writeCustomerInfoMessage($strMessage)
+    {
+        $this->log($strMessage, __FUNCTION__, TL_GENERAL);
+        if(version_compare(VERSION, '2.11', '>='))
+        {
+            $this->addInfoMessage($strMessage);
+        }
+        else
+        {
+            $strType = 'TL_INFO';
+            if (!is_array($_SESSION[$strType]))
+            {
+                $_SESSION[$strType] = array();
+            }
+
+            $_SESSION[$strType][] = $strMessage;            
+        }
+    }
+    
+    /**
      * Create title for content element and return it as string. If no title 
      * exists return content element as object.
      * 
