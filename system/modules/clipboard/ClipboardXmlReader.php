@@ -196,6 +196,8 @@ class ClipboardXmlReader extends Backend
 
                             $dataContainer = 'DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
                             $dc = new $dataContainer($strTable);
+                            $dc->setNewActiveRecord($this->_objDatabase->getPageObject($intLastInsertId));
+                            $dc->setNewId($intLastInsertId);
 
                             if($isGrouped)
                             { 
@@ -217,7 +219,21 @@ class ClipboardXmlReader extends Backend
                                             $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
                                     }
                             }
-                            $this->Input->setGet('act', NULL);                             
+                            $this->Input->setGet('act', NULL);
+                            
+                            $varValue = '';
+                            
+                            // Trigger the save_callback
+                            if (is_array($GLOBALS['TL_DCA'][$strTable]['fields']['alias']['save_callback']))
+                            {
+                                foreach ($GLOBALS['TL_DCA'][$strTable]['fields']['alias']['save_callback'] as $callback)
+                                {
+                                    $this->import($callback[0]);
+                                    $varValue = $this->$callback[0]->$callback[1]($varValue, $dc);
+                                }
+                            }
+                            
+                            $this->_objDatabase->updateAlias($strTable, $varValue, $intLastInsertId);
                             break;
 
                         case 'subpage':
@@ -249,6 +265,7 @@ class ClipboardXmlReader extends Backend
     public function createArticle(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild = FALSE, $isGrouped = FALSE)
     {
         $intLastInsertId = 0;
+        $objDb = NULL;
 
         if ($boolIsChild == TRUE)
         {
@@ -294,7 +311,9 @@ class ClipboardXmlReader extends Backend
 
                             $dataContainer = 'DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
                             $dc = new $dataContainer($strTable);
-
+                            $dc->setNewActiveRecord($this->_objDatabase->getArticleObject($intLastInsertId));
+                            $dc->setNewId($intLastInsertId);
+                            
                             if($isGrouped)
                             {
                                 $this->Input->setGet('act', 'copyAll');
@@ -312,7 +331,21 @@ class ClipboardXmlReader extends Backend
                                             $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
                                     }
                             }
-                            $this->Input->setGet('act', NULL);                            
+                            $this->Input->setGet('act', NULL);
+                            
+                            $varValue = '';
+                            
+                            // Trigger the save_callback
+                            if (is_array($GLOBALS['TL_DCA'][$strTable]['fields']['alias']['save_callback']))
+                            {
+                                foreach ($GLOBALS['TL_DCA'][$strTable]['fields']['alias']['save_callback'] as $callback)
+                                {
+                                    $this->import($callback[0]);
+                                    $varValue = $this->$callback[0]->$callback[1]($varValue, $dc);
+                                }
+                            }
+
+                            $this->_objDatabase->updateAlias($strTable, $varValue, $intLastInsertId);
                             
                             return;
                             break;

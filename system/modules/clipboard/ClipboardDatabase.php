@@ -380,6 +380,20 @@ class ClipboardDatabase extends Backend
                 ->prepare("UPDATE " . $strTable . " SET sorting = ? WHERE id = ?")
                 ->execute($intSorting, $intId);
     }
+    
+    /**
+     * Update alias
+     * 
+     * @param string $strTable
+     * @param integer $intAlias
+     * @param integer $intId 
+     */
+    public function updateAlias($strTable, $intAlias, $intId)
+    {
+        $this->Database
+                ->prepare("UPDATE " . $strTable . " SET alias = ? WHERE id = ?")
+                ->execute($intAlias, $intId);
+    }    
 
 }
 
