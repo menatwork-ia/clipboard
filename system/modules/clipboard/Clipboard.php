@@ -305,6 +305,10 @@ class Clipboard extends Backend
                     }
                 }
                 break;
+            case 'module':
+                $objElem = $this->_objDatabase->getModuleObject($mixedId);
+                $arrTitle = array('title' => $objElem->name);
+                break;                
                 
             default:
                 $arrTitle = array('title' => $GLOBALS['TL_LANG']['MSC']['noClipboardTitle']);
@@ -465,6 +469,16 @@ class Clipboard extends Backend
                 );
 
                 $this->redirect($strRequestWithoutId . '&id=' . $objArticle->id);
+            }
+            else if(in_array($arrUnsetParams['key'], $arrUnsetKeyParams) && $this->_objHelper->getPageType() == 'module')
+            {
+                $objTheme = $this->_objDatabase->getThemeObjectFromModuleId($this->Input->get('id'));
+                
+                $strRequestWithoutId = str_replace(
+                        substr($this->Environment->request, strpos($this->Environment->request, '&id')), '', $this->Environment->request
+                );
+
+                $this->redirect($strRequestWithoutId . '&id=' . $objTheme->id);
             }
             
             $this->redirect($this->Environment->request);

@@ -141,6 +141,10 @@ class ClipboardHelper extends Backend
         {
             $this->_strpageType = 'content';
         }
+        elseif ($this->Input->get('table') == 'tl_module')
+        {
+            $this->_strpageType = 'module';
+        }
         else
         {
             $this->_strpageType = $this->Input->get('do');
@@ -516,6 +520,27 @@ class ClipboardHelper extends Backend
             foreach ($arrCElems AS $strCType => $strCDesc)
             {
                 if (substr($arrSet['type'], 1, -1) == $strCType)
+                {
+                    return TRUE;
+                }
+            }
+        }
+        return FALSE;
+    }
+    
+    /**
+     * Check if the module type exists in this system and return true or false 
+     * 
+     * @param array $arrSet
+     * @return boolean 
+     */    
+    public function existsModuleType($arrSet)
+    {
+        foreach ($GLOBALS['FE_MOD'] AS $group => $arrMElems)
+        {
+            foreach ($arrMElems AS $strMType => $strMDesc)
+            {
+                if (substr($arrSet['type'], 1, -1) == $strMType)
                 {
                     return TRUE;
                 }

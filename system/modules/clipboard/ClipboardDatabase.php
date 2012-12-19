@@ -229,6 +229,55 @@ class ClipboardDatabase extends Backend
 
         return $objDb;
     }
+    
+    /**
+     * Return theme object from given child module id
+     * 
+     * @param integer $intId
+     * @return DB_Mysql_Result
+     */
+    public function getThemeObjectFromModuleId($intId)
+    {
+        $objDb = $this->Database
+                ->prepare("SELECT t.* 
+                    FROM `tl_theme` AS t
+                    LEFT JOIN `tl_module` AS m
+                    ON m.pid = t.id
+                    WHERE m.id = ?")
+                ->limit(1)
+                ->executeUncached($intId);
+
+        return $objDb;
+    }    
+    
+    /**
+     * Return module object from given id
+     * 
+     * @param integer $mixedId
+     * @return DB_Mysql_Result
+     */    
+    public function getModuleObject($mixedId)
+    {
+        if(is_array($mixedId))
+        {
+            $strQuery = "SELECT * FROM `tl_module` WHERE id IN (" . implode(', ', $mixedId) . ")";
+            
+            $objDb = $this->Database
+                ->prepare($strQuery)
+                ->executeUncached();   
+        }
+        else
+        {
+            $strQuery = "SELECT * FROM `tl_module` WHERE id = ?";
+            
+            $objDb = $this->Database
+                ->prepare($strQuery)
+                ->limit(1)
+                ->executeUncached($mixedId);            
+        }               
+
+        return $objDb;        
+    }
 
     /**
      * Return object from given table and his id

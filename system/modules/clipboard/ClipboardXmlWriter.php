@@ -60,6 +60,7 @@ class ClipboardXmlWriter extends Backend
     protected $_strPageTable = 'tl_page';
     protected $_strArticleTable = 'tl_article';
     protected $_strContentTable = 'tl_content';
+    protected $_strModuleTable = 'tl_module';
 
     /**
      * Prevent constructing the object (Singleton)
@@ -155,6 +156,9 @@ class ClipboardXmlWriter extends Backend
                 break;
             case 'tl_content':
                 $this->writeContent($arrSet['elem_id'], $objXml, FALSE, $arrSet['grouped']);
+                break;
+            case 'tl_module':
+                $this->writeModule($arrSet['elem_id'], $objXml, FALSE, $arrSet['grouped']);
                 break;
         }
         $objXml->endElement(); // End datacontainer
@@ -317,6 +321,30 @@ class ClipboardXmlWriter extends Backend
     }
 
     /**
+     * Write module informations to xml object
+     * 
+     * @param integer $mixedId
+     * @param XMLWriter $objXml
+     * @param boolean $boolIsChild
+     * @param boolean $boolGrouped
+     */    
+    protected function writeModule($mixedId, &$objXml, $boolIsChild = FALSE, $boolGrouped = FALSE)
+    {        
+        $arrRows = $this->_objDatabase->getModuleObject($mixedId)->fetchAllAssoc();
+        
+        $objXml->startElement('module');
+        $objXml->writeAttribute('table', $this->_strModuleTable);
+        if($boolGrouped)
+        {
+            $objXml->writeAttribute('grouped', TRUE);
+        }         
+
+        $this->writeGivenDbTableRows($this->_strModuleTable, $arrRows, $objXml);
+
+        $objXml->endElement(); // End module
+    }
+
+    /**
      * Write the given database rows to the xml object
      * 
      * @param string $strTable
@@ -340,6 +368,7 @@ class ClipboardXmlWriter extends Backend
                         case 'id':
                         case 'pid':
                             break;
+                        
                         default:
 
 
@@ -506,6 +535,15 @@ class ClipboardXmlWriter extends Backend
                         $arrChecksum['content'][] = $arrContent;
                     }                    
                 }
+                break;
+                
+            case 'tl_module':
+                $arrModules = $this->_objDatabase->getModuleObject($arrSet['elem_id'])->fetchAllAssoc();
+                foreach ($arrModules AS $arrModule)
+                {
+                    $arrChecksum['module'][] = $arrModule;
+                }
+                break;
         }
         return md5(serialize($arrChecksum));
     }

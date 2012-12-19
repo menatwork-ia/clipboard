@@ -31,10 +31,17 @@
 $arrAllowedLocations = array(
     'page',
     'article',
-    'content'
+    'content',
+    'module'
 );
 
-if(TL_MODE == 'BE' && in_array(Input::getInstance()->get('do'), $arrAllowedLocations) && (!Input::getInstance()->get('act') || Input::getInstance()->get('act') == 'select') )
+$strDo = Input::getInstance()->get('do');
+$strAct = Input::getInstance()->get('act');
+$strTable = Input::getInstance()->get('table');
+
+if(TL_MODE == 'BE' &&
+    (in_array($strDo, $arrAllowedLocations) || ($strDo == 'themes' && $strTable == 'tl_module')) &&
+    (!$strAct || $strAct == 'select'))
 {
     /**
      * Set header informations 

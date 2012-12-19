@@ -128,6 +128,10 @@ class ClipboardXmlReader extends Backend
                                 $this->createContent($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId, FALSE, (($objXml->getAttribute("grouped")) ? TRUE : FALSE));                                                                
                                 break;
 
+                            case 'module':
+                                $this->createModule($objXml, $objXml->getAttribute("table"), $strPastePos, $intElemId, TRUE, (($objXml->getAttribute("grouped")) ? TRUE : FALSE));
+                                break;
+                            
                             default:
                                 break;
                         }
@@ -500,6 +504,118 @@ class ClipboardXmlReader extends Backend
     }
 
     /**
+     * Create Content elements
+     * 
+     * @param XMLReader $objXml
+     * @param string $strTable
+     * @param string $strPastePos
+     * @param integer $intElemId     
+     * @param boolean $boolIsChild
+     * @param boolean $isGrouped
+     */
+    protected function createModule(&$objXml, $strTable, $strPastePos, $intElemId, $boolIsChild, $isGrouped = FALSE)
+    {
+        $arrIds = array();
+        
+        if ($boolIsChild == TRUE)
+        {
+            $intId = $intElemId;
+        }        
+
+        while ($objXml->read())
+        {
+            switch ($objXml->nodeType)
+            {
+                case XMLReader::ELEMENT:
+                    switch ($objXml->localName)
+                    {
+                        case 'row':
+                            $arrSet = $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild);
+                            if (array_key_exists('type', $arrSet))
+                            {
+                                if ($this->_objHelper->existsModuleType($arrSet))
+                                {
+                                    $objDb = $this->_objDatabase->insertInto($strTable, $arrSet);
+                                    $intLastInsertId = $objDb->insertId;
+
+                                    $this->loadDataContainer($strTable);
+
+                                    $dataContainer = 'DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
+                                    $dc = new $dataContainer($strTable);
+
+                                    if($isGrouped)
+                                    { 
+                                        $intElemId = $intLastInsertId;
+                                        $strPastePos = 'pasteAfter';
+
+                                        $this->Input->setGet('act', 'copyAll');
+                                    }
+                                    else
+                                    {
+                                        $this->Input->setGet('act', 'copy');
+                                    }
+
+                                    if (is_array($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback']))
+                                    {
+                                            foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
+                                            {
+                                                    $this->import($callback[0]);
+                                                    $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
+                                            }
+                                    }
+
+                                    // HOOK: call the hooks for clipboardCopy
+                                    if (isset($GLOBALS['TL_HOOKS']['clipboardCopy']) && is_array($GLOBALS['TL_HOOKS']['clipboardCopy']))
+                                    {
+                                        foreach ($GLOBALS['TL_HOOKS']['clipboardCopy'] as $arrCallback)
+                                        {
+                                            $this->import($arrCallback[0]);                        
+                                            $this->$arrCallback[0]->$arrCallback[1]($intLastInsertId, $dc, $isGrouped);
+                                        }
+                                    }
+
+                                    $objResult = $this->Database
+                                            ->prepare('SELECT pid FROM tl_module WHERE id = ?')
+                                            ->execute($intLastInsertId);
+
+                                    $arrIds[$intLastInsertId] = $objResult->pid;
+
+                                    $this->Input->setGet('act', NULL);
+                                }
+                                else
+                                {
+                                    $this->log('Clipboard skip the paste from module element because element type doesn`t exist in this system', __FUNCTION__, TL_GENERAL);
+                                }
+                            }
+                    }
+                    break;
+                case XMLReader::END_ELEMENT:
+                    switch ($objXml->localName)
+                    {
+                        case 'module':
+                            
+                           if($isGrouped && count($arrIds) > 0)
+                           {                               
+                               // HOOK: call the hooks for clipboardCopyAll
+                                if (isset($GLOBALS['TL_HOOKS']['clipboardCopyAll']) && is_array($GLOBALS['TL_HOOKS']['clipboardCopyAll']))
+                                {
+                                    foreach ($GLOBALS['TL_HOOKS']['clipboardCopyAll'] as $arrCallback)
+                                    {
+                                        $this->import($arrCallback[0]);                        
+                                        $this->$arrCallback[0]->$arrCallback[1]($arrIds);
+                                    }
+                                }
+                           }
+                            
+                            return;
+                            break;
+                    }
+                    break;
+            }
+        }
+    }    
+
+    /**
      * Create array set for insert query
      * 
      * @param XMLReader $objXml
@@ -570,6 +686,11 @@ class ClipboardXmlReader extends Backend
                 case XMLReader::END_ELEMENT:
                     if ($objXml->localName == 'row')
                     {
+                        if($strTable == 'tl_module')
+                        {
+                            $arrSet['pid'] = $intId;
+                        }
+                        
                         return $arrSet;
                     }
                     break;
