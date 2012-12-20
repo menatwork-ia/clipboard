@@ -1,4 +1,7 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
+
+if (!defined('TL_ROOT'))
+    die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -48,7 +51,7 @@ class DC_Clipboard extends DC_Table
         static $session;
 
         $session = $this->Session->getData();
-        $node = ($GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['mode'] == 6) ? $this->strTable . '_' . $table . '_tree' : $this->strTable . '_tree';
+        $node    = ($GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['mode'] == 6) ? $this->strTable . '_' . $table . '_tree' : $this->strTable . '_tree';
 
         // Toggle nodes
         if ($this->Input->get('ptg'))
@@ -70,7 +73,7 @@ class DC_Clipboard extends DC_Table
             return '';
         }
 
-        $return = '';
+        $return     = '';
         $intSpacing = 20;
 
         // Add the ID to the list of current IDs
@@ -100,21 +103,21 @@ class DC_Clipboard extends DC_Table
         }
 
         $session[$node][$id] = (is_int($session[$node][$id])) ? $session[$node][$id] : 0;
-        $mouseover = ($GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['mode'] == 5 || $table == $this->strTable) ? ' onmouseover="Theme.hoverDiv(this, 1);" onmouseout="Theme.hoverDiv(this, 0);"' : '';
+        $mouseover           = ($GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['mode'] == 5 || $table == $this->strTable) ? ' onmouseover="Theme.hoverDiv(this, 1);" onmouseout="Theme.hoverDiv(this, 0);"' : '';
 
         $return .= "\n  " . '<li class="' . ((($GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['mode'] == 5 && $objRow->type == 'root') || $table != $this->strTable) ? 'tl_folder' : 'tl_file') . '"' . $mouseover . '><div class="tl_left" style="padding-left:' . ($intMargin + $intSpacing) . 'px;">';
 
         // Calculate label and add a toggle button
         $args = array();
         $folderAttribute = 'style="margin-left:20px;"';
-        $showFields = $GLOBALS['TL_DCA'][$table]['list']['label']['fields'];
-        $level = ($intMargin / $intSpacing + 1);
+        $showFields      = $GLOBALS['TL_DCA'][$table]['list']['label']['fields'];
+        $level           = ($intMargin / $intSpacing + 1);
 
         if (count($childs))
         {
             $folderAttribute = '';
-            $img = ($session[$node][$id] == 1) ? 'folMinus.gif' : 'folPlus.gif';
-            $alt = ($session[$node][$id] == 1) ? $GLOBALS['TL_LANG']['MSC']['collapseNode'] : $GLOBALS['TL_LANG']['MSC']['expandNode'];
+            $img             = ($session[$node][$id] == 1) ? 'folMinus.gif' : 'folPlus.gif';
+            $alt             = ($session[$node][$id] == 1) ? $GLOBALS['TL_LANG']['MSC']['collapseNode'] : $GLOBALS['TL_LANG']['MSC']['expandNode'];
             $return .= '<a href="' . $this->addToUrl('ptg=' . $id) . '" title="' . specialchars($alt) . '" onclick="Backend.getScrollOffset(); return AjaxRequest.toggleStructure(this, \'' . $node . '_' . $id . '\', ' . $level . ', ' . $GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['mode'] . ');">' . $this->generateImage($img, '', 'style="margin-right:2px;"') . '</a>';
         }
 
@@ -168,7 +171,7 @@ class DC_Clipboard extends DC_Table
         // Call label_callback ($row, $label, $this)
         if (is_array($GLOBALS['TL_DCA'][$table]['list']['label']['label_callback']))
         {
-            $strClass = $GLOBALS['TL_DCA'][$table]['list']['label']['label_callback'][0];
+            $strClass  = $GLOBALS['TL_DCA'][$table]['list']['label']['label_callback'][0];
             $strMethod = $GLOBALS['TL_DCA'][$table]['list']['label']['label_callback'][1];
 
             $this->import($strClass);
@@ -181,7 +184,7 @@ class DC_Clipboard extends DC_Table
 
         $return .= '</div> <div class="tl_right">';
         $previous = ($GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['mode'] == 6) ? $arrPrevNext['pp'] : $arrPrevNext['p'];
-        $next = ($GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['mode'] == 6) ? $arrPrevNext['nn'] : $arrPrevNext['n'];
+        $next     = ($GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['mode'] == 6) ? $arrPrevNext['nn'] : $arrPrevNext['n'];
         $_buttons = '';
 
         // Regular buttons ($row, $table, $root, $blnCircularReference, $childs, $previous, $next)
@@ -209,7 +212,7 @@ class DC_Clipboard extends DC_Table
             // Call paste_button_callback(&$dc, $row, $table, $blnCircularReference, $arrClipboard, $childs, $previous, $next)
             if (is_array($GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['paste_button_callback']))
             {
-                $strClass = $GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['paste_button_callback'][0];
+                $strClass  = $GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['paste_button_callback'][0];
                 $strMethod = $GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['paste_button_callback'][1];
 
                 $this->import($strClass);
@@ -218,7 +221,7 @@ class DC_Clipboard extends DC_Table
             else
             {
                 $imagePasteAfter = $this->generateImage('pasteafter.gif', sprintf($GLOBALS['TL_LANG'][$this->strTable]['pasteafter'][1], $id), 'class="blink"');
-                $imagePasteInto = $this->generateImage('pasteinto.gif', sprintf($GLOBALS['TL_LANG'][$this->strTable]['pasteinto'][1], $id), 'class="blink"');
+                $imagePasteInto  = $this->generateImage('pasteinto.gif', sprintf($GLOBALS['TL_LANG'][$this->strTable]['pasteinto'][1], $id), 'class="blink"');
 
                 // Regular tree (on cut: disable buttons of the page all its childs to avoid circular references)
                 if ($GLOBALS['TL_DCA'][$this->strTable]['list']['sorting']['mode'] == 5)
@@ -281,7 +284,7 @@ class DC_Clipboard extends DC_Table
 
         $this->Session->setData($session);
         return $return;
-    }   
+    }
 
     /**
      * List all records of the current table as tree and return them as HTML string
@@ -290,9 +293,9 @@ class DC_Clipboard extends DC_Table
     protected function treeView()
     {
         $strTreeView = parent::treeView();
-        
+
         $arrButtons = array();
-        
+
         // Added by Patrick Kahl
         // HOOK: call the hooks for clipboardActSelectButtons
         if (isset($GLOBALS['TL_HOOKS']['clipboardActSelectButtonsTreeView']) && is_array($GLOBALS['TL_HOOKS']['clipboardActSelectButtonsTreeView']))
@@ -302,11 +305,11 @@ class DC_Clipboard extends DC_Table
                 $this->import($callback[0]);
                 $arrButtons[] = $this->$callback[0]->$callback[1]($this);
             }
-        }        
-        
-        return preg_replace('/<div.*class="tl_submit_container".*>/', "$0" . implode('', $arrButtons), $strTreeView, 1);        
-    }    
-    
+        }
+
+        return preg_replace('/<div.*class="tl_submit_container".*>/', "$0" . implode('', $arrButtons), $strTreeView, 1);
+    }
+
     /**
      * Show header of the parent table and list all records of the current table
      * @return string
@@ -314,9 +317,9 @@ class DC_Clipboard extends DC_Table
     protected function parentView()
     {
         $strParentView = parent::parentView();
-        
+
         $arrButtons = array();
-        
+
         // Added by Patrick Kahl
         // HOOK: call the hooks for clipboardActSelectButtons
         if (isset($GLOBALS['TL_HOOKS']['clipboardActSelectButtonsParentView']) && is_array($GLOBALS['TL_HOOKS']['clipboardActSelectButtonsParentView']))
@@ -326,8 +329,8 @@ class DC_Clipboard extends DC_Table
                 $this->import($callback[0]);
                 $arrButtons[] = $this->$callback[0]->$callback[1]($this);
             }
-        }        
-        
+        }
+
         return preg_replace('/<div.*class="tl_submit_container".*>/', "$0" . implode('', $arrButtons), $strParentView, 1);
     }
 
