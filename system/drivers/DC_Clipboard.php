@@ -333,6 +333,16 @@ class DC_Clipboard extends DC_Table
 
         return preg_replace('/<div.*class="tl_submit_container".*>/', "$0" . implode('', $arrButtons), $strParentView, 1);
     }
+	
+	public function setNewActiveRecord($objRow)
+    {
+        $this->objActiveRecord = $objRow;
+    }
+
+    public function setNewId($intId)
+    {
+        $this->intId = $intId;
+    }
 
 }
 
