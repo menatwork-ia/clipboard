@@ -226,6 +226,7 @@ class ClipboardXmlReader extends Backend
                     switch ($objXml->localName)
                     {
                         case 'page':
+                        case 'subpage':
                             return;
                             break;
                     }

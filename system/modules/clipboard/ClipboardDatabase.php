@@ -98,7 +98,7 @@ class ClipboardDatabase extends Backend
     public function getSubpagesObject($intId)
     {
         $objDb = $this->Database
-                ->prepare("SELECT * FROM `tl_page` WHERE pid = ?")
+                ->prepare("SELECT * FROM `tl_page` WHERE pid = ? ORDER BY sorting")
                 ->executeUncached($intId);
 
         return $objDb;
