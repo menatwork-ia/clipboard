@@ -17,7 +17,7 @@
   }
 
   #clipboard .inside {
-    width:938px;
+    width:958px;
     margin:0 auto;
     text-align:left;
     background:#fff;
@@ -216,7 +216,7 @@
     background: url(icons/icon-pasteinto.png) no-repeat scroll left center transparent;
   }
 
-  .tl_listing .tl_left { 
+  .firefox .tl_listing .tl_left { 
     width:auto;
   }
 

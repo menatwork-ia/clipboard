@@ -1,29 +1,11 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
 
 /**
  * Contao Open Source CMS
- * Copyright (C) 2005-2010 Leo Feyer
  *
- * Formerly known as TYPOlight Open Source CMS.
- *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this program. If not, please visit the Free
- * Software Foundation website at <http://www.gnu.org/licenses/>.
- *
- * PHP version 5
- * @copyright  MEN AT WORK 2012
+ * @copyright  MEN AT WORK 2013 
  * @package    clipboard
- * @license    GNU/LGPL
+ * @license    GNU/LGPL 
  * @filesource
  */
 
@@ -46,8 +28,8 @@ if(TL_MODE == 'BE' &&
     /**
      * Set header informations 
      */
-    $GLOBALS['TL_CSS']['clipboard']         = "system/modules/clipboard/html/clipboard.css";
-    $GLOBALS['TL_JAVASCRIPT']['clipboard']  = "system/modules/clipboard/html/clipboard.js";
+    $GLOBALS['TL_CSS']['clipboard']         = "system/modules/clipboard/assets/clipboard.css";
+    $GLOBALS['TL_JAVASCRIPT']['clipboard']  = "system/modules/clipboard/assets/clipboard.js";
 
     /**
      * Hooks
@@ -64,42 +46,42 @@ if(TL_MODE == 'BE' &&
         // Copy button
         'copy' => array(
             'href'          => 'key=cl_copy',
-            'icon'          => 'system/modules/clipboard/html/icons/icon-clipboard.png',
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-clipboard.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         // Copy with children button
         'copy_childs' => array(
             'href'          => 'key=cl_copy&amp;childs=1',
-            'icon'          => 'system/modules/clipboard/html/icons/icon-clipboard-childs.png',
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-clipboard-childs.png',
             'attributes'    => 'class="cl_paste" onclick="Backend.getScrollOffset();"'        
         ),
         // Paste into button
         'pasteinto' => array(
             'href'          => 'key=cl_paste_into',            
-            'icon'          => 'system/modules/clipboard/html/icons/icon-pasteafter.png',
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-pasteafter.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         // Paste after button
         'pasteafter' => array(
             'href'          => 'key=cl_paste_after',
-            'icon'          => 'system/modules/clipboard/html/icons/icon-pasteinto.png',
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-pasteinto.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         'childs' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-childs.png'
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-childs.png'
         ),
         'imported' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-imported.png'
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-imported.png'
         ),
         'group' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-group.png'
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-group.png'
         ),
         'favorite' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-favorite.gif',
-            'icon_'          => 'system/modules/clipboard/html/icons/icon-favorite_.gif'
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-favorite.gif',
+            'icon_'          => 'system/modules/clipboard/assets/icons/icon-favorite_.gif'
         ),
         'attribute' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-attribute.png'
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-attribute.png'
         ),
         'locations' => $arrAllowedLocations
     );
