@@ -2,7 +2,7 @@
  * Class ClipboardMenu
  *
  * Provide methods to handle context menus
- * @copyright  MEN AT WORK 2012
+ * @copyright  MEN AT WORK 2013
  * @package    Backend
  */
 var ClipboardMenu =
