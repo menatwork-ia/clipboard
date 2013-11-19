@@ -170,7 +170,7 @@ class Clipboard extends Backend
     }
 
     /**
-     * Paste active into
+     * Paste favorite into
      */
     public function pasteInto()
     {
@@ -178,7 +178,7 @@ class Clipboard extends Backend
     }
 
     /**
-     * Paste active after 
+     * Paste favorite after 
      */
     public function pasteAfter()
     {
@@ -364,7 +364,7 @@ class Clipboard extends Backend
                     case 'key':
                         switch ($this->Input->get($strGetParam))
                         {
-                            // Set new active
+                            // Set new favorite
                             case 'cl_favor':
                                 if (strlen($this->Input->get('cl_id')))
                                 {

@@ -7,10 +7,10 @@
             <input type="hidden" name="REQUEST_TOKEN" value="<?php echo REQUEST_TOKEN; ?>">
             <ul>
             <?php foreach ($this->clipboard as $id => $item): ?>
-                <li<?php echo ($item->getActive()) ? ' class="featured"' : ''; ?>>
+                <li<?php echo ($item->getFavorite()) ? ' class="featured"' : ''; ?>>
                     <p class="edit">
                         <a title="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" href="<?php echo $this->addToUrl('key=cl_favor&amp;cl_id=' . $id); ?>">
-                            <img height="16" width="16" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" src="<?php echo $GLOBALS['CLIPBOARD']['active']['icon' . ((!$item->getActive()) ? '_' : '')]; ?>" />
+                            <img height="16" width="16" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['featureSelected']; ?>" src="<?php echo $GLOBALS['CLIPBOARD']['favorite']['icon' . ((!$item->getFavorite()) ? '_' : '')]; ?>" />
                         </a>
                         <a onclick="if (!confirm('<?php echo sprintf($GLOBALS['TL_LANG']['MSC']['deleteConfirm'], $id); ?>')) return false; Backend.getScrollOffset();" title="<?php echo $GLOBALS['TL_LANG']['MSC']['deleteSelected']; ?>" href="<?php echo $this->addToUrl('key=cl_delete&amp;cl_id=' . $id); ?>">
                             <img height="16" width="14" alt="<?php echo $GLOBALS['TL_LANG']['MSC']['deleteSelected']; ?>" src="system/themes/default/images/delete.gif" />

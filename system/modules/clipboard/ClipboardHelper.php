@@ -157,9 +157,9 @@ class ClipboardHelper extends Backend
      */
     public function getPasteButton($row, $href, $label, $title, $icon, $attributes, $table)
     {
-        $boolFavorit = Clipboard::getInstance()->cb()->hasActive();
+        $boolFavorit = Clipboard::getInstance()->cb()->hasFavorite();
 
-        if ($boolActive)
+        if ($boolFavorit)
         {
             $return = '';
             if ($this->User->isAdmin || ($this->User->hasAccess($row['type'], 'alpty') && $this->User->isAllowed(2, $row)))
@@ -211,7 +211,7 @@ class ClipboardHelper extends Backend
     {
         if(!$this->Input->get('act'))
         {
-            $objFavorit = Clipboard::getInstance()->cb()->getActive();
+            $objFavorit = Clipboard::getInstance()->cb()->getFavorite();
 
             if ($dc->table == 'tl_article' && $table == 'tl_page')
             {

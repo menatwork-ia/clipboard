@@ -40,7 +40,7 @@ if (Clipboard::getInstance()->isClipboard('module'))
             $GLOBALS['CLIPBOARD']['copy'], $GLOBALS['TL_DCA']['tl_module']['list']['operations']['cl_copy']
     );
 
-    if(Clipboard::getInstance()->cb()->hasActive())
+    if(Clipboard::getInstance()->cb()->hasFavorite())
     {        
         // -----------------------------------------------------------------------------
         
