@@ -69,7 +69,7 @@ var ClipboardMenu =
      */
     hide: function()
     {
-        if ($defined($('clipboardmenu')))
+        if ($('clipboardmenu') != null)
         {
             $('clipboardmenu').destroy();
         }
