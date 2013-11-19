@@ -51,7 +51,7 @@ if (Clipboard::getInstance()->isClipboard('page'))
             $GLOBALS['CLIPBOARD']['copy_childs'], $GLOBALS['TL_DCA']['tl_page']['list']['operations']['cl_copyChilds']
     );
 
-    if(Clipboard::getInstance()->cb()->hasFavorite())
+    if(Clipboard::getInstance()->cb()->hasActive())
     {    
         // -----------------------------------------------------------------------------
         // Paste after button

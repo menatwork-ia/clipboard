@@ -48,7 +48,7 @@ class ClipboardXmlElement
      */
     protected $_title = NULL;
     protected $_table = NULL;
-    protected $_favorite = NULL;
+    protected $_active = NULL;
     protected $_childs = NULL;
     protected $_group = NULL;
     protected $_groupCount = NULL;
@@ -139,37 +139,37 @@ class ClipboardXmlElement
     }
 
     /**
-     * Get favorite
+     * Get active
      * 
      * @return boolean 
      */
-    public function getFavorite()
+    public function getActive()
     {
-        if (is_null($this->_favorite))
+        if (is_null($this->_active))
         {
             $this->_setFileInfo();
         }
-        return $this->_favorite;
+        return $this->_active;
     }
 
     /**
-     * Set favorite
+     * Set active
      * 
-     * @param boolean $favorite
+     * @param boolean $active
      * @return ClipboardXmlElement 
      */
-    public function setFavorite($favorite)
+    public function setActive($active)
     {
-        if (!is_null($this->_favorite) || $this->_favorite != $favorite)
+        if (!is_null($this->_active) || $this->_active != $active)
         {
-            $strNewFileName = $this->_setNewFileName('favorite', (($favorite) ? 'F' : 'N'));
+            $strNewFileName = $this->_setNewFileName('active', (($active) ? 'F' : 'N'));
             $this->_objFiles->rename(
                     $this->_path . '/' . $this->_filename, $this->_path . '/' . $strNewFileName
             );
             $this->_filename = $strNewFileName;
             $this->_setFileInfo();
         }
-        $this->_favorite = $favorite;
+        $this->_active = $active;
         return $this;
     }
 
@@ -329,7 +329,7 @@ class ClipboardXmlElement
     }
 
     /**
-     * Set new filename. Editable is favorite and title
+     * Set new filename. Editable is active and title
      * 
      * @param string $strEditType
      * @param string $strValue
@@ -340,7 +340,7 @@ class ClipboardXmlElement
         $arrFileName = $this->_objHelper->getArrFromFileName($this->getFilePath());
         switch ($strEditType)
         {
-            case 'favorite':
+            case 'active':
                 $arrFileName[2] = $strValue;
                 break;
             case 'title':
@@ -359,7 +359,7 @@ class ClipboardXmlElement
         $arrFileName = $this->_objHelper->getArrFromFileName($this->getFilePath());
         $this->_table = 'tl_' . $arrFileName[0];
         $this->_timeStemp = $arrFileName[1];
-        $this->_favorite = (($arrFileName[2] == 'F') ? 1 : 0);
+        $this->_active = (($arrFileName[2] == 'A') ? 1 : 0);
         $this->_childs = (($arrFileName[3] == 'C') ? 1 : 0);
         $this->_group = (($arrFileName[4] == 'G') ? 1 : 0);
     }

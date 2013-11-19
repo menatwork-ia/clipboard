@@ -89,14 +89,14 @@ class ClipboardXml extends Backend
     }
 
     /**
-     * Set the current favorite to the given position in action with the id
+     * Set the current active to the given position in action with the id
      * 
      * @param string $strPastePos
      * @param integer $intId 
      */
     public function read($strPastePos, $intId)
     {
-        $this->_objXmlReader->readXml($this->getFavorite(), $strPastePos, $intId);
+        $this->_objXmlReader->readXml($this->getActive(), $strPastePos, $intId);
     }
 
     /**
@@ -106,13 +106,13 @@ class ClipboardXml extends Backend
      */
     public function write($arrSet)
     {
-        $objFile = $this->getFavorite();
+        $objFile = $this->getActive();
         $this->unFavorAll();
         $arrSet['filename'] = $this->_getFileName($arrSet);
         $arrSet['path'] = $this->getPath();
         if(!$this->_objXmlWriter->writeXml($arrSet, $this->_arrClipboardElements))
         {
-            $objFile->setFavorite(TRUE);
+            $objFile->setActive(TRUE);
         }
     }
 
@@ -179,13 +179,13 @@ class ClipboardXml extends Backend
     }
 
     /**
-     * Return if clipboard has favorite elements 
+     * Return if clipboard has active elements 
      * 
      * return boolean
      */
-    public function hasFavorite()
+    public function hasActive()
     {
-        if (is_object($this->getFavorite()))
+        if (is_object($this->getActive()))
         {
             return TRUE;
         }
@@ -193,18 +193,18 @@ class ClipboardXml extends Backend
     }
 
     /**
-     * Get favorite
+     * Get active
      * 
      * @return ClipboardXmlElement
      */
-    public function getFavorite()
+    public function getActive()
     {
         $arrFavorits = array();
         if ($this->hasElements())
         {
             foreach ($this->_arrClipboardElements AS $objFile)
             {
-                if ($objFile->getFavorite())
+                if ($objFile->getActive())
                 {
                     $arrFavorits[] =  $objFile;
                 }
@@ -225,7 +225,7 @@ class ClipboardXml extends Backend
                     }
                 }
                 $this->unFavorAll();
-                $objFileNewest->setFavorite(TRUE);                
+                $objFileNewest->setActive(TRUE);                
                 return $objFileNewest;
             }
         }
@@ -233,14 +233,14 @@ class ClipboardXml extends Backend
     }
 
     /**
-     * Set given file hast to favorite and unfavor all other
+     * Set given file hast to active and unfavor all other
      * 
      * @param type $hash 
      */
     public function setFavor($hash)
     {
         $this->unFavorAll();
-        $this->_arrClipboardElements[$hash]->setFavorite(TRUE);
+        $this->_arrClipboardElements[$hash]->setActive(TRUE);
     }
 
     /**
@@ -252,7 +252,7 @@ class ClipboardXml extends Backend
         {
             foreach ($this->_arrClipboardElements AS $objFile)
             {
-                $objFile->setFavorite(FALSE);
+                $objFile->setActive(FALSE);
             }
         }
     }

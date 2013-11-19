@@ -76,9 +76,9 @@ if(TL_MODE == 'BE' &&
         'group' => array(
             'icon'          => 'system/modules/clipboard/html/icons/icon-group.png'
         ),
-        'favorite' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-favorite.gif',
-            'icon_'          => 'system/modules/clipboard/html/icons/icon-favorite_.gif'
+        'active' => array(
+            'icon'          => 'system/modules/clipboard/html/icons/icon-clipboard-active.png',
+            'icon_'          => 'system/modules/clipboard/html/icons/icon-clipboard-inactive.png'
         ),
         'attribute' => array(
             'icon'          => 'system/modules/clipboard/html/icons/icon-attribute.png'
