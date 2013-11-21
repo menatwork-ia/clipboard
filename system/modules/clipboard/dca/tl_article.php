@@ -12,7 +12,7 @@
 /**
  * Create DCA if clipboard is ready to use 
  */
-if (Clipboard::getInstance()->isClipboard('article'))
+if (TL_MODE == 'BE' && Clipboard::getInstance()->isClipboard('article'))
 {
     /**
      * Prepare clipboard contextmenu 

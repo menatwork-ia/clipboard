@@ -15,7 +15,7 @@
  
 $this->loadLanguageFile('tl_article');
 
-if (Clipboard::getInstance()->isClipboard('content'))
+if (TL_MODE == 'BE' && Clipboard::getInstance()->isClipboard('content'))
 {
     /**
      * Prepare clipboard contextmenu 
