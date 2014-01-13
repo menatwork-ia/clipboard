@@ -9,7 +9,7 @@
   }
   
   #clipboard.toolbox {
-    z-index:90;
+    z-index:98;
     width:270px;
     position:fixed;
     top:0;
