@@ -563,6 +563,7 @@ class ClipboardHelper extends Backend
      */
     public function getArrFromFileName($strFilePath)
     {
+        $this->loadLanguageFile('default');
         $arrFileInfo = pathinfo($strFilePath);
         
         $arrFileName = explode(
