@@ -171,7 +171,8 @@ class ClipboardXmlReader extends Backend
                             break;
 
                         case 'row':
-                            $objDb = $this->_objDatabase->insertInto($strTable, $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild));
+                            $arrSet = $this->createArrSetForRow($objXml, $intId, $strTable, $strPastePos, $intElemId, $boolIsChild);
+                            $objDb = $this->_objDatabase->insertInto($strTable, $arrSet);
                             $intLastInsertId = $objDb->insertId;
 
                             $this->loadDataContainer($strTable);
@@ -202,20 +203,39 @@ class ClipboardXmlReader extends Backend
                                     }
                             }
                             $this->Input->setGet('act', NULL);
-                            
+
+
                             $varValue = '';
-                            
-                            // Trigger the save_callback
-                            if (is_array($GLOBALS['TL_DCA'][$strTable]['fields']['alias']['save_callback']))
+
+                            // Check if we have a hook for the alias generating.
+                            if (is_array($GLOBALS['TL_HOOKS']['clipboard_alias']))
                             {
-                                foreach ($GLOBALS['TL_DCA'][$strTable]['fields']['alias']['save_callback'] as $callback)
+                                foreach ($GLOBALS['TL_HOOKS']['clipboard_alias'] as $callback)
                                 {
                                     $this->import($callback[0]);
-                                    $varValue = $this->$callback[0]->$callback[1]($varValue, $dc);
+                                    $varValue = $this->$callback[0]->$callback[1]($dc, $arrSet, $varValue, $this->_objDatabase, $strTable, $intLastInsertId);
+
                                 }
                             }
-                            
-                            $this->_objDatabase->updateAlias($strTable, $varValue, $intLastInsertId);
+
+                            // Trigger the save_callback as fallback.
+                            if($varValue == '' && $varValue != null)
+                            {
+                                if (is_array($GLOBALS['TL_DCA'][$strTable]['fields']['alias']['save_callback']))
+                                {
+                                    foreach ($GLOBALS['TL_DCA'][$strTable]['fields']['alias']['save_callback'] as $callback)
+                                    {
+                                        $this->import($callback[0]);
+                                        $varValue = $this->$callback[0]->$callback[1]($varValue, $dc);
+                                    }
+                                }
+                            }
+
+                            // Only update on empty string or a value.
+                            if($varValue != null)
+                            {
+                                $this->_objDatabase->updateAlias($strTable, $varValue, $intLastInsertId);
+                            }
                             break;
 
                         case 'subpage':
