@@ -29,13 +29,6 @@ class ClipboardHelper extends Backend
     protected $_objDatabase;
 
     /**
-     * Contains some string functions
-     * 
-     * @var String
-     */
-    protected $_objString;
-
-    /**
      * Pagetype
      * 
      * @var string
@@ -70,7 +63,6 @@ class ClipboardHelper extends Backend
         parent::__construct();
         $this->import('BackendUser', 'User');
         $this->_objDatabase = ClipboardDatabase::getInstance();
-        $this->_objString = String::getInstance();
         $this->_setPageType();
         
     }
@@ -177,14 +169,14 @@ class ClipboardHelper extends Backend
                     specialchars($title),
                     $attributes,
                     // Create linkimage
-                    $this->generateImage($icon, $label)
+                    Image::getHtml($icon, $label)
                         )
                 );
             }
             else
             {
                 // Create image
-                $return .= $this->generateImage(preg_replace('/\.gif$/i', '_.gif', $icon)) . ' ';
+                $return .= Image::getHtml(preg_replace('/\.gif$/i', '_.gif', $icon)) . ' ';
             }
             return $return;
         }
@@ -337,7 +329,7 @@ class ClipboardHelper extends Backend
                     foreach ($GLOBALS['TL_HOOKS']['clipboardContentTitle'] as $arrCallback)
                     {
                         $this->import($arrCallback[0]);                        
-                        $strTmpTitle = $this->$arrCallback[0]->$arrCallback[1]($this, $strHeadline, $objContent, $booClGroup);
+                        $strTmpTitle = $this->{$arrCallback[0]}->{$arrCallback[1]}($this, $strHeadline, $objContent, $booClGroup);
                         if($strTmpTitle !== false && !is_null($strTmpTitle)) 
                         {
                             $arrTitle['title'] = $strTmpTitle;

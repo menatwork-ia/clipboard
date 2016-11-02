@@ -199,7 +199,7 @@ class ClipboardXmlReader extends Backend
                                     foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
                                     {
                                             $this->import($callback[0]);
-                                            $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
+                                            $this->{$callback[0]}->{$callback[1]}($intLastInsertId, $dc);
                                     }
                             }
                             $this->Input->setGet('act', NULL);
@@ -213,7 +213,7 @@ class ClipboardXmlReader extends Backend
                                 foreach ($GLOBALS['TL_HOOKS']['clipboard_alias'] as $callback)
                                 {
                                     $this->import($callback[0]);
-                                    $varValue = $this->$callback[0]->$callback[1]($dc, $arrSet, $varValue, $this->_objDatabase, $strTable, $intLastInsertId);
+                                    $varValue = $this->{$callback[0]}->{$callback[1]}($dc, $arrSet, $varValue, $this->_objDatabase, $strTable, $intLastInsertId);
 
                                 }
                             }
@@ -226,7 +226,7 @@ class ClipboardXmlReader extends Backend
                                     foreach ($GLOBALS['TL_DCA'][$strTable]['fields']['alias']['save_callback'] as $callback)
                                     {
                                         $this->import($callback[0]);
-                                        $varValue = $this->$callback[0]->$callback[1]($varValue, $dc);
+                                        $varValue = $this->{$callback[0]}->{$callback[1]}($varValue, $dc);
                                     }
                                 }
                             }
@@ -331,7 +331,7 @@ class ClipboardXmlReader extends Backend
                                     foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
                                     {
                                             $this->import($callback[0]);
-                                            $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
+                                            $this->{$callback[0]}->{$callback[1]}($intLastInsertId, $dc);
                                     }
                             }
                             $this->Input->setGet('act', NULL);
@@ -344,7 +344,7 @@ class ClipboardXmlReader extends Backend
                                 foreach ($GLOBALS['TL_DCA'][$strTable]['fields']['alias']['save_callback'] as $callback)
                                 {
                                     $this->import($callback[0]);
-                                    $varValue = $this->$callback[0]->$callback[1]($varValue, $dc);
+                                    $varValue = $this->{$callback[0]}->{$callback[1]}($varValue, $dc);
                                 }
                             }
 
@@ -428,7 +428,7 @@ class ClipboardXmlReader extends Backend
                                                     foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
                                                     {
                                                             $this->import($callback[0]);
-                                                            $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
+                                                            $this->{$callback[0]}->{$callback[1]}($intLastInsertId, $dc);
                                                     }
                                             }
                                             
@@ -438,7 +438,7 @@ class ClipboardXmlReader extends Backend
                                                 foreach ($GLOBALS['TL_HOOKS']['clipboardCopy'] as $arrCallback)
                                                 {
                                                     $this->import($arrCallback[0]);                        
-                                                    $this->$arrCallback[0]->$arrCallback[1]($intLastInsertId, $dc, $isGrouped);
+                                                    $this->{$arrCallback[0]}->{$arrCallback[1]}($intLastInsertId, $dc, $isGrouped);
                                                 }
                                             }
                                             
@@ -484,7 +484,7 @@ class ClipboardXmlReader extends Backend
                                                 foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
                                                 {
                                                         $this->import($callback[0]);
-                                                        $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
+                                                        $this->{$callback[0]}->{$callback[1]}($intLastInsertId, $dc);
                                                 }
                                         }
                                         
@@ -494,7 +494,7 @@ class ClipboardXmlReader extends Backend
                                             foreach ($GLOBALS['TL_HOOKS']['clipboardCopy'] as $arrCallback)
                                             {
                                                 $this->import($arrCallback[0]);                        
-                                                $this->$arrCallback[0]->$arrCallback[1]($intLastInsertId, $dc, $isGrouped);
+                                                $this->{$arrCallback[0]}->{$arrCallback[1]}($intLastInsertId, $dc, $isGrouped);
                                             }
                                         }
                                         
@@ -528,7 +528,7 @@ class ClipboardXmlReader extends Backend
                                     foreach ($GLOBALS['TL_HOOKS']['clipboardCopyAll'] as $arrCallback)
                                     {
                                         $this->import($arrCallback[0]);                        
-                                        $this->$arrCallback[0]->$arrCallback[1]($arrIds);
+                                        $this->{$arrCallback[0]}->{$arrCallback[1]}($arrIds);
                                     }
                                 }
                            }
@@ -598,7 +598,7 @@ class ClipboardXmlReader extends Backend
                                             foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
                                             {
                                                     $this->import($callback[0]);
-                                                    $this->$callback[0]->$callback[1]($intLastInsertId, $dc);
+                                                    $this->{$callback[0]}->{$callback[1]}($intLastInsertId, $dc);
                                             }
                                     }
 
@@ -608,7 +608,7 @@ class ClipboardXmlReader extends Backend
                                         foreach ($GLOBALS['TL_HOOKS']['clipboardCopy'] as $arrCallback)
                                         {
                                             $this->import($arrCallback[0]);                        
-                                            $this->$arrCallback[0]->$arrCallback[1]($intLastInsertId, $dc, $isGrouped);
+                                            $this->{$arrCallback[0]}->{$arrCallback[1]}($intLastInsertId, $dc, $isGrouped);
                                         }
                                     }
 
@@ -641,7 +641,7 @@ class ClipboardXmlReader extends Backend
                                     foreach ($GLOBALS['TL_HOOKS']['clipboardCopyAll'] as $arrCallback)
                                     {
                                         $this->import($arrCallback[0]);                        
-                                        $this->$arrCallback[0]->$arrCallback[1]($arrIds);
+                                        $this->{$arrCallback[0]}->{$arrCallback[1]}($arrIds);
                                     }
                                 }
                            }
