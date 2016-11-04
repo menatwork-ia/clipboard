@@ -12,7 +12,6 @@
 /**
  * Create DCA if clipboard is ready to use 
  */
- 
 $this->loadLanguageFile('tl_article');
 
 if (TL_MODE == 'BE' && Clipboard::getInstance()->isClipboard('content'))

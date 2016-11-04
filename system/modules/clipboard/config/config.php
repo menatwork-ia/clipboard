@@ -28,8 +28,8 @@ if(TL_MODE == 'BE' &&
     /**
      * Set header informations 
      */
-    $GLOBALS['TL_CSS']['clipboard']         = "system/modules/clipboard/html/clipboard.css";
-    $GLOBALS['TL_JAVASCRIPT']['clipboard']  = "system/modules/clipboard/html/clipboard.js";
+    $GLOBALS['TL_CSS']['clipboard']         = "system/modules/clipboard/assets/clipboard.css";
+    $GLOBALS['TL_JAVASCRIPT']['clipboard']  = "system/modules/clipboard/assets/clipboard.js";
 
     /**
      * Hooks
@@ -46,42 +46,42 @@ if(TL_MODE == 'BE' &&
         // Copy button
         'copy' => array(
             'href'          => 'key=cl_copy',
-            'icon'          => 'system/modules/clipboard/html/icons/icon-clipboard.png',
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-clipboard.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         // Copy with children button
         'copy_childs' => array(
             'href'          => 'key=cl_copy&amp;childs=1',
-            'icon'          => 'system/modules/clipboard/html/icons/icon-clipboard-childs.png',
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-clipboard-childs.png',
             'attributes'    => 'class="cl_paste" onclick="Backend.getScrollOffset();"'        
         ),
         // Paste into button
         'pasteinto' => array(
             'href'          => 'key=cl_paste_into',            
-            'icon'          => 'system/modules/clipboard/html/icons/icon-pasteafter.png',
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-pasteafter.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         // Paste after button
         'pasteafter' => array(
             'href'          => 'key=cl_paste_after',
-            'icon'          => 'system/modules/clipboard/html/icons/icon-pasteinto.png',
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-pasteinto.png',
             'attributes'    => 'class="clipboardmenu" onclick="Backend.getScrollOffset();"'
         ),
         'childs' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-childs.png'
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-childs.png'
         ),
         'imported' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-imported.png'
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-imported.png'
         ),
         'group' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-group.png'
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-group.png'
         ),
         'favorite' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-favorite.gif',
-            'icon_'          => 'system/modules/clipboard/html/icons/icon-favorite_.gif'
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-favorite.png',
+            'icon_'          => 'system/modules/clipboard/assets/icons/icon-favorite_.png'
         ),
         'attribute' => array(
-            'icon'          => 'system/modules/clipboard/html/icons/icon-attribute.png'
+            'icon'          => 'system/modules/clipboard/assets/icons/icon-attribute.png'
         ),
         'locations' => $arrAllowedLocations
     );

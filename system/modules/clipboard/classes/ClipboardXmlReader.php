@@ -204,12 +204,8 @@ class ClipboardXmlReader extends Backend
                             }
                             $this->Input->setGet('act', NULL);
 
-                            $varValue = '';
 
-                            if(version_compare(VERSION, '3.0', '<') && preg_match('/^0x/',  $arrSet['alias']))
-                            {
-                                $arrSet['alias'] = pack('H*', substr($arrSet['alias'], 2));
-                            }
+                            $varValue = '';
 
                             // Check if we have a hook for the alias generating.
                             if (is_array($GLOBALS['TL_HOOKS']['clipboard_alias']))

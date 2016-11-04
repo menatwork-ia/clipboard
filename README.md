@@ -9,19 +9,10 @@ The clipboard extension offers the possibility to store various content (pages, 
 The saved XML-Data gets collected in a new folder within the Contao file structure: ~/tl_files/clipboard/...
 
 
-Screenshots
------------
-
-![Site structure (Extended context menu)](http://img7.imagebanana.com/img/jryp1k9p/tl_pageextendedcontext.jpg)
-
-Other screenshots
-https://github.com/patrickkahl/clipboard/wiki/Screenshots
-
-
 System requirements
 -------------------
 
-* Contao 2.9.x or higher
+* Contao 3.x or higher
 * php5-xmlwriter (Debian package)
 
 

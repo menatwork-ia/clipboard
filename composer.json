@@ -7,17 +7,25 @@
 	"license":"LGPL-3.0+",
 	"authors":[
 		{
-			"name":"Andreas Isaak",
-			"email":"isaak@men-at-work.de",
+			"name":"Stefan Heimes",
+			"email":"heimes@men-at-work.de",
 			"homepage":"http://www.men-at-work.de",
 			"role":"Developer"
 		},
 		{
-			"name":"Patrick Kahl",
-			"email":"kahl@men-at-work.de",
+			"name":"David Maack",
+			"email":"maack@men-at-work.de",
 			"homepage":"http://www.men-at-work.de",
 			"role":"Developer"
-		}
+		},
+		{
+			"name":"Andreas Isaak",
+			"role":"Developer"
+		},
+		{
+			"name":"Patrick Kahl",
+			"role":"Developer"
+		}		
 	],
 	"support":{
 		"email":"contao@men-at-work.de",
@@ -27,8 +35,8 @@
 	},
 	"require":{
 		"php":">=5.3",
-		"contao/core":">=2.9,<3",
-		"contao-community-alliance/composer-installer":"*"
+		"contao/core":">=3,<4",
+		"contao-community-alliance/composer-plugin":"~2.0"
 	},
 	"autoload":{
 		"classmap":["system/"]
@@ -39,7 +47,6 @@
 	"extra":{
 		"contao":{
 			"sources":{
-				"system/drivers/DC_Clipboard.php":"system/drivers/DC_Clipboard.php",
 				"system/modules/clipboard":"system/modules/clipboard"
 			}
 		}

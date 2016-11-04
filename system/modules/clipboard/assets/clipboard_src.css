@@ -9,7 +9,7 @@
   }
   
   #clipboard.toolbox {
-    z-index:111;
+    z-index:98;
     width:270px;
     position:fixed;
     top:0;
@@ -17,7 +17,7 @@
   }
 
   #clipboard .inside {
-    width:938px;
+    width:958px;
     margin:0 auto;
     text-align:left;
     background:#fff;
