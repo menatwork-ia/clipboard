@@ -28,4 +28,4 @@ Installation & Configuration
 Troubleshooting
 ---------------
 
-If you are having problems using the Clipboard Extension, please visit the issue tracker at https://github.com/patrickkahl/clipboard/issues
+If you are having problems using the Clipboard Extension, please visit the issue tracker at https://github.com/menatwork-ia/clipboard
