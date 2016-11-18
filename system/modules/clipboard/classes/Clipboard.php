@@ -38,13 +38,6 @@ class Clipboard extends Backend
     protected $_objCbXml;
     
     /**
-     * Contains some string functions
-     * 
-     * @var String
-     */
-    protected $_objString;    
-
-    /**
      * Contains specific database request
      * 
      * @var ClipboardDatabase
@@ -61,7 +54,6 @@ class Clipboard extends Backend
         $this->_objHelper = ClipboardHelper::getInstance();
         $this->_objCbXml = ClipboardXml::getInstance();
         $this->_objDatabase = ClipboardDatabase::getInstance();
-        $this->_objString = String::getInstance();
     }
 
     /**
@@ -296,7 +288,7 @@ class Clipboard extends Backend
                 $arrTitle = array('title' => $GLOBALS['TL_LANG']['MSC']['noClipboardTitle']);
         }
         
-        $arrTitle['title'] = $this->_objString->substr($arrTitle['title'], '24');
+        $arrTitle['title'] = \StringUtil::substr($arrTitle['title'], '24');
         
         return $arrTitle;
     }
