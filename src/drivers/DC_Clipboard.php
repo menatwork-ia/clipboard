@@ -3,15 +3,15 @@
 /**
  * Contao Open Source CMS
  *
- * @copyright  MEN AT WORK 2013 
+ * @copyright  MEN AT WORK 2013
  * @package    clipboard
- * @license    GNU/LGPL 
+ * @license    GNU/LGPL
  * @filesource
  */
 
 class DC_Clipboard extends DC_Table
 {
-    
+
 	/**
 	 * Recursively generate the tree and return it as HTML string
 	 * @param string
@@ -169,7 +169,7 @@ class DC_Clipboard extends DC_Table
 		{
 			$_buttons .= (\Input::get('act') == 'select') ? '<input type="checkbox" name="IDS[]" id="ids_'.$id.'" class="tl_tree_checkbox" value="'.$id.'">' : $this->generateButtons($objRow->row(), $table, $this->root, $blnCircularReference, $childs, $previous, $next);
 		}
-    
+
     // Added by Patrick Kahl
     // HOOK: call the hooks for clipboardButtons
     if (isset($GLOBALS['TL_HOOKS']['clipboardButtons']) && is_array($GLOBALS['TL_HOOKS']['clipboardButtons']))
@@ -179,7 +179,7 @@ class DC_Clipboard extends DC_Table
             $this->import($callback[0]);
             $_buttons .= $this->{$callback[0]}->{$callback[1]}($this, $objRow->row(), $table, $blnCircularReference, $arrClipboard, $childs, $previous, $next);
         }
-    }    
+    }
 
 		// Paste buttons
 		if ($arrClipboard !== false && \Input::get('act') != 'select')
@@ -264,44 +264,44 @@ class DC_Clipboard extends DC_Table
 
 		$this->Session->setData($session);
 		return $return;
-	}    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * List all records of the current table as tree and return them as HTML string
@@ -350,7 +350,7 @@ class DC_Clipboard extends DC_Table
 
         return preg_replace('/<div.*class="tl_submit_container".*>/', "$0" . implode('', $arrButtons), $strParentView, 1);
     }
-	
+
 	public function setNewActiveRecord($objRow)
     {
         $this->objActiveRecord = $objRow;
