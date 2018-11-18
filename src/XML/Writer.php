@@ -3,104 +3,93 @@
 /**
  * Contao Open Source CMS
  *
- * @copyright  MEN AT WORK 2013 
+ * @copyright  MEN AT WORK 2013
  * @package    clipboard
- * @license    GNU/LGPL 
+ * @license    GNU/LGPL
  * @filesource
  */
+
+namespace MenAtWork\ClipboardBundle\Xml;
+
+use DOMDocument;
+use MenAtWork\ClipboardBundle\Helper\Base;
+use MenAtWork\ClipboardBundle\Helper\ContaoBridge;
+use MenAtWork\ClipboardBundle\Helper\Database;
+use XMLWriter;
 
 /**
  * Class ClipboardXmlWriter
  */
-class ClipboardXmlWriter extends Backend
+class Writer
 {
-
     /**
-     * Current object instance (Singleton)
-     * 
-     * @var ClipboardXmlWriter
+     * @var \MenAtWork\ClipboardBundle\Helper\Base
      */
-    protected static $_objInstance = NULL;
+    private $helper;
 
     /**
-     * Contains some helper functions
-     * 
-     * @var ClipboardHelper
+     * @var \MenAtWork\ClipboardBundle\Helper\Database
      */
-    protected $_objHelper;
+    private $database;
 
     /**
-     * Contains specific database request
-     * 
-     * @var ClipboardDatabase
+     * @var \MenAtWork\ClipboardBundle\Helper\ContaoBridge
      */
-    protected $_objDatabase;
+    private $contaoBindings;
 
     /**
-     * Variables 
+     * Variables
      */
-    protected $_strPageTable = 'tl_page';
-    protected $_strArticleTable = 'tl_article';
-    protected $_strContentTable = 'tl_content';
-    protected $_strModuleTable = 'tl_module';
+    protected $pageTable    = 'tl_page';
+    protected $articleTable = 'tl_article';
+    protected $contentTable = 'tl_content';
+    protected $moduleTable  = 'tl_module';
 
     /**
-     * Prevent constructing the object (Singleton)
-     */
-    protected function __construct()
-    {
-        parent::__construct();
-        $this->_objHelper = ClipboardHelper::getInstance();
-        $this->_objDatabase = ClipboardDatabase::getInstance();
-    }
-
-    /**
-     * Prevent cloning of the object (Singleton)
-     */
-    final private function __clone(){}
-
-    /**
-     * Get instanz of the object (Singelton) 
+     * Writer constructor.
      *
-     * @return ClipboardXmlWriter 
+     * @param Base         $clipboardHelper
+     *
+     * @param Database     $clipboardDatabase
+     *
+     * @param ContaoBridge $contaoBindings
      */
-    public static function getInstance()
+    public function __construct($clipboardHelper, $clipboardDatabase, $contaoBindings)
     {
-        if (self::$_objInstance == NULL)
-        {
-            self::$_objInstance = new ClipboardXmlWriter();
-        }
-        return self::$_objInstance;
+        $this->helper         = $clipboardHelper;
+        $this->database       = $clipboardDatabase;
+        $this->contaoBindings = $contaoBindings;
     }
-    
+
     /**
      * Create xml file for the given element and all his childs
-     * 
+     *
      * @param array $arrSet
+     *
      * @param array $arrCbElems
-     * @return boolean 
+     *
+     * @return boolean
+     *
+     * @throws \Exception
      */
     public function writeXml($arrSet, $arrCbElems)
     {
         $strMd5Checksum = $this->_createChecksum($arrSet);
 
-        if(is_array($arrCbElems))
-        {            
-            foreach($arrCbElems AS $objCbFile)
-            {
-                if($objCbFile->getChecksum() == $strMd5Checksum)
-                {
-                    return FALSE;
+        if (is_array($arrCbElems)) {
+            foreach ($arrCbElems AS $objCbFile) {
+                if ($objCbFile->getChecksum() == $strMd5Checksum) {
+                    return false;
                 }
             }
         }
-  
-        $this->_strPageTable = $arrSet['table'];
+
+        $this->pageTable = $arrSet['table'];
 
         // Create XML File
         $objXml = new XMLWriter();
         $objXml->openMemory();
-        $objXml->setIndent(TRUE);
+        $objXml->setIndent(true);
         $objXml->setIndentString("\t");
 
         // XML Start
@@ -122,25 +111,24 @@ class ClipboardXmlWriter extends Backend
         $objXml->writeCdata($arrSet['groupCount']);
         $objXml->endElement(); // End group_count
         $objXml->writeElement('childs', (($arrSet['childs']) ? 1 : 0));
-        $objXml->writeElement('table', $arrSet['table']);        
+        $objXml->writeElement('table', $arrSet['table']);
         $objXml->writeElement('checksum', $strMd5Checksum);
         $objXml->writeElement('encryptionKey', md5($GLOBALS['TL_CONFIG']['encryptionKey']));
         $objXml->endElement(); // End metatags
 
         $objXml->startElement('datacontainer');
-        switch ($arrSet['table'])
-        {
+        switch ($arrSet['table']) {
             case 'tl_page':
                 $this->writePage($arrSet['elem_id'], $objXml, $arrSet['childs'], $arrSet['grouped']);
                 break;
             case 'tl_article':
-                $this->writeArticle($arrSet['elem_id'], $objXml, FALSE, $arrSet['grouped']);
+                $this->writeArticle($arrSet['elem_id'], $objXml, false, $arrSet['grouped']);
                 break;
             case 'tl_content':
-                $this->writeContent($arrSet['elem_id'], $objXml, FALSE, $arrSet['grouped']);
+                $this->writeContent($arrSet['elem_id'], $objXml, false, $arrSet['grouped']);
                 break;
             case 'tl_module':
-                $this->writeModule($arrSet['elem_id'], $objXml, FALSE, $arrSet['grouped']);
+                $this->writeModule($arrSet['elem_id'], $objXml, false, $arrSet['grouped']);
                 break;
         }
         $objXml->endElement(); // End datacontainer
@@ -149,47 +137,46 @@ class ClipboardXmlWriter extends Backend
 
         $strXml = $objXml->outputMemory();
 
-        $objFile = new File($arrSet['path'] . '/' . $arrSet['filename']);
-        $write = $objFile->write($strXml);
-        if ($write)
-        {
+        $objFile = $this->contaoBindings->getNewFile($arrSet['path'] . '/' . $arrSet['filename']);
+        $write   = $objFile->write($strXml);
+        if ($write) {
             $objFile->close;
-            return TRUE;
+
+            return true;
         }
-        return FALSE;
+
+        return false;
     }
 
     /**
      * Write page informations to xml object
-     * 
-     * @param mixed $mixedId
+     *
+     * @param mixed     $mixedId
      * @param XMLWriter $objXml
-     * @param boolean $boolChilds
-     * @param boolean $boolGrouped
-     * @return XMLWriter 
+     * @param           $boolHasChilds
+     * @param boolean   $boolGrouped
+     *
+     * @return void
      */
-    protected function writePage($mixedId, &$objXml, $boolHasChilds, $boolGrouped = FALSE)
-    {        
-        $arrRows = $this->_objDatabase->getPageObject($mixedId)->fetchAllAssoc();       
-        
+    protected function writePage($mixedId, &$objXml, $boolHasChilds, $boolGrouped = false)
+    {
+        $arrRows = $this->database->getPageObject($mixedId)->fetchAllAssoc();
+
         $objXml->startElement('page');
-        $objXml->writeAttribute('table', $this->_strPageTable);
-        if($boolGrouped)
-        {
-            $objXml->writeAttribute('grouped', TRUE);
-        }        
-        
-        foreach ($arrRows AS $arrRow)
-        {        
-            $this->writeGivenDbTableRows($this->_strPageTable, array($arrRow), $objXml);
+        $objXml->writeAttribute('table', $this->pageTable);
+        if ($boolGrouped) {
+            $objXml->writeAttribute('grouped', true);
+        }
+
+        foreach ($arrRows AS $arrRow) {
+            $this->writeGivenDbTableRows($this->pageTable, array($arrRow), $objXml);
 
             $objXml->startElement('articles');
-            $this->writeArticle($arrRow['id'], $objXml, TRUE);
+            $this->writeArticle($arrRow['id'], $objXml, true);
             $objXml->endElement(); // End articles
         }
-        
-        if ($boolHasChilds)
-        {
+
+        if ($boolHasChilds) {
             $this->writeSubpages($mixedId, $objXml);
         }
 
@@ -198,25 +185,23 @@ class ClipboardXmlWriter extends Backend
 
     /**
      * Write subpage informations to xml object
-     * 
-     * @param type $intId
+     *
+     * @param type      $intId
      * @param XMLWriter $objXml
      */
     protected function writeSubpages($intId, &$objXml)
     {
-        $arrPageRows = $this->_objDatabase->getSubpagesObject($intId)->fetchAllAssoc();
+        $arrPageRows = $this->database->getSubpagesObject($intId)->fetchAllAssoc();
 
-        if (count($arrPageRows) > 0)
-        {
+        if (count($arrPageRows) > 0) {
             $objXml->startElement('subpage');
-            $objXml->writeAttribute('table', $this->_strPageTable);
+            $objXml->writeAttribute('table', $this->pageTable);
 
-            foreach ($arrPageRows AS $arrRow)
-            {
-                $this->writeGivenDbTableRows($this->_strPageTable, array($arrRow), $objXml);
+            foreach ($arrPageRows AS $arrRow) {
+                $this->writeGivenDbTableRows($this->pageTable, array($arrRow), $objXml);
 
                 $objXml->startElement('articles');
-                $this->writeArticle($arrRow['id'], $objXml, TRUE);
+                $this->writeArticle($arrRow['id'], $objXml, true);
                 $objXml->endElement(); // End articles
 
                 $this->writeSubpages($arrRow['id'], $objXml);
@@ -227,40 +212,34 @@ class ClipboardXmlWriter extends Backend
 
     /**
      * Write article informations to xml object
-     * 
-     * @param mixed $mixedId
+     *
+     * @param mixed     $mixedId
      * @param XMLWriter $objXml
-     * @param boolean $boolIsChild
-     * @param boolean $boolGrouped
+     * @param boolean   $boolIsChild
+     * @param boolean   $boolGrouped
      */
-    protected function writeArticle($mixedId, &$objXml, $boolIsChild, $boolGrouped = FALSE)
+    protected function writeArticle($mixedId, &$objXml, $boolIsChild, $boolGrouped = false)
     {
-        if ($boolIsChild)
-        {
-            $arrRows = $this->_objDatabase->getArticleObjectFromPid($mixedId)->fetchAllAssoc();
-        }
-        else
-        {
-            $arrRows = $this->_objDatabase->getArticleObject($mixedId)->fetchAllAssoc();
+        if ($boolIsChild) {
+            $arrRows = $this->database->getArticleObjectFromPid($mixedId)->fetchAllAssoc();
+        } else {
+            $arrRows = $this->database->getArticleObject($mixedId)->fetchAllAssoc();
         }
 
-        if (count($arrRows) < 1)
-        {
+        if (count($arrRows) < 1) {
             return;
         }
 
         $objXml->startElement('article');
-        $objXml->writeAttribute('table', $this->_strArticleTable);
-        if($boolGrouped)
-        {
-            $objXml->writeAttribute('grouped', TRUE);
-        }         
-        
-        foreach ($arrRows AS $arrRow)
-        {
-            $this->writeGivenDbTableRows($this->_strArticleTable, array($arrRow), $objXml);
+        $objXml->writeAttribute('table', $this->articleTable);
+        if ($boolGrouped) {
+            $objXml->writeAttribute('grouped', true);
+        }
 
-            $this->writeContent($arrRow['id'], $objXml, TRUE);
+        foreach ($arrRows AS $arrRow) {
+            $this->writeGivenDbTableRows($this->articleTable, array($arrRow), $objXml);
+
+            $this->writeContent($arrRow['id'], $objXml, true);
         }
 
         $objXml->endElement(); // End article
@@ -268,94 +247,83 @@ class ClipboardXmlWriter extends Backend
 
     /**
      * Write content informations to xml object
-     * 
-     * @param integer $mixedId
+     *
+     * @param integer   $mixedId
      * @param XMLWriter $objXml
-     * @param boolean $boolIsChild
-     * @param boolean $boolGrouped
+     * @param boolean   $boolIsChild
+     * @param boolean   $boolGrouped
      */
-    protected function writeContent($mixedId, &$objXml, $boolIsChild, $boolGrouped = FALSE)
+    protected function writeContent($mixedId, &$objXml, $boolIsChild, $boolGrouped = false)
     {
-        if ($boolIsChild)
-        {
-            $arrRows = $this->_objDatabase->getContentObjectFromPid($mixedId)->fetchAllAssoc();
-        }
-        else
-        {
-            $arrRows = $this->_objDatabase->getContentObject($mixedId)->fetchAllAssoc();
+        if ($boolIsChild) {
+            $arrRows = $this->database->getContentObjectFromPid($mixedId)->fetchAllAssoc();
+        } else {
+            $arrRows = $this->database->getContentObject($mixedId)->fetchAllAssoc();
         }
 
-        if (count($arrRows) < 1)
-        {
+        if (count($arrRows) < 1) {
             return;
         }
 
         $objXml->startElement('content');
-        $objXml->writeAttribute('table', $this->_strContentTable);
-        if($boolGrouped)
-        {
-            $objXml->writeAttribute('grouped', TRUE);
-        }         
+        $objXml->writeAttribute('table', $this->contentTable);
+        if ($boolGrouped) {
+            $objXml->writeAttribute('grouped', true);
+        }
 
-        $this->writeGivenDbTableRows($this->_strContentTable, $arrRows, $objXml);
+        $this->writeGivenDbTableRows($this->contentTable, $arrRows, $objXml);
 
         $objXml->endElement(); // End content
     }
 
     /**
      * Write module informations to xml object
-     * 
-     * @param integer $mixedId
+     *
+     * @param integer   $mixedId
      * @param XMLWriter $objXml
-     * @param boolean $boolIsChild
-     * @param boolean $boolGrouped
-     */    
-    protected function writeModule($mixedId, &$objXml, $boolIsChild = FALSE, $boolGrouped = FALSE)
-    {        
-        $arrRows = $this->_objDatabase->getModuleObject($mixedId)->fetchAllAssoc();
-        
-        $objXml->startElement('module');
-        $objXml->writeAttribute('table', $this->_strModuleTable);
-        if($boolGrouped)
-        {
-            $objXml->writeAttribute('grouped', TRUE);
-        }         
+     * @param boolean   $boolIsChild
+     * @param boolean   $boolGrouped
+     */
+    protected function writeModule($mixedId, &$objXml, $boolIsChild = false, $boolGrouped = false)
+    {
+        $arrRows = $this->database->getModuleObject($mixedId)->fetchAllAssoc();
 
-        $this->writeGivenDbTableRows($this->_strModuleTable, $arrRows, $objXml);
+        $objXml->startElement('module');
+        $objXml->writeAttribute('table', $this->moduleTable);
+        if ($boolGrouped) {
+            $objXml->writeAttribute('grouped', true);
+        }
+
+        $this->writeGivenDbTableRows($this->moduleTable, $arrRows, $objXml);
 
         $objXml->endElement(); // End module
     }
 
     /**
      * Write the given database rows to the xml object
-     * 
-     * @param string $strTable
-     * @param array $arrRows
-     * @param XMLWriter $objXml 
+     *
+     * @param string    $strTable
+     * @param array     $arrRows
+     * @param XMLWriter $objXml
      */
     protected function writeGivenDbTableRows($strTable, $arrRows, &$objXml)
     {
-        $arrFieldMeta = $this->_objHelper->getTableMetaFields($strTable);
+        $arrFieldMeta = $this->helper->getTableMetaFields($strTable);
 
-        if (count($arrRows) > 0)
-        {
-            foreach ($arrRows AS $row)
-            {
+        if (count($arrRows) > 0) {
+            foreach ($arrRows AS $row) {
                 $objXml->startElement('row');
 
-                foreach ($row as $field_key => $field_data)
-                {
-                    switch ($field_key)
-                    {
+                foreach ($row as $field_key => $field_data) {
+                    switch ($field_key) {
                         case 'id':
                         case 'pid':
                             break;
-                        
+
                         default:
 
 
-                            if (!isset($field_data))
-                            {
+                            if (!isset($field_data)) {
                                 $objXml->startElement('field');
                                 $objXml->writeAttribute("name", $field_key);
 
@@ -363,14 +331,11 @@ class ClipboardXmlWriter extends Backend
                                 $objXml->text("NULL");
 
                                 $objXml->endElement(); // End field
-                            }
-                            else if ($field_data != "")
-                            {
+                            } elseif ($field_data != "") {
                                 $objXml->startElement('field');
                                 $objXml->writeAttribute("name", $field_key);
 
-                                switch (strtolower($arrFieldMeta[$field_key]['type']))
-                                {
+                                switch (strtolower($arrFieldMeta[$field_key]['type'])) {
                                     case 'binary':
                                     case 'varbinary':
                                     case 'blob':
@@ -418,12 +383,14 @@ class ClipboardXmlWriter extends Backend
                                     case 'enum':
                                     case 'set':
                                         $objXml->writeAttribute("type", "text");
-                                        $objXml->writeCdata("'" . str_replace($this->_objHelper->arrSearchFor, $this->_objHelper->arrReplaceWith, $field_data) . "'");
+                                        $objXml->writeCdata("'" . str_replace($this->helper->arrSearchFor,
+                                                $this->helper->arrReplaceWith, $field_data) . "'");
                                         break;
 
                                     default:
                                         $objXml->writeAttribute("type", "default");
-                                        $objXml->writeCdata("'" . str_replace($this->_objHelper->arrSearchFor, $this->_objHelper->arrReplaceWith, $field_data) . "'");
+                                        $objXml->writeCdata("'" . str_replace($this->helper->arrSearchFor,
+                                                $this->helper->arrReplaceWith, $field_data) . "'");
                                         break;
                                 }
                                 $objXml->endElement(); // End field  
@@ -437,124 +404,109 @@ class ClipboardXmlWriter extends Backend
             }
         }
     }
-    
+
     /**
-     * Get checksum as md5 hash from all page, article and content elements 
+     * Get checksum as md5 hash from all page, article and content elements
      * that need to save in xml
-     * 
+     *
      * @param array $arrSet
-     * @return string 
+     *
+     * @return string
      */
     protected function _createChecksum($arrSet)
     {
         $arrChecksum = array();
-        switch ($arrSet['table'])
-        {            
+        switch ($arrSet['table']) {
             case 'tl_page':
-                $arrPages = $this->_objDatabase->getPageObject($arrSet['elem_id'])->fetchAllAssoc();
-                if($arrSet['childs'])
-                {                    
-                    $arrTmp = array($arrPages[0]['id']);
+                $arrPages = $this->database->getPageObject($arrSet['elem_id'])->fetchAllAssoc();
+                if ($arrSet['childs']) {
+                    $arrTmp                = array($arrPages[0]['id']);
                     $arrChecksum['page'][] = $arrPages[0];
-                    for($i = 0; TRUE; $i++)
-                    {
-                        if(!isset($arrTmp[$i]))
-                        {
+                    for ($i = 0; true; $i++) {
+                        if (!isset($arrTmp[$i])) {
                             break;
                         }
-                        $arrSubPages = $this->_objDatabase->getSubpagesObject($arrTmp[$i])->fetchAllAssoc();
-                        foreach($arrSubPages AS $arrSubPage)
-                        {
-                            $arrTmp[] = $arrSubPage['id'];
+                        $arrSubPages = $this->database->getSubpagesObject($arrTmp[$i])->fetchAllAssoc();
+                        foreach ($arrSubPages AS $arrSubPage) {
+                            $arrTmp[]              = $arrSubPage['id'];
                             $arrChecksum['page'][] = $arrSubPage;
                         }
                     }
-                }
-                else
-                {
-                    foreach ($arrPages AS $arrPage)
-                    {
+                } else {
+                    foreach ($arrPages AS $arrPage) {
                         $arrChecksum['page'][] = $arrPage;
                     }
                 }
             case 'tl_article':
-                if(is_array($arrChecksum['page']))
-                {
-                    foreach($arrChecksum['page'] AS $arrPage)
-                    {
-                        $arrArticles = $this->_objDatabase->getArticleObjectFromPid($arrPage['id'])->fetchAllAssoc();
-                        foreach($arrArticles AS $arrArticle)
-                        {
+                if (is_array($arrChecksum['page'])) {
+                    foreach ($arrChecksum['page'] AS $arrPage) {
+                        $arrArticles = $this->database->getArticleObjectFromPid($arrPage['id'])->fetchAllAssoc();
+                        foreach ($arrArticles AS $arrArticle) {
                             $arrChecksum['article'][] = $arrArticle;
                         }
                     }
-                }
-                else
-                {
-                    $arrArticles = $this->_objDatabase->getArticleObject($arrSet['elem_id'])->fetchAllAssoc();
-                    foreach($arrArticles AS $arrArticle)
-                    {
+                } else {
+                    $arrArticles = $this->database->getArticleObject($arrSet['elem_id'])->fetchAllAssoc();
+                    foreach ($arrArticles AS $arrArticle) {
                         $arrChecksum['article'][] = $arrArticle;
-                    }                    
+                    }
                 }
             case 'tl_content':
-                if(is_array($arrChecksum['article']))
-                {
-                    foreach ($arrChecksum['article'] AS $arrArticle)
-                    {
-                        $arrContents = $this->_objDatabase->getContentObjectFromPid($arrArticle['id'])->fetchAllAssoc();
-                        foreach ($arrContents AS $arrContent)
-                        {
+                if (is_array($arrChecksum['article'])) {
+                    foreach ($arrChecksum['article'] AS $arrArticle) {
+                        $arrContents = $this->database->getContentObjectFromPid($arrArticle['id'])->fetchAllAssoc();
+                        foreach ($arrContents AS $arrContent) {
                             $arrChecksum['content'][] = $arrContent;
                         }
                     }
-                }
-                else
-                {
-                    $arrContents = $this->_objDatabase->getContentObject($arrSet['elem_id'])->fetchAllAssoc();
-                    foreach ($arrContents AS $arrContent)
-                    {
+                } else {
+                    $arrContents = $this->database->getContentObject($arrSet['elem_id'])->fetchAllAssoc();
+                    foreach ($arrContents AS $arrContent) {
                         $arrChecksum['content'][] = $arrContent;
-                    }                    
+                    }
                 }
                 break;
-                
+
             case 'tl_module':
-                $arrModules = $this->_objDatabase->getModuleObject($arrSet['elem_id'])->fetchAllAssoc();
-                foreach ($arrModules AS $arrModule)
-                {
+                $arrModules = $this->database->getModuleObject($arrSet['elem_id'])->fetchAllAssoc();
+                foreach ($arrModules AS $arrModule) {
                     $arrChecksum['module'][] = $arrModule;
                 }
                 break;
         }
+
         return md5(serialize($arrChecksum));
     }
-    
+
     /**
      * Set new value for title in metatags of given file
-     * 
+     *
+     * @param        $strFullFilePath
      * @param string $strFilePath
      * @param string $strTitle
-     * @return boolean 
+     *
+     * @return boolean
+     * @throws \Exception
      */
     public function setNewTitle($strFullFilePath, $strFilePath, $strTitle)
     {
         $objDomDoc = new DOMDocument();
         $objDomDoc->load($strFullFilePath);
-        $nodeTitle = $objDomDoc->getElementsByTagName('metatags')->item(0)->getElementsByTagName('title')->item(0);
+        $nodeTitle            = $objDomDoc->getElementsByTagName('metatags')->item(0)->getElementsByTagName('title')->item(0);
         $nodeTitle->nodeValue = '';
-        $cdata = $objDomDoc->createCDATASection($strTitle);
+        $cdata                = $objDomDoc->createCDATASection($strTitle);
         $nodeTitle->appendChild($cdata);
         $strDomDoc = $objDomDoc->saveXML();
-        
-        $objFile = new File($strFilePath);
-        if ($objFile->write($strDomDoc))
-        {
+
+        $objFile = $this->contaoBindings->getNewFile($strFilePath);
+        if ($objFile->write($strDomDoc)) {
             $objFile->close;
-            return TRUE;
+
+            return true;
         }
         $objFile->close;
-        return FALSE;
+
+        return false;
     }
 
 }

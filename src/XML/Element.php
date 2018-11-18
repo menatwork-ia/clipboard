@@ -3,343 +3,399 @@
 /**
  * Contao Open Source CMS
  *
- * @copyright  MEN AT WORK 2013 
+ * @copyright  MEN AT WORK 2013
  * @package    clipboard
- * @license    GNU/LGPL 
+ * @license    GNU/LGPL
  * @filesource
  */
+
+namespace MenAtWork\ClipboardBundle\Xml;
+
+use MenAtWork\ClipboardBundle\Helper\Base as helperBase;
+use MenAtWork\ClipboardBundle\Xml\Reader;
+use MenAtWork\ClipboardBundle\Xml\Writer;
 
 /**
  * Class ClipboardXmlElement
  */
-class ClipboardXmlElement
+class Element
 {
 
     /**
      * Contains some helper functions
-     * 
-     * @var object 
+     *
+     * @var helperBase
      */
-    protected $_objHelper;    
-    
-    /**
-     * Contains all function to write xml
-     * 
-     * @var ClipboardXmlWriter
-     */
-    protected $_objXmlWriter;    
-    
-    /**
-     * Contains all functions to read xml
-     * 
-     * @var ClipboardXmlReader
-     */
-    protected $_objXmlReader;    
-    
-    /**
-     * Contains all file operations
-     * 
-     * @var Files
-     */
-    protected $_objFiles;
+    protected $helper;
 
     /**
-     * Variables 
+     * Contains all function to write xml
+     *
+     * @var Writer
      */
-    protected $_title = NULL;
-    protected $_table = NULL;
-    protected $_favorite = NULL;
-    protected $_childs = NULL;
-    protected $_group = NULL;
-    protected $_groupCount = NULL;
-    protected $_attribute = NULL;
-    protected $_filename = NULL;
-    protected $_path = NULL;
-    protected $_checksum = NULL;
-    protected $_timeStemp = NULL;
-    protected $_encryptionKey = NULL;
+    protected $xmlWriter;
+
+    /**
+     * Contains all functions to read xml
+     *
+     * @var Reader
+     */
+    protected $xmlReader;
+
+    /**
+     * Contains all file operations
+     *
+     * @var \Files
+     */
+    protected $files;
+
+    /**
+     * Variables
+     */
+    protected $title         = null;
+    protected $table         = null;
+    protected $favorite      = null;
+    protected $children      = null;
+    protected $group         = null;
+    protected $groupCount    = null;
+    protected $attribute     = null;
+    protected $filename      = null;
+    protected $path          = null;
+    protected $checksum      = null;
+    protected $timeStemp     = null;
+    protected $encryptionKey = null;
 
     /**
      * Construct object
-     * 
+     *
      * @param string $strFileName
-     * @param string $strPath 
+     * @param string $strPath
      */
     public function __construct($strFileName, $strPath)
     {
-        $this->_objHelper = ClipboardHelper::getInstance();
-        $this->_objXmlWriter = ClipboardXmlWriter::getInstance();
-        $this->_objXmlReader = ClipboardXmlReader::getInstance();
-        $this->_objFiles = Files::getInstance();
+        $this->filename = $strFileName;
+        $this->path     = $strPath;
+    }
 
-        $this->_filename = $strFileName;
-        $this->_path = $strPath;
+    /**
+     * @param \MenAtWork\ClipboardBundle\Helper\Base $helper
+     *
+     * @return Element
+     */
+    public function setHelper(\MenAtWork\ClipboardBundle\Helper\Base $helper): Element
+    {
+        $this->helper = $helper;
+
+        return $this;
+    }
+
+    /**
+     * @param \MenAtWork\ClipboardBundle\Xml\Writer $xmlWriter
+     *
+     * @return Element
+     */
+    public function setXmlWriter(\MenAtWork\ClipboardBundle\Xml\Writer $xmlWriter): Element
+    {
+        $this->xmlWriter = $xmlWriter;
+
+        return $this;
+    }
+
+    /**
+     * @param \MenAtWork\ClipboardBundle\Xml\Reader $xmlReader
+     *
+     * @return Element
+     */
+    public function setXmlReader(\MenAtWork\ClipboardBundle\Xml\Reader $xmlReader): Element
+    {
+        $this->xmlReader = $xmlReader;
+
+        return $this;
+    }
+
+    /**
+     * @param \Files $files
+     *
+     * @return Element
+     */
+    public function setFiles(\Files $files): Element
+    {
+        $this->files = $files;
+
+        return $this;
     }
 
     /**
      * Get title
-     * 
-     * @return string 
+     *
+     * @return string
      */
     public function getTitle()
     {
-        if (is_null($this->_title))
-        {
+        if (is_null($this->title)) {
             $this->_setDetailFileInfo();
         }
-        return $this->_title;
+
+        return $this->title;
     }
 
     /**
      * Set title
-     * 
+     *
      * @param string $title
-     * @return ClipboardXmlElement 
+     *
+     * @return Element
      */
     public function setTitle($title)
     {
-        if (!is_null($this->_title) || $this->_title != $title)
-        {
+        if (!is_null($this->title) || $this->title != $title) {
             $this->_setNewTitle($title);
             $strNewFileName = $this->_setNewFileName('title', $title);
-            $this->_objFiles->rename(
-                    $this->_path . '/' . $this->_filename, $this->_path . '/' . $strNewFileName
+            $this->files->rename(
+                $this->path . '/' . $this->filename, $this->path . '/' . $strNewFileName
             );
-            $this->_filename = $strNewFileName;
-            $this->_setFileInfo();            
+            $this->filename = $strNewFileName;
+            $this->_setFileInfo();
         }
-        $this->_title = $title;
+        $this->title = $title;
+
         return $this;
     }
 
     /**
      * Get table
-     * 
-     * @return string 
+     *
+     * @return string
      */
     public function getTable()
     {
-        if (is_null($this->_table))
-        {
+        if (is_null($this->table)) {
             $this->_setFileInfo();
         }
-        return $this->_table;
+
+        return $this->table;
     }
 
     /**
      * Set table
-     * 
+     *
      * @param string $table
-     * @return ClipboardXmlElement 
+     *
+     * @return Element
      */
     public function setTable($table)
     {
-        $this->_table = $table;
+        $this->table = $table;
+
         return $this;
     }
 
     /**
      * Get favorite
-     * 
-     * @return boolean 
+     *
+     * @return boolean
      */
     public function getFavorite()
     {
-        if (is_null($this->_favorite))
-        {
+        if (is_null($this->favorite)) {
             $this->_setFileInfo();
         }
-        return $this->_favorite;
+
+        return $this->favorite;
     }
 
     /**
      * Set favorite
-     * 
+     *
      * @param boolean $favorite
-     * @return ClipboardXmlElement 
+     *
+     * @return Element
      */
     public function setFavorite($favorite)
     {
-        if (!is_null($this->_favorite) || $this->_favorite != $favorite)
-        {
+        if (!is_null($this->favorite) || $this->favorite != $favorite) {
             $strNewFileName = $this->_setNewFileName('favorite', (($favorite) ? 'F' : 'N'));
-            $this->_objFiles->rename(
-                    $this->_path . '/' . $this->_filename, $this->_path . '/' . $strNewFileName
+            $this->files->rename(
+                $this->path . '/' . $this->filename, $this->path . '/' . $strNewFileName
             );
-            $this->_filename = $strNewFileName;
+            $this->filename = $strNewFileName;
             $this->_setFileInfo();
         }
-        $this->_favorite = $favorite;
+        $this->favorite = $favorite;
+
         return $this;
     }
 
     /**
      * Get childs
-     * 
+     *
      * @return boolean
      */
-    public function getChilds()
+    public function getChildren()
     {
-        if (is_null($this->_childs))
-        {
+        if (is_null($this->children)) {
             $this->_setFileInfo();
         }
-        return $this->_childs;
+
+        return $this->children;
     }
 
     /**
      * Set childs
-     * 
+     *
      * @param boolean $childs
-     * @return ClipboardXmlElement 
+     *
+     * @return Element
      */
-    public function setChilds($childs)
+    public function setChildren($childs)
     {
-        $this->_childs = $childs;
+        $this->children = $childs;
+
         return $this;
     }
-    
+
     /**
      * Get group lable
-     * 
+     *
      * @return string
-     */    
+     */
     public function getGroup()
     {
-        if (is_null($this->_group))
-        {
+        if (is_null($this->group)) {
             $this->_setFileInfo();
         }
-        return (($this->_group) ? $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] : '');
+
+        return (($this->group) ? $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] : '');
     }
-    
+
     public function getGroupCount()
     {
-        if (is_null($this->_groupCount))
-        {
+        if (is_null($this->groupCount)) {
             $this->_setDetailFileInfo();
         }
-        return $this->_groupCount;
+
+        return $this->groupCount;
     }
-    
+
     /**
      * Get attribute lable
-     * 
+     *
      * @return type
      */
     public function getAttribute()
     {
-        if (is_null($this->_attribute))
-        {
+        if (is_null($this->attribute)) {
             $this->_setDetailFileInfo();
         }
-        return $this->_attribute;
+
+        return $this->attribute;
     }
 
     /**
      * Get timestemp
-     * 
+     *
      * @return string
      */
     public function getTimeStemp()
     {
-        if (is_null($this->_timeStemp))
-        {
+        if (is_null($this->timeStemp)) {
             $this->_setFileInfo();
         }
-        return $this->_timeStemp;
+
+        return $this->timeStemp;
     }
-    
+
     /**
      * Get encryptionKey
-     * 
+     *
      * @return string
      */
     public function getEncryptionKey()
     {
-        if (is_null($this->_encryptionKey))
-        {
+        if (is_null($this->encryptionKey)) {
             $this->_setDetailFileInfo();
         }
-        return $this->_encryptionKey;
+
+        return $this->encryptionKey;
     }
-        
+
     /**
      * Get filename
-     * 
-     * @return string 
+     *
+     * @return string
      */
     public function getFileName()
     {
-        return $this->_filename;
+        return $this->filename;
     }
 
     /**
      * Get path to file. If set param full path whould return with TL_ROOT
-     * 
-     * @return string 
+     *
+     * @return string
      */
-    public function getPath($strType = NULL)
+    public function getPath($strType = null)
     {
-        if ($strType == 'full')
-        {
-            return TL_ROOT . '/' . $this->_path;
+        if ($strType == 'full') {
+            return TL_ROOT . '/' . $this->path;
         }
-        return $this->_path;
+
+        return $this->path;
     }
 
     /**
      * Get path and file. If set param full path and file whould return with TL_ROOT
-     * 
-     * @return string 
+     *
+     * @return string
      */
-    public function getFilePath($strType = NULL)
+    public function getFilePath($strType = null)
     {
-        if ($strType == 'full')
-        {
-            return TL_ROOT . '/' . $this->_path . '/' . $this->_filename;
+        if ($strType == 'full') {
+            return TL_ROOT . '/' . $this->path . '/' . $this->filename;
         }
-        return $this->_path . '/' . $this->_filename;
+
+        return $this->path . '/' . $this->filename;
     }
 
     /**
      * Get hash
-     * 
+     *
      * @return string
      */
     public function getHash()
     {
-        $arrFileName = $this->_objHelper->getArrFromFileName($this->getFilePath());
+        $arrFileName = $this->helper->getArrFromFileName($this->getFilePath());
         unset($arrFileName[2]);
+
         return crc32(implode(',', $arrFileName));
     }
-            
+
     /**
      * Get checksum
-     * 
-     * @return string 
+     *
+     * @return string
      */
     public function getChecksum()
     {
-        if (is_null($this->_checksum))
-        {
+        if (is_null($this->checksum)) {
             $this->_setDetailFileInfo();
         }
-        return $this->_checksum;
+
+        return $this->checksum;
     }
 
     /**
      * Set new filename. Editable is favorite and title
-     * 
+     *
      * @param string $strEditType
      * @param string $strValue
-     * @return string 
+     *
+     * @return string
      */
     private function _setNewFileName($strEditType, $strValue)
-    {        
-        $arrFileName = $this->_objHelper->getArrFromFileName($this->getFilePath());
-        switch ($strEditType)
-        {
+    {
+        $arrFileName = $this->helper->getArrFromFileName($this->getFilePath());
+        switch ($strEditType) {
             case 'favorite':
                 $arrFileName[2] = $strValue;
                 break;
@@ -352,42 +408,42 @@ class ClipboardXmlElement
     }
 
     /**
-     * Set default information from filename 
+     * Set default information from filename
      */
     protected function _setFileInfo()
     {
-        $arrFileName = $this->_objHelper->getArrFromFileName($this->getFilePath());
-        $this->_table = 'tl_' . $arrFileName[0];
-        $this->_timeStemp = $arrFileName[1];
-        $this->_favorite = (($arrFileName[2] == 'F') ? 1 : 0);
-        $this->_childs = (($arrFileName[3] == 'C') ? 1 : 0);
-        $this->_group = (($arrFileName[4] == 'G') ? 1 : 0);
+        $arrFileName     = $this->helper->getArrFromFileName($this->getFilePath());
+        $this->table     = 'tl_' . $arrFileName[0];
+        $this->timeStemp = $arrFileName[1];
+        $this->favorite  = (($arrFileName[2] == 'F') ? 1 : 0);
+        $this->children  = (($arrFileName[3] == 'C') ? 1 : 0);
+        $this->group     = (($arrFileName[4] == 'G') ? 1 : 0);
     }
-    
+
     /**
-     * Set detailt information from file meta description 
+     * Set detailt information from file meta description
      */
     protected function _setDetailFileInfo()
     {
-        $arrMetaInformation = $this->_objXmlReader->getDetailFileInfo($this->getFilePath('full'));
-        $tmpTitle = $arrMetaInformation['title'];
-        if(strpos($tmpTitle, '(' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')') !== false) $tmpTitle = trim(str_replace('(' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')', '', $tmpTitle));
-        
-        $this->_title = $tmpTitle;
-        $this->_groupCount = $arrMetaInformation['group_count'];
-        $this->_attribute = $arrMetaInformation['attribute'];
-        $this->_checksum = $arrMetaInformation['checksum'];
-        $this->_encryptionKey = $arrMetaInformation['encryptionKey'];
+        $arrMetaInformation = $this->xmlReader->getDetailFileInfo($this->getFilePath('full'));
+        $tmpTitle           = $arrMetaInformation['title'];
+        if (strpos($tmpTitle, '(' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')') !== false) {
+            $tmpTitle = trim(str_replace('(' . $GLOBALS['TL_LANG']['MSC']['clipboardGroup'] . ')', '', $tmpTitle));
+        }
+
+        $this->title         = $tmpTitle;
+        $this->groupCount    = $arrMetaInformation['group_count'];
+        $this->attribute     = $arrMetaInformation['attribute'];
+        $this->checksum      = $arrMetaInformation['checksum'];
+        $this->encryptionKey = $arrMetaInformation['encryptionKey'];
     }
-    
+
     /**
      * Set new title in file header
      */
     protected function _setNewTitle($title)
     {
-        $this->_objXmlWriter->setNewTitle($this->getFilePath('full'), $this->getFilePath(), $title);
+        $this->xmlWriter->setNewTitle($this->getFilePath('full'), $this->getFilePath(), $title);
     }
 
 }
-
-?>

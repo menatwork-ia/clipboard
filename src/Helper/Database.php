@@ -3,380 +3,397 @@
 /**
  * Contao Open Source CMS
  *
- * @copyright  MEN AT WORK 2013 
+ * @copyright  MEN AT WORK 2018
  * @package    clipboard
- * @license    GNU/LGPL 
- * @filesource
+ * @author     Stefan Heimes <stefan_heimes@hotmail.com>
+ * @license    GNU/LGPL
  */
+
+namespace MenAtWork\ClipboardBundle\Helper;
 
 /**
  * Class ClipboardDatabase
  */
-class ClipboardDatabase extends Backend
+class Database
 {
-
     /**
-     * Current object instance (Singleton)
-     * 
-     * @var ClipboardDatabase
-     */
-    protected static $objInstance;
-
-    /**
-     * Prevent constructing the object (Singleton)
-     */
-    protected function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * Prevent cloning of the object (Singleton)
-     */
-    final private function __clone(){}
-
-    /**
-     * Get instanz of the object (Singelton) 
+     * The contao database.
      *
-     * @return ClipboardDatabase 
-     */    
-    public static function getInstance()
+     * @var \Contao\Database
+     */
+    private $database;
+
+    /**
+     * Database constructor.
+     *
+     * @param ContaoBridge $contaoBridge
+     */
+    public function __construct($contaoBridge)
     {
-        if (!is_object(self::$objInstance))
-        {
-            self::$objInstance = new ClipboardDatabase();
-        }
-        return self::$objInstance;
+        $this->database = $contaoBridge->getDatabase();
     }
 
     /**
-     * Get all fiels from given table
-     * 
-     * @param string $strTable
-     * @return DB_Mysql_Result
+     * Get all fields from given table
+     *
+     * @param string $tableName The name of the table.
+     *
+     * @return array The field list for the table.
      */
-    public function getFields($strTable)
+    public function getFields($tableName)
     {
-        return $this->Database->listFields($strTable);
+        return $this->database->listFields($tableName);
     }
 
     /**
      * Return page object from given id
-     * 
-     * @param mixed $mixedId
-     * @return DB_Mysql_Result
+     *
+     * @param mixed $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getPageObject($mixedId)
-    {        
-        if(is_array($mixedId))
-        {
-            $strQuery = "SELECT * FROM `tl_page` WHERE id IN (" . implode(', ', $mixedId) . ") ORDER BY sorting";
-            
-            $objDb = $this->Database
+    public function getPageObject($id)
+    {
+        if (is_array($id)) {
+            $strQuery = sprintf(
+                "SELECT * FROM `tl_page` WHERE id IN (%s) ORDER BY sorting",
+                implode(', ', $id)
+            );
+            $objDb    = $this->database
                 ->prepare($strQuery)
-                ->executeUncached();   
-        }
-        else
-        {
+                ->execute();
+        } else {
             $strQuery = "SELECT * FROM `tl_page` WHERE id = ?";
-            
-            $objDb = $this->Database
+            $objDb    = $this->database
                 ->prepare($strQuery)
                 ->limit(1)
-                ->executeUncached($mixedId);            
-        }               
+                ->execute($id);
+        }
 
-        return $objDb;        
+        return $objDb;
     }
 
     /**
      * Return all subpages as object from given id
-     * 
-     * @param integer $intId
-     * @return DB_Mysql_Result
+     *
+     * @param int $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getSubpagesObject($intId)
+    public function getSubpagesObject($id)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT * FROM `tl_page` WHERE pid = ? ORDER BY sorting")
-                ->executeUncached($intId);
+        $objDb = $this->database
+            ->prepare("SELECT * FROM `tl_page` WHERE pid = ? ORDER BY sorting")
+            ->execute($id);
 
         return $objDb;
     }
 
     /**
      * Return article object from given id
-     * 
-     * @param mixed $mixedId
-     * @return DB_Mysql_Result
+     *
+     * @param mixed $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getArticleObject($mixedId)
-    {        
-        if(is_array($mixedId))
-        {
-            $strQuery = "SELECT * FROM `tl_article` WHERE id IN (" . implode(', ', $mixedId) . ") ORDER BY sorting";
-            
-            $objDb = $this->Database
+    public function getArticleObject($id)
+    {
+        if (is_array($id)) {
+            $strQuery = sprintf(
+                "SELECT * FROM `tl_article` WHERE id IN (%s) ORDER BY sorting",
+                implode(', ', $id)
+            );
+            $objDb    = $this->database
                 ->prepare($strQuery)
-                ->executeUncached();   
-        }
-        else
-        {
+                ->execute();
+        } else {
             $strQuery = "SELECT * FROM `tl_article` WHERE id = ?";
-            
-            $objDb = $this->Database
+            $objDb    = $this->database
                 ->prepare($strQuery)
                 ->limit(1)
-                ->executeUncached($mixedId);            
-        }               
+                ->execute($id);
+        }
 
-        return $objDb;         
+        return $objDb;
     }
 
     /**
      * Return article object from given pid
-     * 
-     * @param integer $intId
-     * @return DB_Mysql_Result
+     *
+     * @param int $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getArticleObjectFromPid($intId)
+    public function getArticleObjectFromPid($id)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT * FROM `tl_article` WHERE pid = ? ORDER BY sorting")
-                ->executeUncached($intId);
+        $objDb = $this->database
+            ->prepare("SELECT * FROM `tl_article` WHERE pid = ? ORDER BY sorting")
+            ->execute($id);
 
         return $objDb;
     }
 
     /**
      * Return article object from given child content id
-     * 
-     * @param integer $intId
-     * @return DB_Mysql_Result
+     *
+     * @param int $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getArticleObjectFromContentId($intId)
+    public function getArticleObjectFromContentId($id)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT a.* 
+        $objDb = $this->database
+            ->prepare("SELECT a.* 
                     FROM `tl_article` AS a
                     LEFT JOIN `tl_content` AS c
                     ON c.pid = a.id
                     WHERE c.id = ?")
-                ->limit(1)
-                ->executeUncached($intId);
+            ->limit(1)
+            ->execute($id);
 
         return $objDb;
     }
 
     /**
      * Return content object from given pid
-     * 
-     * @param integer $intId
-     * @return DB_Mysql_Result
+     *
+     * @param int $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getContentObjectFromPid($intId)
+    public function getContentObjectFromPid($id)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT * FROM `tl_content` WHERE pid = ? ORDER BY sorting")
-                ->executeUncached($intId);
+        $objDb = $this->database
+            ->prepare("SELECT * FROM `tl_content` WHERE pid = ? ORDER BY sorting")
+            ->execute($id);
 
         return $objDb;
     }
 
     /**
      * Return content object from given id
-     * 
-     * @param integer $mixedId
-     * @return DB_Mysql_Result
+     *
+     * @param int $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getContentObject($mixedId)
+    public function getContentObject($id)
     {
-        if(is_array($mixedId))
-        {
-            $strQuery = "SELECT * FROM `tl_content` WHERE id IN (" . implode(', ', $mixedId) . ") ORDER BY sorting";
-            
-            $objDb = $this->Database
+        if (is_array($id)) {
+            $strQuery = sprintf(
+                "SELECT * FROM `tl_content` WHERE id IN (%s) ORDER BY sorting",
+                implode(', ', $id)
+            );
+            $objDb    = $this->database
                 ->prepare($strQuery)
-                ->executeUncached();   
-        }
-        else
-        {
+                ->execute();
+        } else {
             $strQuery = "SELECT * FROM `tl_content` WHERE id = ?";
-            
-            $objDb = $this->Database
+            $objDb    = $this->database
                 ->prepare($strQuery)
                 ->limit(1)
-                ->executeUncached($mixedId);            
-        }               
+                ->execute($id);
+        }
 
         return $objDb;
     }
-    
+
     /**
      * Return theme object from given child module id
-     * 
-     * @param integer $intId
-     * @return DB_Mysql_Result
+     *
+     * @param int $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getThemeObjectFromModuleId($intId)
+    public function getThemeObjectFromModuleId($id)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT t.* 
+        $objDb = $this->database
+            ->prepare("SELECT t.* 
                     FROM `tl_theme` AS t
                     LEFT JOIN `tl_module` AS m
                     ON m.pid = t.id
                     WHERE m.id = ?")
-                ->limit(1)
-                ->executeUncached($intId);
+            ->limit(1)
+            ->execute($id);
 
         return $objDb;
-    }    
-    
+    }
+
     /**
      * Return module object from given id
-     * 
-     * @param integer $mixedId
-     * @return DB_Mysql_Result
-     */    
-    public function getModuleObject($mixedId)
+     *
+     * @param int $id
+     *
+     * @return \Contao\Database\Result
+     */
+    public function getModuleObject($id)
     {
-        if(is_array($mixedId))
-        {
-            $strQuery = "SELECT * FROM `tl_module` WHERE id IN (" . implode(', ', $mixedId) . ")";
-            
-            $objDb = $this->Database
+        if (is_array($id)) {
+            $strQuery = sprintf(
+                "SELECT * FROM `tl_module` WHERE id IN (%s)",
+                implode(', ', $id)
+            );
+            $objDb    = $this->database
                 ->prepare($strQuery)
-                ->executeUncached();   
-        }
-        else
-        {
+                ->execute();
+        } else {
             $strQuery = "SELECT * FROM `tl_module` WHERE id = ?";
-            
-            $objDb = $this->Database
+            $objDb    = $this->database
                 ->prepare($strQuery)
                 ->limit(1)
-                ->executeUncached($mixedId);            
-        }               
+                ->execute($id);
+        }
 
-        return $objDb;        
+        return $objDb;
     }
 
     /**
      * Return object from given table and his id
-     * 
-     * @param string $strTable
-     * @param integer $intId
-     * @return DB_Mysql_Result
+     *
+     * @param string $tableName
+     *
+     * @param int    $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getDynamicObject($strTable, $intId)
+    public function getDynamicObject($tableName, $id)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT * FROM `$strTable` WHERE id = ?")
-                ->limit(1)
-                ->executeUncached($intId);
+        $objDb = $this->database
+            ->prepare("SELECT * FROM `$tableName` WHERE id = ?")
+            ->limit(1)
+            ->execute($id);
 
         return $objDb;
     }
 
     /**
      * Insert array set to given table
-     * 
-     * @param string $strTable
-     * @param array $arrSet
-     * @return DB_Mysql_Result
+     *
+     * @param string $tableName
+     *
+     * @param array  $set
+     *
+     * @return \Contao\Database\Result|object
      */
-    public function insertInto($strTable, $arrSet)
+    public function insertInto($tableName, $set)
     {
-        $query = vsprintf(
-            "INSERT IGNORE INTO `%s` (`%s`) VALUES \n(%s)", array(
-                $strTable,
-                implode('`, `', array_keys($arrSet)),
-                implode(',', $arrSet)
-            )
+        $query = sprintf(
+            "INSERT IGNORE INTO `%s` (`%s`) VALUES (%s)",
+            $tableName,
+            implode('`, `', array_keys($set)),
+            implode(',', $set)
         );
-
-        $objDb = $this->Database->query($query);
+        $objDb = $this->database->query($query);
 
         return $objDb;
     }
 
     /**
      * Get the min sorting from given pid
-     * 
-     * @param string $strTable
-     * @param integer $intId
-     * @return DB_Mysql_Result
+     *
+     * @param string $tableName
+     *
+     * @param int    $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getSorting($strTable, $intId)
+    public function getSorting($tableName, $id)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT MIN(sorting) AS sorting FROM " . $strTable . " WHERE pid=?")
-                ->executeUncached($intId);
+        $objDb = $this->database
+            ->prepare("SELECT MIN(sorting) AS sorting FROM " . $tableName . " WHERE pid=?")
+            ->execute($id);
 
         return $objDb;
     }
 
     /**
      * Get the next sorting from given id
-     * 
-     * @param string $strTable
-     * @param integer $intId
-     * @param integer $intSorting
-     * @return DB_Mysql_Result 
+     *
+     * @param string $tableName
+     *
+     * @param int    $id
+     *
+     * @param int    $sorting
+     *
+     * @return \Contao\Database\Result
      */
-    public function getNextSorting($strTable, $intId, $intSorting)
+    public function getNextSorting($tableName, $id, $sorting)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT MIN(sorting) AS sorting FROM " . $strTable . " WHERE pid = ? AND sorting > ?")
-                ->executeUncached($intId, $intSorting);
+        $sql   = sprintf(
+            "SELECT MIN(sorting) AS sorting FROM %s WHERE pid = ? AND sorting > ?",
+            $tableName
+        );
+        $objDb = $this->database
+            ->prepare($sql)
+            ->execute($id, $sorting);
 
         return $objDb;
     }
 
     /**
-     * Get elements sorting from given pid ordert by sorting
-     * 
-     * @param string $strTable
-     * @param interer $intId
-     * @return DB_Mysql_Result
+     * Get elements sorting from given pid ordered by sorting
+     *
+     * @param string $tableName
+     *
+     * @param int    $id
+     *
+     * @return \Contao\Database\Result
      */
-    public function getSortingElem($strTable, $intId)
+    public function getSortingElem($tableName, $id)
     {
-        $objDb = $this->Database
-                ->prepare("SELECT id, sorting FROM " . $strTable . " WHERE pid = ? ORDER BY sorting")
-                ->executeUncached($intId);
+        $sql   = sprintf(
+            "SELECT id, sorting FROM %s WHERE pid = ? ORDER BY sorting",
+            $tableName
+        );
+        $objDb = $this->database
+            ->prepare($sql)
+            ->execute($id);
 
         return $objDb;
     }
 
     /**
      * Update sorting
-     * 
-     * @param string $strTable
-     * @param integer $intSorting
-     * @param integer $intId 
+     *
+     * @param string $tableName
+     *
+     * @param int    $sorting
+     *
+     * @param int    $id
+     *
+     * @return void
      */
-    public function updateSorting($strTable, $intSorting, $intId)
+    public function updateSorting($tableName, $sorting, $id)
     {
-        $this->Database
-                ->prepare("UPDATE " . $strTable . " SET sorting = ? WHERE id = ?")
-                ->execute($intSorting, $intId);
+        $sql = sprintf(
+            "UPDATE %s SET sorting = ? WHERE id = ?",
+            $tableName
+        );
+
+        $this->database
+            ->prepare($sql)
+            ->execute($sorting, $id);
     }
-    
+
     /**
      * Update alias
-     * 
-     * @param string $strTable
-     * @param integer $intAlias
-     * @param integer $intId 
+     *
+     * @param string $tableName
+     *
+     * @param string $alias
+     *
+     * @param int    $id
+     *
+     * @return void
      */
-    public function updateAlias($strTable, $intAlias, $intId)
+    public function updateAlias($tableName, $alias, $id)
     {
-        $this->Database
-                ->prepare("UPDATE " . $strTable . " SET alias = ? WHERE id = ?")
-                ->execute($intAlias, $intId);
-    }    
-
+        $sql = sprintf(
+            "UPDATE %s SET alias = ? WHERE id = ?",
+            $tableName
+        );
+        $this->database
+            ->prepare($sql)
+            ->execute($alias, $id);
+    }
 }
-
-?>
