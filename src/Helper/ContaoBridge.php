@@ -24,14 +24,6 @@ class ContaoBridge
     }
 
     /**
-     * @return \Contao\Files
-     */
-    public function getFiles()
-    {
-        return \Contao\Files::getInstance();
-    }
-
-    /**
      * @return \Contao\BackendUser|\Contao\User
      */
     public function getBackendUser()
@@ -40,7 +32,14 @@ class ContaoBridge
     }
 
     /**
-     *
+     * @return \Contao\Files
+     */
+    public function getFiles()
+    {
+        return \Contao\Files::getInstance();
+    }
+
+    /**
      * @param string $path The path of the wile. Without tl_root
      *
      * @return \Contao\File
