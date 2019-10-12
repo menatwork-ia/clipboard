@@ -12,8 +12,6 @@
 namespace MenAtWork\ClipboardBundle\Xml;
 
 use MenAtWork\ClipboardBundle\Helper\Base as helperBase;
-use MenAtWork\ClipboardBundle\Xml\Reader;
-use MenAtWork\ClipboardBundle\Xml\Writer;
 
 /**
  * Class ClipboardXmlElement
