@@ -29,7 +29,7 @@ class ClipboardExtension extends ConfigurableExtension
     private $files = [
 //        'commands.yml',
 //        'listener.yml',
-//        'services.yml',
+        'services.yml'
     ];
 
     /**
