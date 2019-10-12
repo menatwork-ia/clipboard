@@ -1,43 +1,40 @@
 services:
-  maw.clipboard.helper.contao_bridge:
-    class: MenAtWork\ClipboardBundle\Helper\ContaoBridge
-  maw.clipboard.helper.database:
-    class: MenAtWork\ClipboardBundle\Helper\Database
-    arguments:
-      - '@maw.clipboard.helper.contao_bridge'
-  maw.clipboard.helper.base:
-    class: MenAtWork\ClipboardBundle\Helper\Base
-    arguments:
-      - '@maw.clipboard.helper.database'
-      - '@maw.clipboard.helper.contao_bridge'
+  MenAtWork\ClipboardBundle\Helper\ContaoBridge:
 
-  maw.clipboard.xml.writer:
-    class: MenAtWork\ClipboardBundle\Xml\Writer
+  MenAtWork\ClipboardBundle\Helper\Database:
     arguments:
-      - '@maw.clipboard.helper.base'
-      - '@maw.clipboard.helper.database'
-      - '@maw.clipboard.helper.contao_bridge'
-  maw.clipboard.xml.reader:
-    class: MenAtWork\ClipboardBundle\Xml\Reader
-    arguments:
-      - '@maw.clipboard.helper.base'
-      - '@maw.clipboard.helper.database'
-      - '@maw.clipboard.helper.contao_bridge'
-  maw.clopboard.xml.base:
-    class: MenAtWork\ClipboardBundle\Xml\Base
-    arguments:
-      - '@maw.clipboard.xml.reader'
-      - '@maw.clipboard.xml.writer'
-      - '@maw.clipboard.helper.base'
-      - '@maw.clipboard.helper.contao_bridge'
+      - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
 
-  maw.clipboard.factory.xml_element:
-    class: MenAtWork\ClipboardBundle\Factory\XmlElement
+  MenAtWork\ClipboardBundle\Helper\Base:
     arguments:
-      - '@maw.clipboard.helper.base'
-      - '@maw.clipboard.xml.writer'
-      - '@maw.clipboard.xml.reader'
-      - '@maw.clipboard.helper.contao_bridge'
+      - '@MenAtWork\ClipboardBundle\Helper\Database'
+      - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
+
+    MenAtWork\ClipboardBundle\Xml\Writer:
+      arguments:
+        - '@MenAtWork\ClipboardBundle\Helper\Base'
+        - '@MenAtWork\ClipboardBundle\Helper\Database'
+        - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
+
+    MenAtWork\ClipboardBundle\Xml\Reader:
+      arguments:
+        - '@MenAtWork\ClipboardBundle\Helper\Base'
+        - '@MenAtWork\ClipboardBundle\Helper\Database'
+        - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
+
+    MenAtWork\ClipboardBundle\Xml\Base:
+      arguments:
+        - '@MenAtWork\ClipboardBundle\Xml\Reader'
+        - '@MenAtWork\ClipboardBundle\Xml\Writer'
+        - '@MenAtWork\ClipboardBundle\Helper\Base'
+        - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
+
+    MenAtWork\ClipboardBundle\Factory\XmlElement:
+      arguments:
+        - '@MenAtWork\ClipboardBundle\Helper\Base'
+        - '@MenAtWork\ClipboardBundle\Xml\Writer'
+        - '@MenAtWork\ClipboardBundle\Xml\Reader'
+        - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
 
 
 
