@@ -1,54 +1,35 @@
 {
-	"name":"menatwork/clipboard",
-	"description":"Store pages, articles and content elements in long-term clipboard",
-	"keywords":["clipboard","contao","workflow","backend-helper"],
-	"type":"contao-module",
-	"homepage":"http://www.men-at-work.de",
-	"license":"LGPL-3.0+",
-	"authors":[
-		{
-			"name":"Stefan Heimes",
-			"email":"heimes@men-at-work.de",
-			"homepage":"http://www.men-at-work.de",
-			"role":"Developer"
-		},
-		{
-			"name":"David Maack",
-			"email":"maack@men-at-work.de",
-			"homepage":"http://www.men-at-work.de",
-			"role":"Developer"
-		},
-		{
-			"name":"Andreas Isaak",
-			"role":"Developer"
-		},
-		{
-			"name":"Patrick Kahl",
-			"role":"Developer"
-		}		
-	],
-	"support":{
-		"email":"contao@men-at-work.de",
-		"issues":"https://github.com/menatwork-ia/clipboard/issues",
-		"irc":"irc://irc.freenode.org/contao.dev",
-		"source":"https://github.com/menatwork-ia/clipboard"
-	},
-	"require":{
-		"php":">=5.4.0",
-                "contao/core":">=3.5.5,<4.0",
-		"contao-community-alliance/composer-plugin":"~2.0"
-	},
-	"autoload":{
-		"classmap":["system/"]
-	},
-	"replace":{
-		"contao-legacy/clipboard":"self.version"
-	},
-	"extra":{
-		"contao":{
-			"sources":{
-				"system/modules/clipboard":"system/modules/clipboard"
-			}
-		}
-	}
+  "name": "menatwork/clipboard",
+  "description": "Store pages, articles and content elements in long-term clipboard",
+  "keywords": [
+    "clipboard",
+    "contao",
+    "workflow",
+    "backend-helper"
+  ],
+  "type": "contao-module",
+  "homepage": "http://www.men-at-work.de",
+  "license": "LGPL-3.0+",
+  "authors": [
+    {
+      "name": "Stefan Heimes",
+      "email": "heimes@men-at-work.de",
+      "homepage": "http://www.men-at-work.de",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "email": "contao@men-at-work.de",
+    "issues": "https://github.com/menatwork-ia/clipboard/issues",
+    "irc": "irc://irc.freenode.org/contao.dev",
+    "source": "https://github.com/menatwork-ia/clipboard"
+  },
+  "require": {
+    "php": "^7.1",
+    "contao/core": "^4.4",
+    "ext-xmlwriter": "*"
+  },
+  "replace": {
+    "contao-legacy/clipboard": "self.version"
+  }
 }
