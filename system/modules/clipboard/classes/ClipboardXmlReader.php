@@ -198,8 +198,16 @@ class ClipboardXmlReader extends Backend
                             {
                                     foreach ($GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'] as $callback)
                                     {
+                                        // Use the Method from DC_Table.php Line 999 ff
+                                        if (is_array($callback))
+                                        {
                                             $this->import($callback[0]);
                                             $this->{$callback[0]}->{$callback[1]}($intLastInsertId, $dc);
+                                        }
+                                        elseif (is_callable($callback))
+                                        {
+                                            $callback($intLastInsertId, $dc);
+                                        }
                                     }
                             }
                             $this->Input->setGet('act', NULL);
