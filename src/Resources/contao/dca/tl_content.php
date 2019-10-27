@@ -14,12 +14,15 @@
  */
 $this->loadLanguageFile('tl_article');
 
-if (TL_MODE == 'BE' && Clipboard::getInstance()->isClipboard('content'))
+$clipboard = \Contao\System::getContainer()->get(\MenAtWork\ClipboardBundle\Clipboard::class);
+
+
+if (TL_MODE == 'BE' && $clipboard->isClipboard('content'))
 {
     /**
      * Prepare clipboard contextmenu 
      */
-    Clipboard::getInstance()->prepareContext();    
+    $clipboard->prepareContext();
     
     /**
      * Config 
@@ -41,7 +44,7 @@ if (TL_MODE == 'BE' && Clipboard::getInstance()->isClipboard('content'))
             $GLOBALS['CLIPBOARD']['copy'], $GLOBALS['TL_DCA']['tl_content']['list']['operations']['cl_copy']
     );
 
-    if(Clipboard::getInstance()->cb()->hasFavorite())
+    if($clipboard->cb()->hasFavorite())
     {
         // -----------------------------------------------------------------------------
         // Paste after button    

@@ -13,12 +13,15 @@
  * Create DCA if clipboard is ready to use 
  */
 
-if (TL_MODE == 'BE' && Clipboard::getInstance()->isClipboard('module'))
+$clipboard = \Contao\System::getContainer()->get(\MenAtWork\ClipboardBundle\Clipboard::class);
+
+
+if (TL_MODE == 'BE' && $clipboard->isClipboard('module'))
 {
     /**
      * Prepare clipboard contextmenu 
      */
-    Clipboard::getInstance()->prepareContext();
+    $clipboard->prepareContext();
     
     /**
      * Config 
@@ -40,7 +43,7 @@ if (TL_MODE == 'BE' && Clipboard::getInstance()->isClipboard('module'))
             $GLOBALS['CLIPBOARD']['copy'], $GLOBALS['TL_DCA']['tl_module']['list']['operations']['cl_copy']
     );
 
-    if(Clipboard::getInstance()->cb()->hasFavorite())
+    if($clipboard->cb()->hasFavorite())
     {        
         // -----------------------------------------------------------------------------
         

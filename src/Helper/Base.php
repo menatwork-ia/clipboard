@@ -12,6 +12,7 @@
 namespace MenAtWork\ClipboardBundle\Helper;
 
 use Contao\Input;
+use Contao\System;
 
 /**
  * Class ClipboardHelper
@@ -21,7 +22,7 @@ class Base
     /**
      * The clipboard database helper.
      *
-     * @var Database
+     * @var \Contao\Database
      */
     private $database;
 
@@ -66,7 +67,7 @@ class Base
      *
      * @param ContaoBridge $contaoBridge      The contao bindings.
      */
-    protected function __construct($clipboardDatabase, $contaoBridge)
+    public function __construct($clipboardDatabase, $contaoBridge)
     {
         $this->database = $clipboardDatabase;
         $this->user     = $contaoBridge->getBackendUser();
@@ -539,7 +540,7 @@ class Base
      */
     public function getArrFromFileName($strFilePath)
     {
-        $this->loadLanguageFile('default');
+        System::loadLanguageFile('default');
         $arrFileInfo = pathinfo($strFilePath);
 
         $arrFileName = explode(

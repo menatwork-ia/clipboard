@@ -13,25 +13,16 @@ namespace MenAtWork\ClipboardBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
 /**
  * Class ContaoCoreExtension
  *
  * @package MenAtWork\ClipboardBundle\DependencyInjection
  */
-class ClipboardExtension extends ConfigurableExtension
+class ClipboardExtension extends Extension
 {
-    /**
-     * @var array
-     */
-    private $files = [
-//        'commands.yml',
-//        'listener.yml',
-        'services.yml'
-    ];
-
     /**
      * {@inheritdoc}
      */
@@ -42,16 +33,15 @@ class ClipboardExtension extends ConfigurableExtension
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \Exception
      */
-    protected function loadInternal(array $mergedConfig, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container)
     {
         $loader = new YamlFileLoader(
             $container,
             new FileLocator(__DIR__ . '/../Resources/config')
         );
-
-        foreach ($this->files as $file) {
-            $loader->load($file);
-        }
+        $loader->load('services.yml');
     }
 }

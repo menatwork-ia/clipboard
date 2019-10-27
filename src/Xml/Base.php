@@ -11,6 +11,9 @@
 
 namespace MenAtWork\ClipboardBundle\Xml;
 
+use Contao\File;
+use Contao\Folder;
+
 /**
  * Class ClipboardXml
  */
@@ -113,7 +116,7 @@ class Base
     {
         if (is_object($this->_arrClipboardElements[$strHash])) {
             $objFile = $this->_arrClipboardElements[$strHash];
-            if ($this->_fileExists($objFile->getFileName())) {
+            if ($this->fileExists($objFile->getFileName())) {
                 $this->files->delete($this->getPath() . '/' . $objFile->getFileName());
             }
         }
@@ -140,7 +143,7 @@ class Base
      *
      * @return boolean
      */
-    protected function _fileExists($strFileName)
+    protected function fileExists($strFileName)
     {
         if (file_exists(TL_ROOT . '/' . $this->getPath() . '/' . $strFileName)) {
             return true;
@@ -156,11 +159,7 @@ class Base
      */
     public function hasElements()
     {
-        if (count($this->_arrClipboardElements) > 0) {
-            return true;
-        }
-
-        return false;
+        return is_array($this->_arrClipboardElements) && count($this->_arrClipboardElements) > 0;
     }
 
     /**
@@ -246,6 +245,8 @@ class Base
 
     /**
      * Fill the clipboard from files
+     *
+     * @throws \Exception
      */
     protected function _createClipboardFromFiles()
     {
@@ -257,10 +258,14 @@ class Base
                     continue;
                 }
 
-                if ($this->_fileExists($strFileName)) {
+                if ($this->fileExists($strFileName)) {
                     $objFile = new Element($strFileName, $this->getPath());
+                    $objFile->setHelper($this->helper);
+                    $objFile->setXmlReader($this->xmlReader);
+                    $objFile->setXmlWriter($this->xmlWriter);
+
+                    $this->_arrClipboardElements[$objFile->getHash()] = $objFile;
                 }
-                $this->_arrClipboardElements[$objFile->getHash()] = $objFile;
             }
         }
     }
@@ -269,10 +274,11 @@ class Base
      * Return path to clipboard files for current user
      *
      * @return string
+     * @throws \Exception
      */
     public function getPath()
     {
-        $objUserFolder = new Folder($GLOBALS['TL_CONFIG']['uploadPath'] . '/clipboard/' . $this->User->username);
+        $objUserFolder = new Folder($GLOBALS['TL_CONFIG']['uploadPath'] . '/clipboard/' . $this->backendUser->username);
         $this->_protect($objUserFolder->value);
 
         return $objUserFolder->value;
@@ -280,6 +286,8 @@ class Base
 
     /**
      * Protect the folder by adding an .htaccess file
+     *
+     * @throws \Exception
      */
     protected function _protect($strFolder)
     {

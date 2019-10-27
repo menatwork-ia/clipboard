@@ -1,4 +1,11 @@
 services:
+  MenAtWork\ClipboardBundle\Clipboard:
+    public: true
+    arguments:
+      - '@MenAtWork\ClipboardBundle\Helper\Base'
+      - '@MenAtWork\ClipboardBundle\Xml\Base'
+      - '@MenAtWork\ClipboardBundle\Helper\Database'
+
   MenAtWork\ClipboardBundle\Helper\ContaoBridge:
 
   MenAtWork\ClipboardBundle\Helper\Database:
@@ -10,31 +17,33 @@ services:
       - '@MenAtWork\ClipboardBundle\Helper\Database'
       - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
 
-    MenAtWork\ClipboardBundle\Xml\Writer:
-      arguments:
-        - '@MenAtWork\ClipboardBundle\Helper\Base'
-        - '@MenAtWork\ClipboardBundle\Helper\Database'
-        - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
+  MenAtWork\ClipboardBundle\Xml\Writer:
+    arguments:
+      - '@MenAtWork\ClipboardBundle\Helper\Base'
+      - '@MenAtWork\ClipboardBundle\Helper\Database'
+      - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
 
-    MenAtWork\ClipboardBundle\Xml\Reader:
-      arguments:
-        - '@MenAtWork\ClipboardBundle\Helper\Base'
-        - '@MenAtWork\ClipboardBundle\Helper\Database'
-        - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
+  MenAtWork\ClipboardBundle\Xml\Reader:
+    arguments:
+      - '@MenAtWork\ClipboardBundle\Helper\Base'
+      - '@MenAtWork\ClipboardBundle\Helper\Database'
+      - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
 
-    MenAtWork\ClipboardBundle\Xml\Base:
-      arguments:
-        - '@MenAtWork\ClipboardBundle\Xml\Reader'
-        - '@MenAtWork\ClipboardBundle\Xml\Writer'
-        - '@MenAtWork\ClipboardBundle\Helper\Base'
-        - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
+  MenAtWork\ClipboardBundle\Xml\Base:
+    arguments:
+      - '@MenAtWork\ClipboardBundle\Xml\Reader'
+      - '@MenAtWork\ClipboardBundle\Xml\Writer'
+      - '@MenAtWork\ClipboardBundle\Helper\Base'
+      - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
 
-    MenAtWork\ClipboardBundle\Factory\XmlElement:
-      arguments:
-        - '@MenAtWork\ClipboardBundle\Helper\Base'
-        - '@MenAtWork\ClipboardBundle\Xml\Writer'
-        - '@MenAtWork\ClipboardBundle\Xml\Reader'
-        - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
+  MenAtWork\ClipboardBundle\Factory\XmlElement:
+    arguments:
+      - '@MenAtWork\ClipboardBundle\Helper\Base'
+      - '@MenAtWork\ClipboardBundle\Xml\Writer'
+      - '@MenAtWork\ClipboardBundle\Xml\Reader'
+      - '@MenAtWork\ClipboardBundle\Helper\ContaoBridge'
+
+
 
 
 

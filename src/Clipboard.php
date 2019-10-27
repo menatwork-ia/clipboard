@@ -79,20 +79,18 @@ class Clipboard
      *
      * @param \Contao\Environment $environment
      */
-    protected function __construct(
+    public function __construct(
         $clipboardHelper,
         $clipboardXml,
-        $clipboardDatabase,
-        $session,
-        $user,
-        $environment
+        $clipboardDatabase
     ) {
         $this->helper      = $clipboardHelper;
         $this->xml         = $clipboardXml;
         $this->database    = $clipboardDatabase;
-        $this->session     = $session;
-        $this->user        = $user;
-        $this->environment = $environment;
+
+        $this->session     = \Contao\Session::getInstance();
+        $this->user        = \Contao\BackendUser::getInstance();
+        $this->environment = \Contao\Environment::getInstance();
     }
 
     /**
