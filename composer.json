@@ -36,7 +36,8 @@
   "autoload": {
     "psr-4": {
       "MenAtWork\\ClipboardBundle\\": "src"
-    }
+    },
+    "files": ["Drivers/DC_Clipboard.php"]
   },
   "extra": {
     "contao-manager-plugin": "MenAtWork\\ClipboardBundle\\ContaoManager\\Plugin"
