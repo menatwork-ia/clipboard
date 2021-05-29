@@ -6,21 +6,20 @@ About
 
 The clipboard extension offers the possibility to store various content (pages, articles and content-elements) to the clipboard for a extended time-period. All stored entries can easily be transfered from one to another installation of Contao through the backend file manager or the use of FTP. 
 
-The saved XML-Data gets collected in a new folder within the Contao file structure: ~/tl_files/clipboard/...
+The saved XML-Data gets collected in a new folder within the Contao file structure: /files/clipboard/...
 
 
 System requirements
 -------------------
 
-* Contao 3.x or higher
+* Contao 4.4.x or higher
 * php5-xmlwriter (Debian package)
 
 
 Installation & Configuration
 ----------------------------
 
-* Unpack the archive on your server
-* Open the installation directory in your web browser
+* Install the package with Contao Manager od via console
 * Update the database
 * Activate the clipboard functionality in your personal data
 
