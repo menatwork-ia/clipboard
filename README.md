@@ -1,6 +1,8 @@
 Clipboard
 ======================
 
+This repository will not be continued. You can find the current version here: https://github.com/contao-community-alliance/contao-clipboard-bundle
+
 About
 -----
 
